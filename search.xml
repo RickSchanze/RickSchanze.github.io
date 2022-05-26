@@ -407,4 +407,145 @@ int main()
         <tag>Qt</tag>
       </tags>
   </entry>
+  <entry>
+    <title>关于函数体内指针指向问题</title>
+    <url>/2022/02/16/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>　　今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
+<p>　　下面来诠释此问题。</p>
+<p>　　</p>
+<p>　　首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
+<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
+	int data;
+	test* next &#x3D; NULL;
+&#125;;
+
+test* createList()
+&#123;
+	test* list &#x3D; new test;
+	test* ret &#x3D; list;
+	for (int i &#x3D; 0; i &lt; 10; i++)
+	&#123;
+		test* newNode &#x3D; new test;
+		newNode-&gt;data &#x3D; i;
+		list-&gt;next &#x3D; newNode;
+		list &#x3D; list-&gt;next;
+	&#125;
+	return ret;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　我们有一个测试函数来改变指针：</p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+
+int main()
+&#123;
+	test* testlist &#x3D; createList();
+	changePoint(testlist);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
+<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
+<p>　　可见在函数体内部，指针是被改变了的。</p>
+<p>　　但在函数执行完毕后，指针又变成了原来未被改变的：</p>
+<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
+<p>　　如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　可以发现，指针被顺利改写。</p>
+<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
+<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
+<p>　</p>
+]]></content>
+      <tags>
+        <tag>C++</tag>
+        <tag>细节问题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QScreen</title>
+    <url>/2022/03/01/2022-03-01-QScreen/</url>
+    <content><![CDATA[<h1 id="availableGeometry"><a href="#availableGeometry" class="headerlink" title="availableGeometry()"></a>availableGeometry()</h1><p>获取应用程序可用区域</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QSystemTrayIcon</title>
+    <url>/2022/03/01/2022-03-01-QSystemTrayIcon/</url>
+    <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
+<h1 id="toolTip"><a href="#toolTip" class="headerlink" title="toolTip"></a>toolTip</h1><p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
+<p>使用setTooTip()设置</p>
+<h1 id="show"><a href="#show" class="headerlink" title="show()"></a>show()</h1><p>在托盘显示你对象拥有的图标</p>
+<h1 id="setContextMenu-Qmenu"><a href="#setContextMenu-Qmenu" class="headerlink" title="setContextMenu(Qmenu*)"></a>setContextMenu(Qmenu*)</h1><p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWebEngineView</title>
+    <url>/2022/03/01/2022-03-01-QWebEngineView/</url>
+    <content><![CDATA[<h1 id="page"><a href="#page" class="headerlink" title="page()"></a>page()</h1><p>返回一个指向页面的指针，为QWebEnginePage*</p>
+<h1 id="load"><a href="#load" class="headerlink" title="load()"></a>load()</h1><p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWidget</title>
+    <url>/2022/03/01/2022-03-01-QWidget/</url>
+    <content><![CDATA[<p><strong>Qt::WA_TranslucentBackground</strong></p>
+<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
+<p><strong>Qt::WA_NoSystemBackground</strong></p>
+<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
+<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
+<p><strong>Qt::WA_OpaquePaintEvent</strong></p>
+<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPainter</title>
+    <url>/2022/03/02/2022-03-02-QPainter/</url>
+    <content><![CDATA[<h2 id="void-translate-const-QPointF-amp-offset"><a href="#void-translate-const-QPointF-amp-offset" class="headerlink" title="void translate(const QPointF &amp;offset)"></a><strong><strong>void translate(const QPointF &amp;offset)</strong></strong></h2><p>按照给定偏移量平移坐标系(重设坐标原点)</p>
+<h2 id="void-scale-qreal-sx-qreal-sy"><a href="#void-scale-qreal-sx-qreal-sy" class="headerlink" title="void scale(qreal sx, qreal sy)"></a><strong><strong>void scale(qreal sx, qreal sy)</strong></strong></h2><p>按 （sx， sy） 缩放坐标系。</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="void-QPainter-rotate-qreal-angle"><a href="#void-QPainter-rotate-qreal-angle" class="headerlink" title="void QPainter::rotate(qreal angle)"></a><strong>void QPainter::rotate(qreal angle)</strong></h2><p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
+<h2 id="void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source"><a href="#void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source" class="headerlink" title="void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)"></a><strong>void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</strong></h2><p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
+<p>此函数有重载，详请查看帮助文档</p>
+<p>此函数主要用于绘制图片</p>
+<h2 id="void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill"><a href="#void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill" class="headerlink" title="*void QPainter::drawPolygon(const QPointF points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)"></a>*<em>void QPainter::drawPolygon(const QPointF <em>points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)</em></em></h2><p>使用points里的前pointCount个点进行多边形绘图</p>
+<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong><br>|Qt::OddEvenFill|0|指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。<br>|Qt::WindingFill|1|Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</p>
+<h2 id="-1"><a href="#-1" class="headerlink" title=""></a></h2><h2 id="bool-QPainter-begin-QPaintDevice-device"><a href="#bool-QPainter-begin-QPaintDevice-device" class="headerlink" title="*bool QPainter::begin(QPaintDevice device)"></a>*<em>bool QPainter::begin(QPaintDevice <em>device)</em></em></h2><p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
+<p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
+<p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
+<p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
+<p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
+<h2 id="bool-QPainter-end"><a href="#bool-QPainter-end" class="headerlink" title="bool QPainter::end()"></a><strong><strong>bool QPainter::end()</strong></strong></h2><p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
+<p>如果绘制器不再活动，则返回true;否则返回false。</p>
+]]></content>
+      <tags>
+        <tag>python</tag>
+      </tags>
+  </entry>
 </search>
