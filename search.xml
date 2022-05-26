@@ -1,0 +1,410 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>静态链表</title>
+    <url>/2022/02/11/2022-02-11-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8/</url>
+    <content><![CDATA[<p>　　虽然我不知道静态链表什么时候用，但学了总有好处</p>
+<h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>　　1.老师仅仅布置了静态链表的初始化、插入和删除操作，因此我只做这几个。</p>
+<p>　　2.本文使用cpp完成。</p>
+<h3 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h3><p>　　Component中有两个元素，一个是DataType,这里我使用了string,用来表示存储的元素，另一个是cursor，它的作用与链表节点中的指针一样，用来指出下一个元素的位置</p>
+<p>　　不同的是，cursor指出的不再是地址，而是下一个元素在数组中的下标。</p>
+<p>　　由此可以看出，<strong>静态链表本质还是链表，我们仍需用出来链表的方式处理静态链表，不能被数组所迷惑。</strong></p>
+<p>   下面开始实现。</p>
+<h3 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h3><p>　　静态链表，归根结底还是链表，因此首先我们要定义节点。</p>
+<pre class="line-numbers language-none"><code class="language-none">#define MAXSIZE 1000     &#x2F;&#x2F;数组最大长度
+
+struct Component
+&#123;
+    string data &#x3D;  &quot;&quot; ;         &#x2F;&#x2F;数据
+    int cursor &#x3D; 0;            &#x2F;&#x2F;游标
+&#125;;    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　在main函数中，我们定义静态链表</p>
+<pre class="line-numbers language-none"><code class="language-none">int main()
+&#123;
+    Component StaticLinkedList[MAXSIZE];      &#x2F;&#x2F;静态链表
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　接下来，我们需要进行初始化</p>
+<pre class="line-numbers language-none"><code class="language-none">void initLinkedList(Component* list)
+&#123;
+    int cnt &#x3D; 1;
+    for ( int i &#x3D; 0; i &lt; MAXSIZE - 1; i++)
+    &#123;
+        list[i].cursor &#x3D; i++;                  &#x2F;&#x2F;初始化时每个节点的cursor指出
+    &#125;                                                     &#x2F;&#x2F;下一个节点的位置，而最后一个
+    list[MAXSIZE - 1].cursor &#x3D; 0;            &#x2F;&#x2F;节点的cursor为0，指向头节点
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　无论插入还是删除，我们都需要找到元素。</p>
+<pre class="line-numbers language-none"><code class="language-none">Component&amp; find(string input, Component* list)
+&#123; &#x2F;&#x2F;返回component的引用，这样可以修改数组中的元素，而无需使用指针
+    int curEle &#x3D; list[0].cursor;
+    while (list[curEle].cursor !&#x3D; 0 &amp;&amp; list[curEle].data !&#x3D;  &quot;&quot; )　　　　 &#x2F;&#x2F;初始化时每个元素都为空，因此以此为条件
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; input)
+        &#123;
+            return list[curEle];
+        &#125;
+        else
+        &#123;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+    return list[curEle];　　 &#x2F;&#x2F;当找不到时返回的元素
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　</p>
+<p>　　当我们插入元素时，我们需要将最后一个非空元素后面的那一个元素使用，将数据保存在那个元素里。</p>
+<p><img src="https://s2.loli.net/2022/05/25/DzMxsWebVGNQjS2.png" alt="当前长度" title="当前长度"></p>
+<p>　　这里是将元素出入指定元素之后</p>
+<pre class="line-numbers language-none"><code class="language-none">void insertAfter(string input, string query, Component* list)
+&#123; &#x2F;&#x2F;与链表插入几乎一样的手法，无需多言
+    currenLength++;
+    Component&amp; target &#x3D; find(query, list);
+    list[currenLength].data &#x3D; input;
+    list[currenLength].cursor &#x3D; target.cursor;
+    target.cursor &#x3D; currenLength;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　删除元素</p>
+<pre class="line-numbers language-none"><code class="language-none">void deleteElement(string query, Component* list)
+&#123;
+    if (query &#x3D;&#x3D;  &quot;&quot; )
+    &#123;
+        cout &lt;&lt;  &quot;you didn&#39;t input anything.&quot; ;
+        return ;
+    &#125;
+    Component&amp; target &#x3D; find(query, list);
+    if (target.data !&#x3D; query)
+    &#123;
+        cout &lt;&lt;  &quot;the element you input does not exist in the list.&quot; ;
+        return ;
+    &#125;
+    int curEle &#x3D; 0;
+    int pre;
+    while (1)　　 &#x2F;&#x2F;需要寻找指定元素之前的元素
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; query)
+        &#123;
+            list[pre].cursor &#x3D; list[curEle].cursor;
+            list[curEle].cursor &#x3D; -1;
+            list[curEle].data &#x3D;  &quot;&quot; ;
+            break ;
+        &#125;
+        else
+        &#123;
+            pre &#x3D; curEle;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　<strong>完整代码：</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include 
+#include 
+using namespace std;
+#define MAXSIZE 1000
+struct Component
+&#123;
+    string data &#x3D;  &quot;&quot; ;
+    int cursor &#x3D; 0;
+&#125;;
+
+static int currenLength &#x3D; 0;
+
+Component&amp; find(string input, Component* list)
+&#123;
+    int curEle &#x3D; list[0].cursor;
+    while (list[curEle].cursor !&#x3D; 0 &amp;&amp; list[curEle].data !&#x3D;  &quot;&quot; )
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; input)
+        &#123;
+            return list[curEle];
+        &#125;
+        else
+        &#123;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+    return list[curEle];
+&#125;
+
+void insertAfter(string input, string query, Component* list)
+&#123;
+    currenLength++;
+    Component&amp; target &#x3D; find(query, list);
+    list[currenLength].data &#x3D; input;
+    list[currenLength].cursor &#x3D; target.cursor;
+    target.cursor &#x3D; currenLength;
+&#125;
+
+void deleteElement(string query, Component* list)
+&#123;
+    if (query &#x3D;&#x3D;  &quot;&quot; )
+    &#123;
+        cout &lt;&lt;  &quot;you didn&#39;t input anything.&quot; ;
+        return ;
+    &#125;
+    Component&amp; target &#x3D; find(query, list);
+    if (target.data !&#x3D; query)
+    &#123;
+        cout &lt;&lt;  &quot;the element you input does not exist in the list.&quot; ;
+        return ;
+    &#125;
+    int curEle &#x3D; 0;
+    int pre;
+    while (1)
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; query)
+        &#123;
+            list[pre].cursor &#x3D; list[curEle].cursor;
+            list[curEle].cursor &#x3D; -1;
+            list[curEle].data &#x3D;  &quot;&quot; ;
+            break ;
+        &#125;
+        else
+        &#123;
+            pre &#x3D; curEle;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+&#125;
+
+void initLinkedList(Component* list)
+&#123;
+    int cnt &#x3D; 1;
+    for ( int i &#x3D; 0; i &lt; MAXSIZE - 1; i++)
+    &#123;
+        list[i].cursor &#x3D; i++;
+    &#125;
+    list[MAXSIZE - 1].cursor &#x3D; 0;
+&#125;
+int main()
+&#123;
+   
+    Component StaticLinkedList[MAXSIZE];
+    initLinkedList(StaticLinkedList);
+    string input, query, deleteMent;
+    while (1) &#123;
+        cin &gt;&gt; input &gt;&gt; query &gt;&gt; deleteMent;
+        insertAfter(input, query, StaticLinkedList);
+        deleteElement(deleteMent, StaticLinkedList);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　</p>
+<h3 id="结语："><a href="#结语：" class="headerlink" title="结语："></a>结语：</h3><p>　　这就是静态链表这几个操作了，我经过VS调试后并未出现异常</p>
+<p>　　如有看不懂，或错误的地方，欢迎讨论。</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>双链表</title>
+    <url>/2022/02/14/2022-02-14-%E5%8F%8C%E9%93%BE%E8%A1%A8/</url>
+    <content><![CDATA[<p>　　相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
+<h2 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h2><p>　　1.这里的双链表使用C++实现</p>
+<p>　　2.只完成了插入删除操作</p>
+<h2 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h2><p>　　<img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png"></p>
+<p>　　如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
+<h2 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h2><p>　　首先，需要定义表示节点的结构体:</p>
+<pre class="line-numbers language-none"><code class="language-none">struct node
+&#123;
+	string data;
+	node* next;		&#x2F;&#x2F;指向下一个元素
+	node* prev;		&#x2F;&#x2F;指向前一个元素
+	node()                　&#x2F;&#x2F;构造函数，用于在创建新节点时自动初始化    
+	&#123;
+		data &#x3D; &quot;&quot;;
+		prev &#x3D; NULL;
+		next &#x3D; NULL;
+	&#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　这里我为了在字面上区分节点和链表的区别，使用了</p>
+<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png"></p>
+<p>　　接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
+<pre class="line-numbers language-none"><code class="language-none">doubleLinkedList* createList()
+&#123;
+	node* list &#x3D; new node();　　&#x2F;&#x2F;这种方式返回不会存在局部变量内存销毁的问题，因为它是new出来的
+	return list;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　插入操作</p>
+<pre class="line-numbers language-none"><code class="language-none">void insert(node* position, string input)
+&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
+	node* newNode &#x3D; new node();
+	&lt;strong&gt;newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
+	newNode-&gt;next &#x3D; position-&gt;next;		　　　　 &#x2F;&#x2F;如果不对新节点优先处理，会造成找不到节点的清空，造成野指针
+	newNode-&gt;prev &#x3D; position;
+	if (position-&gt;next !&#x3D; NULL) &#123;　　　　　　　　　　　　&#x2F;&#x2F;如果不进行判断，可能会对NULL操作而错误
+		position-&gt;next-&gt;prev &#x3D; newNode;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+	else &#123;
+		position-&gt;next &#x3D; newNode;
+	&#125;&lt;&#x2F;strong&gt;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　</p>
+<pre class="line-numbers language-none"><code class="language-none">void deleteElement(node* ele)
+&#123;
+	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
+	if (ele-&gt;next !&#x3D; NULL)
+	&#123;
+		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
+	&#125;
+	else
+	&#123;&#x2F;&#x2F;ele-&gt;next为空时不需要做什么了
+	&#125;
+	delete ele;　　　　&#x2F;&#x2F;必须删除，否则长时间可能造成内存泄漏
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　</p>
+<p>　　查找操作</p>
+<pre class="line-numbers language-none"><code class="language-none">node* find(string input, doubleLinkedList* list)
+&#123;&#x2F;&#x2F;与单链表差不多
+	doubleLinkedList* L &#x3D; list;
+	while (L !&#x3D; NULL)
+	&#123;
+		if (L-&gt;data &#x3D;&#x3D; input)
+		&#123;
+			return L;
+		&#125;
+		else
+		&#123;
+			L &#x3D; L-&gt;next;
+		&#125;
+	&#125;
+	return NULL;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　<strong>完整代码</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+struct node
+&#123;
+	string data;
+	node* next;		&#x2F;&#x2F;指向下一个元素
+	node* prev;		&#x2F;&#x2F;指向前一个元素
+	node()
+	&#123;
+		data &#x3D; &quot;&quot;;
+		prev &#x3D; NULL;
+		next &#x3D; NULL;
+	&#125;
+&#125;;
+
+using doubleLinkedList &#x3D; node;
+
+void insert(node* position, string input)
+&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
+	node* newNode &#x3D; new node();
+	newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
+	newNode-&gt;next &#x3D; position-&gt;next;		
+	newNode-&gt;prev &#x3D; position;
+	if (position-&gt;next !&#x3D; NULL) &#123;
+		position-&gt;next-&gt;prev &#x3D; newNode;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+	else &#123;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+&#125;
+
+void deleteElement(node* ele)
+&#123;
+	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
+	if (ele-&gt;next !&#x3D; NULL)
+	&#123;
+		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
+	&#125;
+	else
+	&#123;
+	&#125;
+	delete ele;
+&#125;
+
+node* find(string input, doubleLinkedList* list)
+&#123;
+	doubleLinkedList* L &#x3D; list;
+	while (L !&#x3D; NULL)
+	&#123;
+		if (L-&gt;data &#x3D;&#x3D; input)
+		&#123;
+			return L;
+		&#125;
+		else
+		&#123;
+			L &#x3D; L-&gt;next;
+		&#125;
+	&#125;
+	return NULL;
+&#125;
+
+doubleLinkedList* createList()
+&#123;
+	node* list &#x3D; new node();
+	return list;
+&#125;
+
+int main()
+&#123;
+	doubleLinkedList* list &#x3D; createList();
+	while (true)
+	&#123;
+		int j;
+		cin &gt;&gt; j;
+		if (j &#x3D;&#x3D; 1)
+		&#123;
+			string query, input;
+			cin &gt;&gt; input;
+			insert(list, input);
+		&#125;
+		else
+		&#123;
+			string query;
+			cin &gt;&gt; query;
+			deleteElement(find(query, list));
+		&#125;
+	&#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+
+<p>　　此代码已经本人VS调试测试，暂时没有发现什么问题</p>
+<p>　　如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>数据结构</tag>
+        <tag>C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryScreen"><a href="#primaryScreen" class="headerlink" title="primaryScreen()"></a>primaryScreen()</h1><p>获取应用主屏幕</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+      </tags>
+  </entry>
+</search>

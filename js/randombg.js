@@ -2,7 +2,7 @@
  * @Author: zh(RickSchanze)(帝皇の惊)
  * @Description: 描述
  * @Date: 2022-05-25 16:39:54
- * @LastEditTime: 2022-05-25 17:24:57
+ * @LastEditTime: 2022-05-26 15:37:54
  */
 //随机背景图片数组,图片可以换成图床链接，注意最后一条后面不要有逗号
 var bannerimg = [
@@ -25,3 +25,9 @@ var bannerindex = Math.floor(Math.random() * bannerimg.length);
 //重设banner图片
 document.getElementById("page-header").style.backgroundImage = bannerimg[bannerindex];
 console.log("加载成功")
+
+document.getElementById("rightside_config").innerHTML = "设置";
+document.getElementById("go-up").innerHTML = "顶部";
+document.getElementById("darkmode").innerHTML = "深色";
+document.getElementById("hide-aside-btn").innerHTML = "单栏";
+document.getElementById("")
