@@ -506,46 +506,82 @@ int main()
     <content><![CDATA[<h1 id="page"><a href="#page" class="headerlink" title="page()"></a>page()</h1><p>返回一个指向页面的指针，为QWebEnginePage*</p>
 <h1 id="load"><a href="#load" class="headerlink" title="load()"></a>load()</h1><p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
 ]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
       <tags>
-        <tag>python</tag>
+        <tag>C++</tag>
+        <tag>Qt</tag>
       </tags>
   </entry>
   <entry>
     <title>QWidget</title>
     <url>/2022/03/01/2022-03-01-QWidget/</url>
-    <content><![CDATA[<p><strong>Qt::WA_TranslucentBackground</strong></p>
-<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
-<p><strong>Qt::WA_NoSystemBackground</strong></p>
-<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
+    <content><![CDATA[<h1 id="Qt-WA-TranslucentBackground"><a href="#Qt-WA-TranslucentBackground" class="headerlink" title="Qt::WA_TranslucentBackground"></a>Qt::WA_TranslucentBackground</h1><p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
+<h1 id="Qt-WA-NoSystemBackground"><a href="#Qt-WA-NoSystemBackground" class="headerlink" title="Qt::WA_NoSystemBackground"></a>Qt::WA_NoSystemBackground</h1><p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
 <p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
-<p><strong>Qt::WA_OpaquePaintEvent</strong></p>
-<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+<h1 id="Qt-WA-OpaquePaintEvent"><a href="#Qt-WA-OpaquePaintEvent" class="headerlink" title="Qt::WA_OpaquePaintEvent"></a>Qt::WA_OpaquePaintEvent</h1><p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
 ]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
       <tags>
-        <tag>python</tag>
+        <tag>C++</tag>
+        <tag>Qt</tag>
       </tags>
   </entry>
   <entry>
     <title>QPainter</title>
     <url>/2022/03/02/2022-03-02-QPainter/</url>
-    <content><![CDATA[<h2 id="void-translate-const-QPointF-amp-offset"><a href="#void-translate-const-QPointF-amp-offset" class="headerlink" title="void translate(const QPointF &amp;offset)"></a><strong><strong>void translate(const QPointF &amp;offset)</strong></strong></h2><p>按照给定偏移量平移坐标系(重设坐标原点)</p>
-<h2 id="void-scale-qreal-sx-qreal-sy"><a href="#void-scale-qreal-sx-qreal-sy" class="headerlink" title="void scale(qreal sx, qreal sy)"></a><strong><strong>void scale(qreal sx, qreal sy)</strong></strong></h2><p>按 （sx， sy） 缩放坐标系。</p>
-<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="void-QPainter-rotate-qreal-angle"><a href="#void-QPainter-rotate-qreal-angle" class="headerlink" title="void QPainter::rotate(qreal angle)"></a><strong>void QPainter::rotate(qreal angle)</strong></h2><p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
-<h2 id="void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source"><a href="#void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source" class="headerlink" title="void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)"></a><strong>void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</strong></h2><p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
+    <content><![CDATA[<h2 id="void-translate-const-QPointF-amp-offset"><a href="#void-translate-const-QPointF-amp-offset" class="headerlink" title="void translate(const QPointF &amp;offset)"></a>void translate(const QPointF &amp;offset)</h2><p>按照给定偏移量平移坐标系(重设坐标原点)</p>
+<h2 id="void-scale-qreal-sx-qreal-sy"><a href="#void-scale-qreal-sx-qreal-sy" class="headerlink" title="void scale(qreal sx, qreal sy)"></a>void scale(qreal sx, qreal sy)</h2><p>按 （sx， sy） 缩放坐标系。</p>
+<h2 id=""><a href="#" class="headerlink" title=""></a></h2><h2 id="void-QPainter-rotate-qreal-angle"><a href="#void-QPainter-rotate-qreal-angle" class="headerlink" title="void QPainter::rotate(qreal angle)"></a>void QPainter::rotate(qreal angle)</h2><p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
+<h2 id="void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source"><a href="#void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source" class="headerlink" title="void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)"></a>void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2><p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
 <p>此函数有重载，详请查看帮助文档</p>
 <p>此函数主要用于绘制图片</p>
-<h2 id="void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill"><a href="#void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill" class="headerlink" title="*void QPainter::drawPolygon(const QPointF points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)"></a>*<em>void QPainter::drawPolygon(const QPointF <em>points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)</em></em></h2><p>使用points里的前pointCount个点进行多边形绘图</p>
-<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong><br>|Qt::OddEvenFill|0|指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。<br>|Qt::WindingFill|1|Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</p>
-<h2 id="-1"><a href="#-1" class="headerlink" title=""></a></h2><h2 id="bool-QPainter-begin-QPaintDevice-device"><a href="#bool-QPainter-begin-QPaintDevice-device" class="headerlink" title="*bool QPainter::begin(QPaintDevice device)"></a>*<em>bool QPainter::begin(QPaintDevice <em>device)</em></em></h2><p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
+<h2 id="void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill"><a href="#void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill" class="headerlink" title="void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)"></a>void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)</h2><p>使用points里的前pointCount个点进行多边形绘图</p>
+<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong></p>
+<table>
+<thead>
+<tr>
+<th>Qt::OddEvenFill</th>
+<th>0</th>
+<th>指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Qt::WindingFill</td>
+<td>1</td>
+<td>Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</td>
+</tr>
+</tbody></table>
+<h2 id="bool-QPainter-begin-QPaintDevice-device"><a href="#bool-QPainter-begin-QPaintDevice-device" class="headerlink" title="bool QPainter::begin(QPaintDevice *device)"></a>bool QPainter::begin(QPaintDevice *device)</h2><p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
 <p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
 <p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
 <p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
 <p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
-<h2 id="bool-QPainter-end"><a href="#bool-QPainter-end" class="headerlink" title="bool QPainter::end()"></a><strong><strong>bool QPainter::end()</strong></strong></h2><p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
+<h2 id="bool-QPainter-end"><a href="#bool-QPainter-end" class="headerlink" title="bool QPainter::end()"></a>bool QPainter::end()</h2><p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
 <p>如果绘制器不再活动，则返回true;否则返回false。</p>
 ]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
       <tags>
-        <tag>python</tag>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Qt动画框架使用</title>
+    <url>/2022/05/26/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>　　最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>　　本文算是一篇转载文章。<br>　　原文<a href="https://zhuanlan.zhihu.com/p/334711269">点这里</a>。<br><img src="/2022/05/26/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/1.gif"></p>
+]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
       </tags>
   </entry>
 </search>
