@@ -458,9 +458,9 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>QGuiApplication</title>
-    <url>/2022/03/01/2022-03-01-QGuiApplication/</url>
-    <content><![CDATA[<h1 id="primaryScreen"><a href="#primaryScreen" class="headerlink" title="primaryScreen()"></a>primaryScreen()</h1><p>获取应用主屏幕</p>
+    <title>QScreen</title>
+    <url>/2022/03/01/2022-03-01-QScreen/</url>
+    <content><![CDATA[<h1 id="availableGeometry"><a href="#availableGeometry" class="headerlink" title="availableGeometry()"></a>availableGeometry()</h1><p>获取应用程序可用区域</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -471,9 +471,9 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>QScreen</title>
-    <url>/2022/03/01/2022-03-01-QScreen/</url>
-    <content><![CDATA[<h1 id="availableGeometry"><a href="#availableGeometry" class="headerlink" title="availableGeometry()"></a>availableGeometry()</h1><p>获取应用程序可用区域</p>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryScreen"><a href="#primaryScreen" class="headerlink" title="primaryScreen()"></a>primaryScreen()</h1><p>获取应用主屏幕</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -515,22 +515,6 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>QWidget</title>
-    <url>/2022/03/01/2022-03-01-QWidget/</url>
-    <content><![CDATA[<h1 id="Qt-WA-TranslucentBackground"><a href="#Qt-WA-TranslucentBackground" class="headerlink" title="Qt::WA_TranslucentBackground"></a>Qt::WA_TranslucentBackground</h1><p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
-<h1 id="Qt-WA-NoSystemBackground"><a href="#Qt-WA-NoSystemBackground" class="headerlink" title="Qt::WA_NoSystemBackground"></a>Qt::WA_NoSystemBackground</h1><p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
-<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
-<h1 id="Qt-WA-OpaquePaintEvent"><a href="#Qt-WA-OpaquePaintEvent" class="headerlink" title="Qt::WA_OpaquePaintEvent"></a>Qt::WA_OpaquePaintEvent</h1><p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>QPainter</title>
     <url>/2022/03/02/2022-03-02-QPainter/</url>
     <content><![CDATA[<h2 id="void-translate-const-QPointF-amp-offset"><a href="#void-translate-const-QPointF-amp-offset" class="headerlink" title="void translate(const QPointF &amp;offset)"></a>void translate(const QPointF &amp;offset)</h2><p>按照给定偏移量平移坐标系(重设坐标原点)</p>
@@ -562,6 +546,22 @@ int main()
 <p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
 <h2 id="bool-QPainter-end"><a href="#bool-QPainter-end" class="headerlink" title="bool QPainter::end()"></a>bool QPainter::end()</h2><p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
 <p>如果绘制器不再活动，则返回true;否则返回false。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWidget</title>
+    <url>/2022/03/01/2022-03-01-QWidget/</url>
+    <content><![CDATA[<h1 id="Qt-WA-TranslucentBackground"><a href="#Qt-WA-TranslucentBackground" class="headerlink" title="Qt::WA_TranslucentBackground"></a>Qt::WA_TranslucentBackground</h1><p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
+<h1 id="Qt-WA-NoSystemBackground"><a href="#Qt-WA-NoSystemBackground" class="headerlink" title="Qt::WA_NoSystemBackground"></a>Qt::WA_NoSystemBackground</h1><p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
+<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
+<h1 id="Qt-WA-OpaquePaintEvent"><a href="#Qt-WA-OpaquePaintEvent" class="headerlink" title="Qt::WA_OpaquePaintEvent"></a>Qt::WA_OpaquePaintEvent</h1><p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
