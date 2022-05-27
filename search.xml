@@ -395,19 +395,6 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>QGuiApplication</title>
-    <url>/2022/03/01/2022-03-01-QGuiApplication/</url>
-    <content><![CDATA[<h1 id="primaryScreen"><a href="#primaryScreen" class="headerlink" title="primaryScreen()"></a>primaryScreen()</h1><p>获取应用主屏幕</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>关于函数体内指针指向问题</title>
     <url>/2022/02/16/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<p>　　今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
@@ -468,6 +455,19 @@ int main()
       <tags>
         <tag>C++</tag>
         <tag>细节问题</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryScreen"><a href="#primaryScreen" class="headerlink" title="primaryScreen()"></a>primaryScreen()</h1><p>获取应用主屏幕</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
       </tags>
   </entry>
   <entry>
