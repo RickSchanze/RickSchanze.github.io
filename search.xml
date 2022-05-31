@@ -3,22 +3,22 @@
   <entry>
     <title>EffectiveC++(1)(1~4)</title>
     <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
-    <content><![CDATA[<h2 id="01-视C-为一个语言联邦"><a href="#01-视C-为一个语言联邦" class="headerlink" title="01:视C++为一个语言联邦"></a><strong>01:视C++为一个语言联邦</strong></h2><p><strong>四个次语言:</strong></p>
+    <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
+<p><strong>四个次语言:</strong></p>
 <ul>
 <li>C</li>
 <li>Object-Oriented C++（面向对象C++）</li>
 <li>Template C++</li>
 <li>STL</li>
 </ul>
-<h2 id="02-尽量以-const-enum-inline代替-define"><a href="#02-尽量以-const-enum-inline代替-define" class="headerlink" title="02:尽量以 const, enum, inline代替 #define"></a>02:尽量以 const, enum, inline代替 #define</h2><p>使用#define时，编译器看不到你所define的变量，那么当报错时，为了查找理解你所定义的，就需要耗费大量时间</p>
+<h2 id="02-尽量以-const-enum-inline代替-define">02:尽量以 const, enum, inline代替 #define</h2>
+<p>使用#define时，编译器看不到你所define的变量，那么当报错时，为了查找理解你所定义的，就需要耗费大量时间</p>
 <pre class="line-numbers language-none"><code class="language-none">#define ASPECT_RATIO 1.653　　　　&#x2F;&#x2F;aspect_ratio并未进入符号表<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
 <p>当以常量代替#define时，有两种特殊情况</p>
 <ul>
 <li><strong>定义常量指针</strong></li>
 </ul>
 <pre class="line-numbers language-none"><code class="language-none">const char* const authoerNameo &#x3D; &quot;ScottMeyers&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-
 <ul>
 <li><strong><strong>定义class专有常量</strong></strong></li>
 </ul>
@@ -27,7 +27,6 @@ class GamePlayer&#123;
     static const int NumTurns &#x3D; 5;&#x2F;&#x2F;常量声明式
     int scores[NumTurns];&#x2F;&#x2F;使用常量    
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
 <p>对于形似函数的宏(如#definr Test(a,b) f((a)&gt;(b)?(a):(b)))，可以用inline代替</p>
 <pre class="line-numbers language-none"><code class="language-none">template&lt;typename T&gt;
 inline void callWithMax(const T&amp; a, const T&amp; b)
@@ -35,15 +34,14 @@ inline void callWithMax(const T&amp; a, const T&amp; b)
     f(a &gt; b ? a: b);
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<h2 id="03-尽可能使用const"><a href="#03-尽可能使用const" class="headerlink" title="03:尽可能使用const"></a>03:尽可能使用const</h2><p>const的几种不同用法</p>
+<h2 id="03-尽可能使用const">03:尽可能使用const</h2>
+<p>const的几种不同用法</p>
 <pre class="line-numbers language-none"><code class="language-none">char greeting[] &#x3D; &quot;hewwl&quot;;
 char* p &#x3D; greeting;
 const char* p &#x3D;greeting;    &#x2F;&#x2F;non-const pointer, const data
 char* const p &#x3D; greeting;   &#x2F;&#x2F;const pointer, non-const data
 const char* const p &#x3D; greeting; &#x2F;&#x2F;const pointer, const data
 &#x2F;&#x2F;注: const Widget* pw与Widget const* pw等价<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
 <p>令函数返回一个常量值，可以降低因错误而造成的意外，如：</p>
 <pre class="line-numbers language-none"><code class="language-none">class Rational&#123;&#125;;
 const Rational operator*(const Rational&amp; lhs, const Rational&amp; rhs);
@@ -53,19 +51,17 @@ if (a*b &#x3D; c)
 &#123;
     &#x2F;* code *&#x2F;
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
 <p><strong>另：双目运算符operator*想拥有两个参数，必须在类外定义，因为类内有隐式this指针</strong></p>
 <p><strong>当const 和 non-const成员函数有着实质等价的实现时，令non-const版本调用const版本来避免代码重复</strong></p>
-<p>class TextBlock { public: const char&amp; operator[](std::size_t position) const{ &#x2F;&#x2F;过程1 &#x2F;&#x2F;过程2 &#x2F;&#x2F;过程3 return text[position]; } char&amp; operator[](std::size_t position){ return const_cast&lt;char&amp;&gt; (static_cast&lt;const TextBlock&amp;&gt; (*this)[position]); } }; &#x2F;&#x2F;注:不能用const调用non-const,因为non-const可能改变对象</p>
-<h2 id="04-确定对象使用前已被初始化"><a href="#04-确定对象使用前已被初始化" class="headerlink" title="04:确定对象使用前已被初始化"></a>04:确定对象使用前已被初始化</h2><li>
+<p>class TextBlock { public: const char&amp; operator[](std::size_t position) const{ //过程1 //过程2 //过程3 return text[position]; } char&amp; operator[](std::size_t position){ return const_cast&lt;char&amp;&gt; (static_cast&lt;const TextBlock&amp;&gt; (*this)[position]); } }; //注:不能用const调用non-const,因为non-const可能改变对象</p>
+<h2 id="04-确定对象使用前已被初始化">04:确定对象使用前已被初始化</h2>
+<li>
 <h4>**为内置对象进行手工初始化**</h4>
 </li>
-
-<p>　　　　内置对象不进行手工初始化的话很可能得到随机值，而浪费性能</p>
+<p>内置对象不进行手工初始化的话很可能得到随机值，而浪费性能</p>
 <li>
 <h4>**构造函数使用成员初始化列表，而不是赋值**</h4>
 </li>
-
 <pre class="line-numbers language-none"><code class="language-none">class A
 &#123;
 private:
@@ -84,12 +80,10 @@ public:
     &#125;
 &#125;;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　使用赋值初始化的构造函数在赋值前还会调用default的构造函数，因此会造成性能流失</p>
+<p>使用赋值初始化的构造函数在赋值前还会调用default的构造函数，因此会造成性能流失</p>
 <li>
 <h4>**以本地静态对象代替非本地静态对象**</h4>
 </li>
-
 <p>**　　**这是为避免跨编译单元初始化次序问题而提出的解决方案，简单来说就是：</p>
 <pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
 class hen&#123;
@@ -107,9 +101,8 @@ class eggs&#123;
         ji.makeEggs();
     &#125;
 &#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　此时若调用eggs构造函数，而ji未初始化，则会造成严重问题（多编译文件初始化次序不确定）</p>
-<p>　　而</p>
+<p>此时若调用eggs构造函数，而ji未初始化，则会造成严重问题（多编译文件初始化次序不确定）</p>
+<p>而</p>
 <pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
 class hen&#123;
     public:
@@ -131,8 +124,7 @@ class eggs&#123;
     &#125;
 &#125;;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　不存在问题，原因简单分析:</p>
+<p>不存在问题，原因简单分析:</p>
 <p>local static 的做法 &gt; 调用 eggs() &gt; 调用 egg 构造函数 &gt; 调用 ji() &gt; 调用 ji 的构造函数 &gt; 成功</p>
 <p><a href="https://blog.csdn.net/pursue_my_life/article/details/80950580">参考链接</a></p>
 ]]></content>
@@ -145,9 +137,10 @@ class eggs&#123;
       </tags>
   </entry>
   <entry>
-    <title>QGuiApplication</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
-    <content><![CDATA[<h1 id="primaryScreen"><a href="#primaryScreen" class="headerlink" title="primaryScreen()"></a>primaryScreen()</h1><p>获取应用主屏幕</p>
+    <title>QScreen</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
+    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
+<p>获取应用程序可用区域</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -159,9 +152,10 @@ class eggs&#123;
       </tags>
   </entry>
   <entry>
-    <title>QScreen</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
-    <content><![CDATA[<h1 id="availableGeometry"><a href="#availableGeometry" class="headerlink" title="availableGeometry()"></a>availableGeometry()</h1><p>获取应用程序可用区域</p>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
+<p>获取应用主屏幕</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -176,25 +170,13 @@ class eggs&#123;
     <title>QSystemTrayIcon</title>
     <url>/2022/03/01/QtAPI/2022-03-01-QSystemTrayIcon/</url>
     <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
-<h1 id="toolTip"><a href="#toolTip" class="headerlink" title="toolTip"></a>toolTip</h1><p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
+<h1 id="tooltip">toolTip</h1>
+<p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
 <p>使用setTooTip()设置</p>
-<h1 id="show"><a href="#show" class="headerlink" title="show()"></a>show()</h1><p>在托盘显示你对象拥有的图标</p>
-<h1 id="setContextMenu-Qmenu"><a href="#setContextMenu-Qmenu" class="headerlink" title="setContextMenu(Qmenu*)"></a>setContextMenu(Qmenu*)</h1><p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QWebEngineView</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
-    <content><![CDATA[<h1 id="page"><a href="#page" class="headerlink" title="page()"></a>page()</h1><p>返回一个指向页面的指针，为QWebEnginePage*</p>
-<h1 id="load"><a href="#load" class="headerlink" title="load()"></a>load()</h1><p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
+<h1 id="show">show()</h1>
+<p>在托盘显示你对象拥有的图标</p>
+<h1 id="setcontextmenu-qmenu">setContextMenu(Qmenu*)</h1>
+<p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -208,10 +190,30 @@ class eggs&#123;
   <entry>
     <title>QWidget</title>
     <url>/2022/03/01/QtAPI/2022-03-01-QWidget/</url>
-    <content><![CDATA[<h1 id="Qt-WA-TranslucentBackground"><a href="#Qt-WA-TranslucentBackground" class="headerlink" title="Qt::WA_TranslucentBackground"></a>Qt::WA_TranslucentBackground</h1><p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
-<h1 id="Qt-WA-NoSystemBackground"><a href="#Qt-WA-NoSystemBackground" class="headerlink" title="Qt::WA_NoSystemBackground"></a>Qt::WA_NoSystemBackground</h1><p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
+    <content><![CDATA[<h1 id="qt-wa-translucentbackground">Qt::WA_TranslucentBackground</h1>
+<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
+<h1 id="qt-wa-nosystembackground">Qt::WA_NoSystemBackground</h1>
+<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
 <p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
-<h1 id="Qt-WA-OpaquePaintEvent"><a href="#Qt-WA-OpaquePaintEvent" class="headerlink" title="Qt::WA_OpaquePaintEvent"></a>Qt::WA_OpaquePaintEvent</h1><p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+<h1 id="qt-wa-opaquepaintevent">Qt::WA_OpaquePaintEvent</h1>
+<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWebEngineView</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
+    <content><![CDATA[<h1 id="page">page()</h1>
+<p>返回一个指向页面的指针，为QWebEnginePage*</p>
+<h1 id="load">load()</h1>
+<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -225,13 +227,18 @@ class eggs&#123;
   <entry>
     <title>QPainter</title>
     <url>/2022/03/02/QtAPI/2022-03-02-QPainter/</url>
-    <content><![CDATA[<h2 id="void-translate-const-QPointF-amp-offset"><a href="#void-translate-const-QPointF-amp-offset" class="headerlink" title="void translate(const QPointF &amp;offset)"></a>void translate(const QPointF &amp;offset)</h2><p>按照给定偏移量平移坐标系(重设坐标原点)</p>
-<h2 id="void-scale-qreal-sx-qreal-sy"><a href="#void-scale-qreal-sx-qreal-sy" class="headerlink" title="void scale(qreal sx, qreal sy)"></a>void scale(qreal sx, qreal sy)</h2><p>按 （sx， sy） 缩放坐标系。</p>
-<h2 id="void-QPainter-rotate-qreal-angle"><a href="#void-QPainter-rotate-qreal-angle" class="headerlink" title="void QPainter::rotate(qreal angle)"></a>void QPainter::rotate(qreal angle)</h2><p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
-<h2 id="void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source"><a href="#void-QPainter-drawPixmap-const-QRectF-amp-target-const-QPixmap-amp-pixmap-const-QRectF-amp-source" class="headerlink" title="void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)"></a>void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2><p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
+    <content><![CDATA[<h2 id="void-translate-const-qpointf-offset">void translate(const QPointF &amp;offset)</h2>
+<p>按照给定偏移量平移坐标系(重设坐标原点)</p>
+<h2 id="void-scale-qreal-sx-qreal-sy">void scale(qreal sx, qreal sy)</h2>
+<p>按 （sx， sy） 缩放坐标系。</p>
+<h2 id="void-qpainter-rotate-qreal-angle">void QPainter::rotate(qreal angle)</h2>
+<p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
+<h2 id="void-qpainter-drawpixmap-const-qrectf-target-const-qpixmap-pixmap-const-qrectf-source">void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2>
+<p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
 <p>此函数有重载，详请查看帮助文档</p>
 <p>此函数主要用于绘制图片</p>
-<h2 id="void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill"><a href="#void-QPainter-drawPolygon-const-QPointF-points-int-pointCount-Qt-FillRule-fillRule-x3D-Qt-OddEvenFill" class="headerlink" title="void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)"></a>void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule &#x3D; Qt::OddEvenFill)</h2><p>使用points里的前pointCount个点进行多边形绘图</p>
+<h2 id="void-qpainter-drawpolygon-const-qpointf-points-int-pointcount-qt-fillrule-fillrule-qt-oddevenfill">void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule = Qt::OddEvenFill)</h2>
+<p>使用points里的前pointCount个点进行多边形绘图</p>
 <p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong></p>
 <table>
 <thead>
@@ -241,18 +248,22 @@ class eggs&#123;
 <th>指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>Qt::WindingFill</td>
 <td>1</td>
 <td>Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</td>
 </tr>
-</tbody></table>
-<h2 id="bool-QPainter-begin-QPaintDevice-device"><a href="#bool-QPainter-begin-QPaintDevice-device" class="headerlink" title="bool QPainter::begin(QPaintDevice *device)"></a>bool QPainter::begin(QPaintDevice *device)</h2><p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
+</tbody>
+</table>
+<h2 id="bool-qpainter-begin-qpaintdevice-device">bool QPainter::begin(QPaintDevice *device)</h2>
+<p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
 <p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
 <p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
 <p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
 <p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
-<h2 id="bool-QPainter-end"><a href="#bool-QPainter-end" class="headerlink" title="bool QPainter::end()"></a>bool QPainter::end()</h2><p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
+<h2 id="bool-qpainter-end">bool QPainter::end()</h2>
+<p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
 <p>如果绘制器不再活动，则返回true;否则返回false。</p>
 ]]></content>
       <categories>
@@ -267,11 +278,14 @@ class eggs&#123;
   <entry>
     <title>QList</title>
     <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
-    <content><![CDATA[<h2 id="removeLast"><a href="#removeLast" class="headerlink" title="removeLast()"></a><strong><strong>removeLast()</strong></strong></h2><p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
-<h2 id="int-QList-indexOf-const-T-amp-value-int-from-x3D-…-const"><a href="#int-QList-indexOf-const-T-amp-value-int-from-x3D-…-const" class="headerlink" title="int QList::indexOf(const T &amp;value, int from &#x3D; …) const"></a><strong><strong>int QList::indexOf(const T &amp;value, int from &#x3D; …) const</strong></strong></h2><p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
-<p>此函数要求值类型具有operator&#x3D;&#x3D;()的实现。</p>
+    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
+<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
+<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
+<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
+<p>此函数要求值类型具有operator==()的实现。</p>
 <p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
-<h2 id="const-T-amp-QList-at-int-i-const"><a href="#const-T-amp-QList-at-int-i-const" class="headerlink" title="const T &amp;QList::at(int i) const"></a><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2><p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;&#x3D; i &lt; size())。</p>
+<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
+<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
 <p>这个函数非常快(常数时间)。</p>
 ]]></content>
       <categories>
@@ -286,14 +300,17 @@ class eggs&#123;
   <entry>
     <title>静态链表</title>
     <url>/2022/02/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-11-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8/</url>
-    <content><![CDATA[<p>　　虽然我不知道静态链表什么时候用，但学了总有好处</p>
-<h3 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h3><p>　　1.老师仅仅布置了静态链表的初始化、插入和删除操作，因此我只做这几个。</p>
-<p>　　2.本文使用cpp完成。</p>
-<h3 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h3><p>　　Component中有两个元素，一个是DataType,这里我使用了string,用来表示存储的元素，另一个是cursor，它的作用与链表节点中的指针一样，用来指出下一个元素的位置</p>
-<p>　　不同的是，cursor指出的不再是地址，而是下一个元素在数组中的下标。</p>
-<p>　　由此可以看出，<strong>静态链表本质还是链表，我们仍需用出来链表的方式处理静态链表，不能被数组所迷惑。</strong></p>
-<p>   下面开始实现。</p>
-<h3 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h3><p>　　静态链表，归根结底还是链表，因此首先我们要定义节点。</p>
+    <content><![CDATA[<p>虽然我不知道静态链表什么时候用，但学了总有好处</p>
+<h3 id="前言：">前言：</h3>
+<p>1.老师仅仅布置了静态链表的初始化、插入和删除操作，因此我只做这几个。</p>
+<p>2.本文使用cpp完成。</p>
+<h3 id="思路：">思路：</h3>
+<p>Component中有两个元素，一个是DataType,这里我使用了string,用来表示存储的元素，另一个是cursor，它的作用与链表节点中的指针一样，用来指出下一个元素的位置</p>
+<p>不同的是，cursor指出的不再是地址，而是下一个元素在数组中的下标。</p>
+<p>由此可以看出，<strong>静态链表本质还是链表，我们仍需用出来链表的方式处理静态链表，不能被数组所迷惑。</strong></p>
+<p>下面开始实现。</p>
+<h3 id="实现：">实现：</h3>
+<p>静态链表，归根结底还是链表，因此首先我们要定义节点。</p>
 <pre class="line-numbers language-none"><code class="language-none">#define MAXSIZE 1000     &#x2F;&#x2F;数组最大长度
 
 struct Component
@@ -301,14 +318,12 @@ struct Component
     string data &#x3D;  &quot;&quot; ;         &#x2F;&#x2F;数据
     int cursor &#x3D; 0;            &#x2F;&#x2F;游标
 &#125;;    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　在main函数中，我们定义静态链表</p>
+<p>在main函数中，我们定义静态链表</p>
 <pre class="line-numbers language-none"><code class="language-none">int main()
 &#123;
     Component StaticLinkedList[MAXSIZE];      &#x2F;&#x2F;静态链表
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　接下来，我们需要进行初始化</p>
+<p>接下来，我们需要进行初始化</p>
 <pre class="line-numbers language-none"><code class="language-none">void initLinkedList(Component* list)
 &#123;
     int cnt &#x3D; 1;
@@ -318,8 +333,7 @@ struct Component
     &#125;                                                     &#x2F;&#x2F;下一个节点的位置，而最后一个
     list[MAXSIZE - 1].cursor &#x3D; 0;            &#x2F;&#x2F;节点的cursor为0，指向头节点
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　无论插入还是删除，我们都需要找到元素。</p>
+<p>无论插入还是删除，我们都需要找到元素。</p>
 <pre class="line-numbers language-none"><code class="language-none">Component&amp; find(string input, Component* list)
 &#123; &#x2F;&#x2F;返回component的引用，这样可以修改数组中的元素，而无需使用指针
     int curEle &#x3D; list[0].cursor;
@@ -336,11 +350,10 @@ struct Component
     &#125;
     return list[curEle];　　 &#x2F;&#x2F;当找不到时返回的元素
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　</p>
-<p>　　当我们插入元素时，我们需要将最后一个非空元素后面的那一个元素使用，将数据保存在那个元素里。</p>
+<p></p>
+<p>当我们插入元素时，我们需要将最后一个非空元素后面的那一个元素使用，将数据保存在那个元素里。</p>
 <p><img src="https://s2.loli.net/2022/05/25/DzMxsWebVGNQjS2.png" alt="当前长度" title="当前长度"></p>
-<p>　　这里是将元素出入指定元素之后</p>
+<p>这里是将元素出入指定元素之后</p>
 <pre class="line-numbers language-none"><code class="language-none">void insertAfter(string input, string query, Component* list)
 &#123; &#x2F;&#x2F;与链表插入几乎一样的手法，无需多言
     currenLength++;
@@ -349,8 +362,7 @@ struct Component
     list[currenLength].cursor &#x3D; target.cursor;
     target.cursor &#x3D; currenLength;
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　删除元素</p>
+<p>删除元素</p>
 <pre class="line-numbers language-none"><code class="language-none">void deleteElement(string query, Component* list)
 &#123;
     if (query &#x3D;&#x3D;  &quot;&quot; )
@@ -382,8 +394,7 @@ struct Component
         &#125;
     &#125;
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　<strong>完整代码：</strong></p>
+<p><strong>完整代码：</strong></p>
 <pre class="line-numbers language-none"><code class="language-none">#include 
 #include 
 using namespace std;
@@ -475,10 +486,10 @@ int main()
         deleteElement(deleteMent, StaticLinkedList);
     &#125;
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　</p>
-<h3 id="结语："><a href="#结语：" class="headerlink" title="结语："></a>结语：</h3><p>　　这就是静态链表这几个操作了，我经过VS调试后并未出现异常</p>
-<p>　　如有看不懂，或错误的地方，欢迎讨论。</p>
+<p></p>
+<h3 id="结语：">结语：</h3>
+<p>这就是静态链表这几个操作了，我经过VS调试后并未出现异常</p>
+<p>如有看不懂，或错误的地方，欢迎讨论。</p>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
@@ -491,12 +502,15 @@ int main()
   <entry>
     <title>双链表</title>
     <url>/2022/02/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-14-%E5%8F%8C%E9%93%BE%E8%A1%A8/</url>
-    <content><![CDATA[<p>　　相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
-<h2 id="前言："><a href="#前言：" class="headerlink" title="前言："></a>前言：</h2><p>　　1.这里的双链表使用C++实现</p>
-<p>　　2.只完成了插入删除操作</p>
-<h2 id="思路："><a href="#思路：" class="headerlink" title="思路："></a>思路：</h2><p>　　<img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png"></p>
-<p>　　如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
-<h2 id="实现："><a href="#实现：" class="headerlink" title="实现："></a>实现：</h2><p>　　首先，需要定义表示节点的结构体:</p>
+    <content><![CDATA[<p>相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
+<h2 id="前言：">前言：</h2>
+<p>1.这里的双链表使用C++实现</p>
+<p>2.只完成了插入删除操作</p>
+<h2 id="思路：">思路：</h2>
+<p><img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png" alt=""></p>
+<p>如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
+<h2 id="实现：">实现：</h2>
+<p>首先，需要定义表示节点的结构体:</p>
 <pre class="line-numbers language-none"><code class="language-none">struct node
 &#123;
 	string data;
@@ -510,18 +524,16 @@ int main()
 	&#125;
 &#125;;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　这里我为了在字面上区分节点和链表的区别，使用了</p>
-<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png"></p>
-<p>　　接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
+<p>这里我为了在字面上区分节点和链表的区别，使用了</p>
+<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png" alt=""></p>
+<p>接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
 <pre class="line-numbers language-none"><code class="language-none">doubleLinkedList* createList()
 &#123;
 	node* list &#x3D; new node();　　&#x2F;&#x2F;这种方式返回不会存在局部变量内存销毁的问题，因为它是new出来的
 	return list;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　插入操作</p>
+<p>插入操作</p>
 <pre class="line-numbers language-none"><code class="language-none">void insert(node* position, string input)
 &#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
 	node* newNode &#x3D; new node();
@@ -537,8 +549,7 @@ int main()
 	&#125;&lt;&#x2F;strong&gt;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　</p>
+<p></p>
 <pre class="line-numbers language-none"><code class="language-none">void deleteElement(node* ele)
 &#123;
 	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
@@ -552,9 +563,8 @@ int main()
 	delete ele;　　　　&#x2F;&#x2F;必须删除，否则长时间可能造成内存泄漏
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　</p>
-<p>　　查找操作</p>
+<p></p>
+<p>查找操作</p>
 <pre class="line-numbers language-none"><code class="language-none">node* find(string input, doubleLinkedList* list)
 &#123;&#x2F;&#x2F;与单链表差不多
 	doubleLinkedList* L &#x3D; list;
@@ -572,8 +582,7 @@ int main()
 	return NULL;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　<strong>完整代码</strong></p>
+<p><strong>完整代码</strong></p>
 <pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
 #include &lt;string&gt;
 using namespace std;
@@ -665,9 +674,8 @@ int main()
 	&#125;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　此代码已经本人VS调试测试，暂时没有发现什么问题</p>
-<p>　　如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
+<p>此代码已经本人VS调试测试，暂时没有发现什么问题</p>
+<p>如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
@@ -678,13 +686,285 @@ int main()
       </tags>
   </entry>
   <entry>
+    <title>【算法】Prim算法</title>
+    <url>/2022/05/30/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-05-29-Prim%E7%AE%97%E6%B3%95/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>最近数据结构已经结课了，但是我差的太多啦！！！这篇文章就来补最小生成树的Prim算法。</p>
+<h2 id="简介">简介</h2>
+<p>Prim是一种生成最小生成树的算法。<s>雀氏简啊</s></p>
+<h2 id="算法步骤描述">算法步骤描述</h2>
+<p>假设$$ N=(V, {E}) $$ 是一连通图, <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mi>E</mi></mrow><annotation encoding="application/x-tex">TE</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span></span></span></span>为最小生成树种边的集合。</p>
+<ol>
+<li>初始时<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><mo>=</mo><msub><mi>u</mi><mn>0</mn></msub><mo stretchy="false">(</mo><msub><mi>u</mi><mn>0</mn></msub><mo>∈</mo><mi>V</mi><mo stretchy="false">)</mo><mo separator="true">,</mo><mi>T</mi><mi>E</mi><mo>=</mo><mi mathvariant="normal">∅</mi></mrow><annotation encoding="application/x-tex">U={u_0}(u_0\in V), TE=\empty</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">u</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mclose">)</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.80556em;vertical-align:-0.05556em;"></span><span class="mord">∅</span></span></span></span> 。</li>
+<li>在所有的$u\in U,v\in V-U <span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>的边中，选一条代价最小的边</mtext></mrow><annotation encoding="application/x-tex">的边中，选一条代价最小的边</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">边</span><span class="mord cjk_fallback">中</span><span class="mord cjk_fallback">，</span><span class="mord cjk_fallback">选</span><span class="mord cjk_fallback">一</span><span class="mord cjk_fallback">条</span><span class="mord cjk_fallback">代</span><span class="mord cjk_fallback">价</span><span class="mord cjk_fallback">最</span><span class="mord cjk_fallback">小</span><span class="mord cjk_fallback">的</span><span class="mord cjk_fallback">边</span></span></span></span>(u,v)<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>并入集合</mtext></mrow><annotation encoding="application/x-tex">并入集合</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">并</span><span class="mord cjk_fallback">入</span><span class="mord cjk_fallback">集</span><span class="mord cjk_fallback">合</span></span></span></span>TE<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo separator="true">,</mo><mtext>同时</mtext></mrow><annotation encoding="application/x-tex">,同时</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8777699999999999em;vertical-align:-0.19444em;"></span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord cjk_fallback">同</span><span class="mord cjk_fallback">时</span></span></span></span>v<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mtext>并入</mtext></mrow><annotation encoding="application/x-tex">并入</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord cjk_fallback">并</span><span class="mord cjk_fallback">入</span></span></span></span>U$.</li>
+<li>重复第二个步骤，直到<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi><mo>=</mo><mi>V</mi></mrow><annotation encoding="application/x-tex">U=V</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span></span></span></span>为止。</li>
+</ol>
+<p>此时，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mi>E</mi></mrow><annotation encoding="application/x-tex">TE</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span></span></span></span>种必含<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>条边，则<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo>=</mo><mo stretchy="false">(</mo><mi>V</mi><mo separator="true">,</mo><mrow><mi>T</mi><mi>E</mi></mrow><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T=(V,{TE})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mord mathdefault" style="margin-right:0.05764em;">E</span></span><span class="mclose">)</span></span></span></span>为N的最小生成树。</p>
+<h2 id="算法图解">算法图解</h2>
+<p><img src="https://s2.loli.net/2022/05/30/KTOcxhZpN2qWdgj.jpg" alt="1.jpg"></p>
+<center>此图来源于课本</center>
+<h2 id="算法实现">算法实现</h2>
+<p>为了记录已在生成树的顶点集<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span>，我们使用一个结构来记录，如下</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">struct Assist
+&#123;
+    int tail;			&#x2F;&#x2F; 表示从结点tail引出
+    int lowcost;		&#x2F;&#x2F; 表示到当前结点的最短距离
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在进行操作时，我们(closedge为Assist数组)</p>
+<ol>
+<li>将初始顶点<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">u</span></span></span></span>加入到<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span>中，对其余每一顶点<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathdefault">i</span></span></span></span>,将<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>l</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>d</mi><mi>g</mi><mi>e</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo></mrow><annotation encoding="application/x-tex">closedge[i]</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">e</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span></span></span></span>均初始化为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathdefault">i</span></span></span></span>到<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>u</mi></mrow><annotation encoding="application/x-tex">u</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault">u</span></span></span></span>的边信息。</li>
+<li>循环<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>次，进行如下操作：
+<ul>
+<li>在<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>l</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>d</mi><mi>g</mi><mi>e</mi></mrow><annotation encoding="application/x-tex">closedge</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">e</span></span></span></span>中选出最小边<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>l</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>d</mi><mi>g</mi><mi>e</mi><mo stretchy="false">[</mo><mi>v</mi><mo stretchy="false">]</mo><mo separator="true">,</mo><mtext>这里</mtext><mi>v</mi><mo>∈</mo><mi>V</mi><mo>−</mo><mi>U</mi></mrow><annotation encoding="application/x-tex">closedge[v],这里v \in V-U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">e</span><span class="mopen">[</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mclose">]</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord cjk_fallback">这</span><span class="mord cjk_fallback">里</span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span>。</li>
+<li>将<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>v</mi></mrow><annotation encoding="application/x-tex">v</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">v</span></span></span></span>加入<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>U</mi></mrow><annotation encoding="application/x-tex">U</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span></span></span></span></li>
+<li>更新剩余每组的最小边信息<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>c</mi><mi>l</mi><mi>o</mi><mi>s</mi><mi>e</mi><mi>d</mi><mi>g</mi><mi>e</mi><mo stretchy="false">[</mo><mi>i</mi><mo stretchy="false">]</mo><mo stretchy="false">(</mo><mi>i</mi><mo>∈</mo><mi>V</mi><mo>−</mo><mi>U</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">closedge[i](i \in V-U)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault">c</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">o</span><span class="mord mathdefault">s</span><span class="mord mathdefault">e</span><span class="mord mathdefault">d</span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mord mathdefault">e</span><span class="mopen">[</span><span class="mord mathdefault">i</span><span class="mclose">]</span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">∈</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.76666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault" style="margin-right:0.22222em;">V</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10903em;">U</span><span class="mclose">)</span></span></span></span> 。</li>
+</ul>
+</li>
+</ol>
+<p>关键部分如下:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;**
+ * @description: Prim算法
+ * @param begin 最小生成树的开始结点
+ * @return void
+ *&#x2F;
+void Graph::prim(int begin)
+&#123;
+    &#x2F;*用于求最小生成树的辅助结构*&#x2F;
+    Assist closedge[20];
+    auto start &#x3D; begin - 1;
+    closedge[start].lowcost &#x3D; 0; &#x2F;&#x2F; 初始化, U &#x3D; &#123;u&#125;
+    for (int i &#x3D; 0; i &lt; vexnum; i++)
+    &#123;
+        if (i !&#x3D; start)			&#x2F;&#x2F; 初始化closedge[i]
+        &#123;
+            closedge[i].tail &#x3D; start;
+            auto weig &#x3D; findArc(start, i + 1);
+            if (!weig)
+            &#123;
+                closedge[i].lowcost &#x3D; 10000;
+            &#125;
+            else
+            &#123;
+                closedge[i].lowcost &#x3D; weig-&gt;weight;
+            &#125;
+        &#125;
+    &#125;
+    for (int i &#x3D; 0; i &lt; vexnum - 1; i++)		&#x2F;&#x2F; 循环n-1次
+    &#123;
+        auto minNode &#x3D; minimum(closedge);		&#x2F;&#x2F; 找出最小边
+        start &#x3D; closedge[minNode].tail;
+        &#x2F;*输出最小生成树信息*&#x2F;
+        std::cout &lt;&lt; &quot;&lt;&quot; &lt;&lt; start + 1 &lt;&lt; &quot;,&quot; &lt;&lt; minNode + 1 &lt;&lt; &quot;&gt;&quot; &lt;&lt; std::endl;
+        closedge[minNode].lowcost &#x3D; 0;			&#x2F;&#x2F; 将minNode并入U中
+        &#x2F;*更新closedge信息*&#x2F;
+        for (int j &#x3D; 0; j &lt; vexnum; j++)
+        &#123;
+            auto now &#x3D; findArc(minNode, j + 1);
+            if (!now)
+            &#123;
+                continue;
+            &#125;
+            if (now-&gt;weight &lt; closedge[j].lowcost)
+            &#123;
+                closedge[j].lowcost &#x3D; now-&gt;weight;
+                closedge[j].tail &#x3D; minNode;
+            &#125;
+        &#125;
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="完整代码实现">完整代码实现</h2>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;*
+ * @Author: zh(RickSchanze)(帝皇の惊)
+ * @Description: 最小生成树的Prim算法
+ * @Date: 2022-05-29 22:48:52
+ * @LastEditTime: 2022-05-31 21:34:56
+ *&#x2F;
+#include &lt;iostream&gt;
+
+struct ArcNode
+&#123;
+    int arc;
+    int weight;
+    ArcNode *next;
+
+    ArcNode(int arc, int weight) : arc(arc), weight(weight), next(nullptr) &#123;&#125;
+&#125;;
+
+struct VexNode
+&#123;
+    int vex;
+    ArcNode *first;
+
+    VexNode(int vex) : vex(vex), first(nullptr) &#123;&#125;
+    VexNode() : vex(-1), first(nullptr) &#123;&#125;
+&#125;;
+
+struct Assist
+&#123;
+    int tail;
+    int lowcost;
+&#125;;
+
+struct Graph
+&#123;
+    VexNode vexMat[20];
+    int arcnum;
+    int vexnum;
+
+    &#x2F;&#x2F; void createDirectedGraph();  有向图暂时先不写了
+    void createGraph();
+    void prim(int begin);
+    ArcNode *findArc(int begin, int end) const;
+    int minimum(Assist *) const;
+&#125;;
+
+int Graph::minimum(Assist dist[]) const
+&#123;
+    int min &#x3D; 10000, rtn &#x3D; 10000;
+    for (int i &#x3D; 0; i &lt; vexnum; i++)
+    &#123;
+        if (dist[i].lowcost &#x3D;&#x3D; 0)
+        &#123;
+            continue;
+        &#125;
+        if (dist[i].lowcost &lt; min)
+        &#123;
+            min &#x3D; dist[i].lowcost;
+            rtn &#x3D; i;
+        &#125;
+    &#125;
+    return rtn;
+&#125;
+
+ArcNode *Graph::findArc(int begin, int end) const
+&#123;
+    auto beginPtr &#x3D; vexMat[begin].first;
+    if (beginPtr)
+    &#123;
+        while (beginPtr !&#x3D; nullptr)
+        &#123;
+            if (beginPtr-&gt;arc &#x3D;&#x3D; end)
+            &#123;
+                return beginPtr;
+            &#125;
+            beginPtr &#x3D; beginPtr-&gt;next;
+        &#125;
+    &#125;
+    return beginPtr;
+&#125;
+
+void Graph::createGraph()
+&#123;
+    std::cout &lt;&lt; &quot;请输入顶点个数:&quot;;
+    std::cin &gt;&gt; vexnum;
+    &#x2F;&#x2F; vexMat &#x3D; new VexNode[vexnum];
+    for (size_t i &#x3D; 0; i &lt; vexnum; i++)
+    &#123;
+        std::cin &gt;&gt; vexMat[i].vex;
+    &#125;
+    std::cout &lt;&lt; &quot;请输入边个数:&quot;;
+    std::cin &gt;&gt; arcnum;
+    for (size_t i &#x3D; 0; i &lt; arcnum; i++)
+    &#123;
+        int begin, end, weight;
+        std::cout &lt;&lt; &quot;输入弧尾弧头权重:&quot;;
+        std::cin &gt;&gt; begin &gt;&gt; end &gt;&gt; weight;
+        auto first &#x3D; vexMat[begin - 1].first;
+        for (; first !&#x3D; nullptr &amp;&amp; first-&gt;next !&#x3D; nullptr; first &#x3D; first-&gt;next)
+            ;
+        if (first &#x3D;&#x3D; nullptr)
+        &#123;
+            vexMat[begin - 1].first &#x3D; new ArcNode(end, weight);
+        &#125;
+        else
+        &#123;
+            first-&gt;next &#x3D; new ArcNode(end, weight);
+        &#125;
+    &#125;
+&#125;
+
+&#x2F;**
+ * @description: Prim算法
+ * @param begin 最小生成树的开始结点
+ * @return void
+ *&#x2F;
+void Graph::prim(int begin)
+&#123;
+    &#x2F;*用于求最小生成树的辅助结构*&#x2F;
+    Assist closedge[20];
+    auto start &#x3D; begin - 1;
+    closedge[start].lowcost &#x3D; 0; &#x2F;&#x2F; 初始化, U &#x3D; &#123;u&#125;
+    for (int i &#x3D; 0; i &lt; vexnum; i++)
+    &#123;
+        if (i !&#x3D; start)
+        &#123;
+            closedge[i].tail &#x3D; start;
+            auto weig &#x3D; findArc(start, i + 1);
+            if (!weig)
+            &#123;
+                closedge[i].lowcost &#x3D; 10000;
+            &#125;
+            else
+            &#123;
+                closedge[i].lowcost &#x3D; weig-&gt;weight;
+            &#125;
+        &#125;
+    &#125;
+    for (int i &#x3D; 0; i &lt; vexnum - 1; i++)
+    &#123;
+        auto minNode &#x3D; minimum(closedge);
+        start &#x3D; closedge[minNode].tail;
+        std::cout &lt;&lt; &quot;&lt;&quot; &lt;&lt; start + 1 &lt;&lt; &quot;,&quot; &lt;&lt; minNode + 1 &lt;&lt; &quot;&gt;&quot; &lt;&lt; std::endl;
+        closedge[minNode].lowcost &#x3D; 0;
+        for (int j &#x3D; 0; j &lt; vexnum; j++)
+        &#123;
+            auto now &#x3D; findArc(minNode, j + 1);
+            if (!now)
+            &#123;
+                continue;
+            &#125;
+            if (now-&gt;weight &lt; closedge[j].lowcost)
+            &#123;
+                closedge[j].lowcost &#x3D; now-&gt;weight;
+                closedge[j].tail &#x3D; minNode;
+            &#125;
+        &#125;
+    &#125;
+&#125;
+
+int main()
+&#123;
+    Graph *graph &#x3D; new Graph();
+    graph-&gt;createGraph();
+    graph-&gt;prim(2);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>注：这里的图用邻接表存储</strong></p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>算法</tag>
+        <tag>最小生成树</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Qt动画框架使用</title>
     <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>　　最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>　　本文算是一篇转载文章。<br>　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br><img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
-<h2 id="Qt-Animation-Framework继承体系"><a href="#Qt-Animation-Framework继承体系" class="headerlink" title="Qt Animation Framework继承体系"></a>Qt Animation Framework继承体系</h2><p>　　Qt有一套专门的动画框架，其继承体系如下图。<br><img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
-<p>　　Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
-<p>　　复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
-<p>　　Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
+　　本文算是一篇转载文章。<br>
+　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
+<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
+<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
+<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
+<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
+　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
+<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
+<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
+<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
 <table>
 <thead>
 <tr>
@@ -692,7 +972,8 @@ int main()
 <th>所有动画类的基类</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>QAnimationGroup</td>
 <td>动画容器类的抽象基类</td>
 </tr>
@@ -724,8 +1005,11 @@ int main()
 <td>QVariantAnimation</td>
 <td>动画类的抽象基类</td>
 </tr>
-</tbody></table>
-<h2 id="Qt动画属性"><a href="#Qt动画属性" class="headerlink" title="Qt动画属性"></a>Qt动画属性</h2><p>　　正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
+</tbody>
+</table>
+<h2 id="qt动画属性">Qt动画属性</h2>
+<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
+　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
 <pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
 &#123;
 　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
@@ -734,7 +1018,9 @@ int main()
 　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
 　　animation-&gt;start();
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>　　这段代码使按钮被按下后，$label$从$(0,0)$在10秒内移动到了$(500,500)$<br><strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>　　也可以做到类似CSS中的@keyframe效果，例如：</p>
+<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
+<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
+　　也可以做到类似CSS中的@keyframe效果，例如：</p>
 <pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
 &#123;
 　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
@@ -744,13 +1030,14 @@ int main()
 　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
 　　animation-&gt;start();
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>　　而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
+<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
 <pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
 &#123;
     Q_OBJECT
     Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
 &#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="动画和图形视图框架"><a href="#动画和图形视图框架" class="headerlink" title="动画和图形视图框架"></a>动画和图形视图框架</h2>]]></content>
+<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
+]]></content>
       <categories>
         <category>Qt具体使用</category>
       </categories>
@@ -763,24 +1050,33 @@ int main()
   <entry>
     <title>Qt图形视图框架</title>
     <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
-    <content><![CDATA[<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>　　为了应付大作业<del>更好的整活</del>，我需要学习以下Qt的图形视图框架。<br>　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
-<h2 id="图形视图框架概述"><a href="#图形视图框架概述" class="headerlink" title="图形视图框架概述"></a>图形视图框架概述</h2><p>　　如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
-<p>　　图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
-<p>　　图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
-<h2 id="场景"><a href="#场景" class="headerlink" title="场景"></a>场景</h2><p>　　<strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
-<p>　　<strong>QGraphicsItem</strong>主要支持如下功能：</p>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
+　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
+<h2 id="图形视图框架概述">图形视图框架概述</h2>
+<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
+<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
+<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
+<h2 id="场景">场景</h2>
+<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
+<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
 <ul>
-<li><p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
+<li>
+<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
 </li>
-<li><p>键盘输入焦点和键盘事件</p>
+<li>
+<p>键盘输入焦点和键盘事件</p>
 </li>
-<li><p>拖放事件</p>
+<li>
+<p>拖放事件</p>
 </li>
-<li><p>碰撞检测</p>
+<li>
+<p>碰撞检测</p>
 </li>
 </ul>
-<p>　　除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
-<p>　　要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>　　纯虚函数实现示例：</p>
+<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
+<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
+　　纯虚函数实现示例：</p>
 <pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
 &#123;
     qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
@@ -792,14 +1088,19 @@ int main()
     painter-&gt;setBrush(Qt::red);
     painter-&gt;drawRect(0, 0, 20, 20);
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>##图形视图框架的坐标系统<br>　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
-<h3 id="图形项坐标"><a href="#图形项坐标" class="headerlink" title="图形项坐标"></a>图形项坐标</h3><p>　　图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
-<p>　　图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
-<p>　　子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
-<p>　　所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
-<h3 id="场景坐标"><a href="#场景坐标" class="headerlink" title="场景坐标"></a>场景坐标</h3><p>　　场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
-<h3 id="视图坐标"><a href="#视图坐标" class="headerlink" title="视图坐标"></a>视图坐标</h3><p>　　视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
-<h3 id="坐标映射"><a href="#坐标映射" class="headerlink" title="坐标映射"></a>坐标映射</h3><p>　　不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
+<p>##图形视图框架的坐标系统<br>
+　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
+<h3 id="图形项坐标">图形项坐标</h3>
+<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
+<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
+<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
+<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
+<h3 id="场景坐标">场景坐标</h3>
+<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
+<h3 id="视图坐标">视图坐标</h3>
+<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
+<h3 id="坐标映射">坐标映射</h3>
+<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
 <p>####图形视图框架的映射函数</p>
 <table>
 <thead>
@@ -808,7 +1109,8 @@ int main()
 <th>描述</th>
 </tr>
 </thead>
-<tbody><tr>
+<tbody>
+<tr>
 <td>QGraphicsView::mapToScene( )</td>
 <td>从视图坐标系统映射到场景坐标系统</td>
 </tr>
@@ -840,10 +1142,16 @@ int main()
 <td>QGraphicsItem::mapFromItem( )</td>
 <td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
 </tr>
-</tbody></table>
-<h2 id="事件处理与传播"><a href="#事件处理与传播" class="headerlink" title="事件处理与传播"></a>事件处理与传播</h2><p>　　图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
-<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><h3 id="MyItem"><a href="#MyItem" class="headerlink" title="MyItem"></a>MyItem</h3><ul>
-<li>MyItem.h<pre class="line-numbers language-none"><code class="language-none">#pragma once
+</tbody>
+</table>
+<h2 id="事件处理与传播">事件处理与传播</h2>
+<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
+<h2 id="示例">示例</h2>
+<h3 id="myitem">MyItem</h3>
+<ul>
+<li>MyItem.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
 
 #include &lt;QGraphicsItem&gt;
 
@@ -868,8 +1176,11 @@ protected:
 	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
 	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
 &#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
-<li>MyItem.cpp<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyItem.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
 
 #include &lt;QPainter&gt;
 #include &lt;QCursor&gt;
@@ -952,8 +1263,11 @@ void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 		setPos(0, 0);
 	&#125;
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="MyView"><a href="#MyView" class="headerlink" title="MyView"></a>MyView</h3></li>
-<li>MyView.h<pre class="line-numbers language-none"><code class="language-none">#pragma once
+<h3 id="myview">MyView</h3>
+<ul>
+<li>MyView.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
 
 #include &lt;QGraphicsView&gt;
 
@@ -965,8 +1279,11 @@ public:
 	~MyView();
 protected:
 	void keyPressEvent(QKeyEvent* event);
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
-<li>MyView.cpp<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyView.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
 #include &lt;QKeyEvent&gt;
 
 MyView::MyView()
@@ -995,8 +1312,11 @@ void MyView::keyPressEvent(QKeyEvent* event)
 	&#125;
 	QGraphicsView::keyPressEvent(event);
 &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="main"><a href="#main" class="headerlink" title="main"></a>main</h3></li>
-<li>main.cpp<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
+<h3 id="main">main</h3>
+<ul>
+<li>main.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
 #include &lt;QTime&gt;
 #include &quot;MyTime.h&quot;
 #include &quot;MyView.h&quot;
@@ -1021,9 +1341,7 @@ int main(int argc, char *argv[])
     view.setBackgroundBrush(QBrush(Qt::red));
     view.show();
     return app.exec();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre></li>
-</ul>
-]]></content>
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
       <categories>
         <category>Qt具体使用</category>
       </categories>
@@ -1036,10 +1354,10 @@ int main(int argc, char *argv[])
   <entry>
     <title>关于函数体内指针指向问题</title>
     <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>　　今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
-<p>　　下面来诠释此问题。</p>
-<p>　　</p>
-<p>　　首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
+    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
+<p>下面来诠释此问题。</p>
+<p></p>
+<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
 <pre class="line-numbers language-none"><code class="language-none">struct test &#123;
 	int data;
 	test* next &#x3D; NULL;
@@ -1059,8 +1377,7 @@ test* createList()
 	return ret;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　我们有一个测试函数来改变指针：</p>
+<p>我们有一个测试函数来改变指针：</p>
 <pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
 &#123;
 	list &#x3D; list-&gt;next;
@@ -1072,24 +1389,22 @@ int main()
 	changePoint(testlist);
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
+<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
 <p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
 <p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
-<p>　　可见在函数体内部，指针是被改变了的。</p>
-<p>　　但在函数执行完毕后，指针又变成了原来未被改变的：</p>
+<p>可见在函数体内部，指针是被改变了的。</p>
+<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
 <p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
-<p>　　如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
+<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
 <pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
 &#123;
 	list &#x3D; list-&gt;next;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　可以发现，指针被顺利改写。</p>
+<p>可以发现，指针被顺利改写。</p>
 <p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
 <p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
-<p>　</p>
+<p></p>
 ]]></content>
       <tags>
         <tag>C++</tag>
@@ -1099,25 +1414,24 @@ int main()
   <entry>
     <title>C++类里静态成员链接错误</title>
     <url>/2022/03/03/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-03-03-C++%E7%B1%BB%E9%87%8C%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E9%93%BE%E6%8E%A5%E9%94%99%E8%AF%AF/</url>
-    <content><![CDATA[<p>　　我现声明一个类内静态变量:</p>
+    <content><![CDATA[<p>我现声明一个类内静态变量:</p>
 <pre class="line-numbers language-none"><code class="language-none">class test&#123;
 public:
     static int a;
     int get();
 &#125;;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　在test.cpp中对a进行使用</p>
+<p>在test.cpp中对a进行使用</p>
 <pre class="line-numbers language-none"><code class="language-none">#include&lt;test.h&gt;
 int test::get()
 &#123;
     return a;                    
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　会产生链接错误</p>
-<p><img src="https://s2.loli.net/2022/05/29/MPGYQKLqogBn7uE.png" alt="1.png"><br>　　解决方案：</p>
-<p>　　　　<strong>①在头文件中定义函数</strong></p>
+<p>会产生链接错误</p>
+<p><img src="https://s2.loli.net/2022/05/29/MPGYQKLqogBn7uE.png" alt="1.png"><br>
+　　解决方案：</p>
+<p><strong>①在头文件中定义函数</strong></p>
 <p>**　　　　**</p>
 <pre class="line-numbers language-none"><code class="language-none">#pragma once
 class test
@@ -1130,8 +1444,7 @@ public:
 	&#125;
 &#125;;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　　　<strong>②在源文件加上静态变量的声明</strong></p>
+<p><strong>②在源文件加上静态变量的声明</strong></p>
 <pre class="line-numbers language-none"><code class="language-none">#include &quot;test.h&quot;
 
 int test::a;
@@ -1141,8 +1454,7 @@ int test::get()
 	return a;
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-
-<p>　　</p>
+<p></p>
 ]]></content>
       <categories>
         <category>细节问题</category>
