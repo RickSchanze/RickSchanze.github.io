@@ -1,6 +1,1040 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>EffectiveC++(1)(1~4)</title>
+    <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
+    <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
+<p><strong>四个次语言:</strong></p>
+<ul>
+<li>C</li>
+<li>Object-Oriented C++（面向对象C++）</li>
+<li>Template C++</li>
+<li>STL</li>
+</ul>
+<h2 id="02-尽量以-const-enum-inline代替-define">02:尽量以 const, enum, inline代替 #define</h2>
+<p>使用#define时，编译器看不到你所define的变量，那么当报错时，为了查找理解你所定义的，就需要耗费大量时间</p>
+<pre class="line-numbers language-none"><code class="language-none">#define ASPECT_RATIO 1.653　　　　&#x2F;&#x2F;aspect_ratio并未进入符号表<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>当以常量代替#define时，有两种特殊情况</p>
+<ul>
+<li><strong>定义常量指针</strong></li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">const char* const authoerNameo &#x3D; &quot;ScottMeyers&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<ul>
+<li><strong><strong>定义class专有常量</strong></strong></li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;为了将常量作用域限制于class内，需要static
+class GamePlayer&#123;
+    static const int NumTurns &#x3D; 5;&#x2F;&#x2F;常量声明式
+    int scores[NumTurns];&#x2F;&#x2F;使用常量    
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>对于形似函数的宏(如#definr Test(a,b) f((a)&gt;(b)?(a):(b)))，可以用inline代替</p>
+<pre class="line-numbers language-none"><code class="language-none">template&lt;typename T&gt;
+inline void callWithMax(const T&amp; a, const T&amp; b)
+&#123;
+    f(a &gt; b ? a: b);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="03-尽可能使用const">03:尽可能使用const</h2>
+<p>const的几种不同用法</p>
+<pre class="line-numbers language-none"><code class="language-none">char greeting[] &#x3D; &quot;hewwl&quot;;
+char* p &#x3D; greeting;
+const char* p &#x3D;greeting;    &#x2F;&#x2F;non-const pointer, const data
+char* const p &#x3D; greeting;   &#x2F;&#x2F;const pointer, non-const data
+const char* const p &#x3D; greeting; &#x2F;&#x2F;const pointer, const data
+&#x2F;&#x2F;注: const Widget* pw与Widget const* pw等价<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>令函数返回一个常量值，可以降低因错误而造成的意外，如：</p>
+<pre class="line-numbers language-none"><code class="language-none">class Rational&#123;&#125;;
+const Rational operator*(const Rational&amp; lhs, const Rational&amp; rhs);
+&#x2F;&#x2F;如果没有const可能会造成
+Rational a,b,c;
+if (a*b &#x3D; c)
+&#123;
+    &#x2F;* code *&#x2F;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>另：双目运算符operator*想拥有两个参数，必须在类外定义，因为类内有隐式this指针</strong></p>
+<p><strong>当const 和 non-const成员函数有着实质等价的实现时，令non-const版本调用const版本来避免代码重复</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">class TextBlock &#123; public: const char&amp; operator[](std::size_t position) const&#123; &#x2F;&#x2F;过程1 &#x2F;&#x2F;过程2 &#x2F;&#x2F;过程3 return text[position]; &#125; char&amp; operator[](std::size_t position)&#123; return const_cast&lt;char&amp;&gt; (static_cast&lt;const TextBlock&amp;&gt; (*this)[position]); &#125; &#125;; &#x2F;&#x2F;注:不能用const调用non-const,因为non-const可能改变对象<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="04-确定对象使用前已被初始化">04:确定对象使用前已被初始化</h2>
+<li>
+<p><strong>为内置对象进行手工初始化</strong></p>
+</li>
+<p>内置对象不进行手工初始化的话很可能得到随机值，而浪费性能</p>
+<li>
+<p><strong>构造函数使用成员初始化列表，而不是赋值</strong></p>
+</li>
+<pre class="line-numbers language-none"><code class="language-none">class A
+&#123;
+private:
+    int member1;
+    double member2;
+    std::string member3;
+
+public:
+    &#x2F;&#x2F;使用初始值列表
+    A() : member1(0), member2(0), member3(std::string())&#123;&#125;
+    &#x2F;&#x2F;赋值初始化
+    A()&#123;
+        member1 &#x3D; 0;
+        member2 &#x3D; 0;
+        member3 &#x3D; &quot;&quot;;
+    &#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>使用赋值初始化的构造函数在赋值前还会调用default的构造函数，因此会造成性能流失</p>
+<li>
+<p><strong>以本地静态对象代替非本地静态对象</strong></p>
+</li>
+<p>这是为避免跨编译单元初始化次序问题而提出的解决方案，简单来说就是：</p>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
+class hen&#123;
+    public:
+    std::size_t makeEggs();
+&#125;;
+hen ji;&#x2F;&#x2F;non-local static
+
+&#x2F;&#x2F;b.cpp
+extern hen ji;
+class eggs&#123;
+    public:
+    void eggs()
+    &#123;
+        ji.makeEggs();
+    &#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此时若调用eggs构造函数，而ji未初始化，则会造成严重问题（多编译文件初始化次序不确定）</p>
+<p>而</p>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
+class hen&#123;
+    public:
+    std::size_t makeEggs();
+&#125;;
+hen&amp; chicken()
+&#123;
+    static hen ji
+    return ji;
+&#125;;
+
+&#x2F;&#x2F;b.cpp
+extern hen ji;
+class eggs&#123;
+    public:
+    eggs()
+    &#123;
+        chicken().makeEggs();
+    &#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>不存在问题，原因简单分析:</p>
+<p>local static 的做法 &gt; 调用 eggs() &gt; 调用 egg 构造函数 &gt; 调用 ji() &gt; 调用 ji 的构造函数 &gt; 成功</p>
+<p><a href="https://blog.csdn.net/pursue_my_life/article/details/80950580">参考链接</a></p>
+]]></content>
+      <categories>
+        <category>Effective C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Effective C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EffectiveC++(2)(5~12)</title>
+    <url>/2022/03/05/Effective%20C++/2022-03-05-EffectiveC++(2)(5~12)/</url>
+    <content><![CDATA[<h2 id="05-了解c-默默编写并调用了哪些函数">05:了解C++默默编写并调用了哪些函数</h2>
+<p>如果定义一个类</p>
+<pre class="line-numbers language-none"><code class="language-none">class Empty&#123;&#125;；
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>相当于定义了</p>
+<pre class="line-numbers language-none"><code class="language-none">class Empty&#123;
+    public:
+    Empty()&#123;&#125;;　　&#x2F;&#x2F;default构造
+    Empty(const Empty&amp; rhs)&#123;&#125;;　　&#x2F;&#x2F;拷贝构造
+    ~Empty();　　&#x2F;&#x2F;编译器合成的析构函数　　Empty&amp; operator&#x3D;(const Empty&amp; rhs)&#123;&#125;;&#x2F;&#x2F;拷贝赋值运算符
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>由于这本书标准不是C++11，有关默认移动构造和移动赋值函数等我了解了之后再补充</p>
+<p>如果定义了带有参数的构造函数，则不再合成默认构造函数，但可以显式要求编译器合成</p>
+<pre class="line-numbers language-none"><code class="language-none">Empty() &#x3D; default;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>当类内含有引用成员或cont的成员时，编译器拒绝生成默认拷贝赋值运算符。</p>
+<p>如果某个基类的拷贝赋值运算符为private,则编译器拒绝为其子类生成默认拷贝运算符</p>
+<p><strong>注意：引用只能定义一次，定义后不能改变它的指向</strong></p>
+<h2 id="06：若不想使用编译器自动生成的函数-就该明确拒绝"><strong>06：若不想使用编译器自动生成的函数，就该明确拒绝</strong></h2>
+<p>书上给出的方法是定义一个基类，该基类的拷贝构造和拷贝赋值为private，另你的类继承于该基类，则编译器无法合成默认拷贝构造和拷贝赋值函数。</p>
+<p>但是在C++11中，<strong>只需要这么在函数后加上delete</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">class Empty&#123;
+    public:
+    Empty()&#123;&#125;;
+    Empty(const Empty&amp;) &#x3D; delete;
+    Empty&amp; operator&#x3D;(const Empty&amp;) &#x3D; delete;
+    ~Empty();
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="07-为多态基类声明virtual析构函数">07:为多态基类声明virtual析构函数</h2>
+<p>多态基类是为了通过基类指针来控制派生类对象</p>
+<ul>
+<li><strong>polymorphic(多态)基类应声明一个virtual析构函数， 任何一个类带有任何virtual函数，它就应该用于一个virtual析构函数</strong></li>
+</ul>
+<p>带有虚构函数的类一般作为基类使用，而如果该类没有虚析构函数，当其派生类对象执行析构时，会导致局部销毁，进而导致内存泄漏</p>
+<pre class="line-numbers language-none"><code class="language-none">class Base
+&#123;
+public:
+    Base() &#x3D; default;
+    int testBase;
+&#125;;
+
+class Derived : public Base
+&#123;
+public:
+    int testDerived;
+&#125;;
+int main()
+&#123;
+    Base* A &#x3D; new Base;
+    Derived* B &#x3D; new Derived;
+    A &#x3D; B;  
+    delete A;       &#x2F;&#x2F;执行此语句时只会删掉Base部分的成员，而Derived的部分不会被删除
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>注意<strong>即使基类指针指向了派生类对象，该指针也只能操作基类成员，因此要定义虚函数来操作派生类对象。</strong></p>
+<ul>
+<li><strong>类的设计如不不是为了作为基类使用，或不是为了多态性，则不应声明virtual析构函数</strong></li>
+</ul>
+<p>因为会使对象占用内存增加。同时，为了让你的非基类、非多态用途的类不被继承，可以<strong>使用final关键字</strong>来禁止其派生。</p>
+<pre class="line-numbers language-none"><code class="language-none">class NoDerived final
+&#123;
+     ...  
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="08-别让异常逃离虚构函数">08:别让异常逃离虚构函数</h2>
+<ul>
+<li>
+<p><strong>析构函数觉得不能抛出异常，如果一个被析构函数调用的函数可能抛出异常，析构函数应该捕捉任何异常，然后吞下它们（不传播）或接受程序。</strong></p>
+</li>
+<li>
+<p><strong>如果客户需要对某个操作函数运行期间抛出的异常做出反应，那么class应提供一个普通函数（而非在析构函数中）执行该操作</strong></p>
+</li>
+</ul>
+<p>对于异常处理不熟悉，先记录，以后有机会补充</p>
+<h2 id="09-绝不在构造和析构过程中调用virtual函数">09:绝不在构造和析构过程中调用virtual函数</h2>
+<p>因为这类调用不会下降至派生类</p>
+<p>考虑：</p>
+<pre class="line-numbers language-none"><code class="language-none">class Transaction&#123;
+public:
+    Transaction();
+    virtual void logTransaction() const &#x3D; 0;
+&#125;;
+
+Transaction::Transaction()
+&#123;
+    logTransaction();
+&#125;
+
+class BuyTransaction : public Transaction&#123;
+public:
+    virtual void logTransaction() const;
+&#125;;
+
+BuyTransaction a;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在定义a时，会先构造基类Transaction，此时调用的将会是基类的logTransaction()，因为在派生类对象的基类构造期间对象类型为基类而非派生类。</p>
+<p>因此构造函数和析构函数都不能调用virtual函数</p>
+<p>一种解决方案：</p>
+<pre class="line-numbers language-none"><code class="language-none">class Transaction
+&#123;
+public:
+    explicit Transaction(const std::string &amp;logInfo);
+    void logTransaction(const std::string &amp;logInfo) const; &#x2F;&#x2F;非虚函数
+&#125;;
+
+Transaction::Transaction(const std::string &amp;logInfo)
+&#123;
+    &#x2F;&#x2F;...
+    logTransaction(logInfo);
+&#125;
+
+class BuyTransaction : public Transaction
+&#123;
+public:
+    BuyTransaction(parameters) : Transaction(createLogString(parameters)) &#123;&#125;
+
+private:
+    static std::string createLogString(parameters);
+&#125;;
+&#x2F;&#x2F;令派生类将必要构造信息向上传给基类狗在函数
+&#x2F;&#x2F;从而让构造函数拜托虚函数
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="10-令operator-返回一个reference-to-this">10:令operator=返回一个reference to *this</h2>
+<p>为了实现连锁赋值，即<strong>a = b = c = 15</strong>这种赋值，则需要这么做</p>
+<pre class="line-numbers language-none"><code class="language-none">class Widget&#123;
+public:
+    Widget&amp; operator&#x3D;(const Widget&amp; rhs)
+    &#123;
+         ...
+         return *this;
+    &#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此协议使用于所有赋值运算，+= , -= , …</p>
+<h2 id="11-在operator-中处理-自我赋值">11:在operator=中处理&quot;自我赋值&quot;</h2>
+<pre class="line-numbers language-none"><code class="language-none">class widget
+&#123;
+public:
+    widget &amp;operator&#x3D;(const widget &amp;rhs);
+
+private:
+    widget *wp;
+&#125;;
+
+widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
+&#123;
+    delete wp;
+    wp &#x3D; new widget(*rhs.wp);
+    return *this;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>当自我赋值时，会造成未定义行为，因为rhs在被删掉后还在使用，有三种方法解决</p>
+<p><strong>使用证同测试来避免这个问题</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
+&#123;
+    if (this &#x3D;&#x3D; &amp;rhs)
+    &#123;
+        return *this;
+    &#125;
+    
+    delete wp;
+    wp &#x3D; new widget(*rhs.wp);
+    return *this;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>精心周到的语句排序</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
+&#123;
+    widget* old &#x3D; wp;
+    wp &#x3D; new widget(*rhs.wp);
+    delete old;
+    return *this;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>copy and swap技术</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">class widget
+&#123;
+public:
+    widget &amp;operator&#x3D;(const widget &amp;rhs);
+    void swap(widget&amp; rhs); &#x2F;&#x2F;交换*this和rhs的数据
+
+private:
+    widget *wp;
+&#125;;
+
+widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
+&#123;
+    widget temp(rhs);
+    swap(temp);
+    return *this;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>或使用值传递的方式，这里会产生副本，并让*this与副本的数据互换</p>
+<pre class="line-numbers language-none"><code class="language-none">widget&amp; operator&#x3D;(widget rhs)
+&#123;
+    swap(rhs);
+    return *this;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="12-复制对象时勿忘其每一个成分">12:复制对象时勿忘其每一个成分</h2>
+<p>考虑如下代码</p>
+<pre class="line-numbers language-none"><code class="language-none">class Base
+&#123;
+private:
+    int base;
+&#125;;
+
+class Derived : public Base
+&#123;
+public:
+    Derived(const Derived &amp;rhs);
+    Derived &amp;operator&#x3D;(const Derived &amp;rhs);
+
+private:
+    int derived;
+&#125;;
+
+Derived::Derived(const Derived &amp;rhs) : derived(rhs.derived)
+&#123;
+    &#x2F;&#x2F;do something
+&#125;
+
+Derived&amp; Derived::operator&#x3D;(const Derived&amp; rhs)
+&#123;
+    &#x2F;&#x2F;do something
+    derived &#x3D; rhs.derived;
+    return *this;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>它们并未对Base部分进行初始化，会调用默认构造函数，而这往往造成不想要的结果。</p>
+<p>考虑到Base部分往往是private的，可以使用相应base部分的拷贝构造函数</p>
+<pre class="line-numbers language-none"><code class="language-none">Derived::Derived(const Derived &amp;rhs) : Base(rhs), derived(rhs.derived)
+&#123;
+    &#x2F;&#x2F;do something
+&#125;
+
+Derived&amp; Derived::operator&#x3D;(const Derived&amp; rhs)
+&#123;
+    &#x2F;&#x2F;do something
+    Base::operator&#x3D;(rhs);
+    derived &#x3D; rhs.derived;
+    return *this;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+]]></content>
+      <categories>
+        <category>Effective C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Effective C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QSystemTrayIcon</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QSystemTrayIcon/</url>
+    <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
+<h1 id="tooltip">toolTip</h1>
+<p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
+<p>使用setTooTip()设置</p>
+<h1 id="show">show()</h1>
+<p>在托盘显示你对象拥有的图标</p>
+<h1 id="setcontextmenu-qmenu">setContextMenu(Qmenu*)</h1>
+<p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QScreen</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
+    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
+<p>获取应用程序可用区域</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
+<p>获取应用主屏幕</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWebEngineView</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
+    <content><![CDATA[<h1 id="page">page()</h1>
+<p>返回一个指向页面的指针，为QWebEnginePage*</p>
+<h1 id="load">load()</h1>
+<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWidget</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QWidget/</url>
+    <content><![CDATA[<h1 id="qt-wa-translucentbackground">Qt::WA_TranslucentBackground</h1>
+<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
+<h1 id="qt-wa-nosystembackground">Qt::WA_NoSystemBackground</h1>
+<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
+<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
+<h1 id="qt-wa-opaquepaintevent">Qt::WA_OpaquePaintEvent</h1>
+<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>EffectiveC++(3)(13~17)</title>
+    <url>/2022/06/02/Effective%20C++/2022-03-07-EffectiveC++(3)(13~17)/</url>
+    <content><![CDATA[<h2 id="13-以对象管理资源">13:以对象管理资源</h2>
+<p>以对象管理资源的两个关键想法:</p>
+<ol>
+<li><strong>获得资源后立刻放进资源管理对象内</strong></li>
+<li><strong>管理对象应用析构函数确保资源被释放</strong></li>
+</ol>
+<p>考虑：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class test&#123;
+    public:
+    test* createTets();     &#x2F;&#x2F;创建一个指向对象的指针
+    void f();   &#x2F;&#x2F;用于删除使用完毕之后的对象
+&#125;;
+
+void test::f()
+&#123;
+    test* newTett &#x3D; createTets();
+    &#x2F;&#x2F;...
+    delete newTett;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这样的做法看似稳妥，但是假如在…部分有return语句使函数提前结束，则资源无法释放，久而久之造成内存泄漏。</p>
+<p>有时候也会有无我们个人的原因，忘记析构某个对象之类的，为此我们的解决方案是<strong>利用对象管理资源</strong></p>
+<p>如使用 <strong>shared_ptr</strong> 或 <strong>unique_ptr.</strong></p>
+<p>但仍要注意，在使用shared_ptr时可能会造成的错误。</p>
+<p>如：</p>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;memory&gt;
+#include &lt;iostream&gt;
+int main()
+&#123;
+    int a &#x3D; 52;
+    &#123;
+        std::shared_ptr&lt;int&gt; test(&amp;a);
+    &#125;
+    std::cout &lt;&lt; a;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在test退出程序块时会释放掉内存，因此之前定义的变量a就不能使用了，需时刻注意。</p>
+<p><strong>注意：shared_ptr在析构时调用的是delete而不是delete[ ],若想改变这一状况可自行传入删除器</strong></p>
+<p><font size=5>请记住:</font></p>
+<ol>
+<li>为防止资源泄漏，请使用RAII对象，它们在构造函数中获得资源并在析构函数中释放资源</li>
+<li>两个常用的RAII类为shared_ptr与unique_ptr,前者通常为较佳选择，因为其复制行为比较直观，若选择unique_ptr,复制动作会报错，但是可以通过右值来转移所有权（即std::move)</li>
+</ol>
+<h2 id="14：在资源管理类中小心copying行为">14：在资源管理类中小心copying行为</h2>
+<p>当一个RAII对象被复制，可以的选择是:</p>
+<ul>
+<li>
+<p><strong>禁止复制</strong></p>
+<p>有些RAII对象的复制并不合理，可以使用=delete来禁止这类对象的辅助。</p>
+</li>
+<li>
+<p><strong>对底层资源使用&quot;引用计数&quot;</strong></p>
+<p>在希望保有资源，知道其最后一个使用者被销毁。这种情况下使该资源的&quot;引用计数&quot;递增。</p>
+<p>使用shared_ptr可以为一个资源管理类方便地添加一个引用计数功能，当shared_ptr析构时所做的操作不是你所想要的时候，可以为其提供一个删除其来提供合理的删除操作。</p>
+</li>
+<li>
+<p><strong>复制底部资源</strong></p>
+<p>使用&quot;资源管理类&quot;的唯一理由时确保在不再需要时被释放，此时复制资源管理对象，也应复制其所包覆的资源，即&quot;深拷贝&quot;。</p>
+</li>
+<li>
+<p><strong>转移底部资源的拥有权</strong></p>
+<p>自己编写拷贝函数，以免编译器合成的默认函数造成不符合预期的效果。</p>
+</li>
+</ul>
+<h2 id="15：在资源管理类中提供对原始资源的访问">15：在资源管理类中提供对原始资源的访问</h2>
+<p>在一些API中直接指涉资源，除非永远不会使用这样的API，否则只得绕过资源管理对象而直接访问原始资源。</p>
+<p>类shared_ptr与unique_ptr都提供给了一个函数get(),用于返回智能指针的原始指针。</p>
+<p>而shared_ptr与unique_ptr都重载了&quot;-&gt;“与”.&quot;，它们允许隐式转换至底部原始指针。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class Investment
+&#123;
+    public:
+    bool isTaxFree() const;
+&#125;;
+
+Investment* createInvestment();     &#x2F;&#x2F; factory函数
+std::shared_ptr&lt;Investment&gt; pi1(createInvestment());
+bool taxablel1 &#x3D; pi1-&gt;isTaxFree();       &#x2F;&#x2F; operator -&gt;
+std::unique_ptr&lt;Investment&gt; pi2(createInvestment());
+bool taxablel2 &#x3D; (*pi2).isTaxFree();    &#x2F;&#x2F; 右operator*访问资源<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>由于有时候还是需要取得RAII对象内部的原始资源，为此可以设置一个显示get,例如：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class ResourceManage
+&#123;
+public:
+    int *get()
+    &#123;
+        return a;
+    &#125;
+
+private:
+    int *a;
+&#125;;
+&#x2F;&#x2F; 调用
+ResourceManage a;
+invoke(a.get());<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这可能会造成大量的get调用。</p>
+<p>或为类提供隐式转换函数</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class NeedType
+&#123;&#125;;
+
+class ResourceManage
+&#123;
+public:
+    operator NeedType() const
+    &#123;
+        return a;
+    &#125;
+private:
+    NeedType a;
+&#125;;
+&#x2F;&#x2F; 调用
+ResourceManage a;
+invoke(a);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>但这可能增加出错几率，可能会造成在赋值时调用隐式转换而造成预期之外的结果。</p>
+<p><strong>请记住</strong></p>
+<ol>
+<li>API往往要求访问原始资源，所以每一个RAII类都有提供一个获取其所管理资源的方法。</li>
+<li>对原始资源的访问可能经由显示转换和隐式转换，一般而言显示转换比较安全，而隐式转换比较方便。</li>
+</ol>
+<h2 id="16：成对使用new和delete时要采用相同的形式">16：成对使用new和delete时要采用相同的形式</h2>
+<p>当使用new生成对象时，会:</p>
+<ol>
+<li>分配内存</li>
+<li>在此内存上调用构造函数</li>
+</ol>
+<p>而当使用delete删除对象时，会：</p>
+<ol>
+<li>在此内存上调用析构函数</li>
+<li>释放此内存</li>
+</ol>
+<p>然而如果对数组使用delete而非delete [ ]，则会造成未定义行为。</p>
+<p>这常常意味着只删除了单一对象，数组内的其余对象未被删除。</p>
+<p>同样的，对单一对象调用delete [ ]，也会造成未定义行为。</p>
+<p>因此<strong>如调用new时使用了[ ]，则调用delete时也需要使用[ ],如果调用new时未使用[ ]，则调用delete时也不该使用[ ]</strong></p>
+<p>此外，考虑</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">typedef std::string AddressLines[4];
+std::string* pal &#x3D; new AddressLines;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>则删除pal时必须使用[ ]:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">delete pal;	&#x2F;&#x2F;未定义
+delete [] pal; &#x2F;&#x2F; 好<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>因此，最好不要对数组形式使用typedef。</p>
+<h2 id="17：以独立语句将newed对象置入智能指针">17：以独立语句将newed对象置入智能指针</h2>
+<p>考虑:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">int priority();
+void a(sharded_ptr&lt;Obj&gt; pw, int p);
+a(new Obj, priority());		&#x2F;&#x2F; 无法通过编译，因为shared_ptr需要指针的构造函数是一个explicit函数
+a(shared_ptr&lt;obj&gt;(new obj), priority());	&#x2F;&#x2F; 虽然通过编译，但是可能造成资源泄漏<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>为什么第二种方式可能会资源泄漏呢？</p>
+<p>在以第二种形式调用时，需要做以下三件事：</p>
+<ul>
+<li>调用priority</li>
+<li>执行&quot;new obj&quot;</li>
+<li>调用shared_ptr构造函数</li>
+</ul>
+<p>但是由于C++编译器的自由性，编译器优化后可能会产生这样的顺序：</p>
+<ul>
+<li>执行&quot;new obj&quot;</li>
+<li>调用priority</li>
+<li>调用shared_ptr构造函数</li>
+</ul>
+<p>假如在调用priority时抛出异常，则new obj返回的指针不会被置入shared_ptr中，从而造成资源泄漏。</p>
+<p>解决该问题的办法就是将new语句分开来写。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">shared_ptr&lt;obj&gt; pw(new obj);
+a(pw, priority());<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p><strong>请记住</strong></p>
+<ul>
+<li>以独立语句将newed对象存储入智能指针内，如果不这样做，一旦一场被抛出，则有可能产生难以察觉的资源泄漏。</li>
+</ul>
+]]></content>
+      <categories>
+        <category>Effective C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Effective C++</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPainter</title>
+    <url>/2022/03/02/QtAPI/2022-03-02-QPainter/</url>
+    <content><![CDATA[<h2 id="void-translate-const-qpointf-offset">void translate(const QPointF &amp;offset)</h2>
+<p>按照给定偏移量平移坐标系(重设坐标原点)</p>
+<h2 id="void-scale-qreal-sx-qreal-sy">void scale(qreal sx, qreal sy)</h2>
+<p>按 （sx， sy） 缩放坐标系。</p>
+<h2 id="void-qpainter-rotate-qreal-angle">void QPainter::rotate(qreal angle)</h2>
+<p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
+<h2 id="void-qpainter-drawpixmap-const-qrectf-target-const-qpixmap-pixmap-const-qrectf-source">void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2>
+<p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
+<p>此函数有重载，详请查看帮助文档</p>
+<p>此函数主要用于绘制图片</p>
+<h2 id="void-qpainter-drawpolygon-const-qpointf-points-int-pointcount-qt-fillrule-fillrule-qt-oddevenfill">void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule = Qt::OddEvenFill)</h2>
+<p>使用points里的前pointCount个点进行多边形绘图</p>
+<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong></p>
+<table>
+<thead>
+<tr>
+<th>Qt::OddEvenFill</th>
+<th>0</th>
+<th>指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qt::WindingFill</td>
+<td>1</td>
+<td>Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bool-qpainter-begin-qpaintdevice-device">bool QPainter::begin(QPaintDevice *device)</h2>
+<p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
+<p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
+<p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
+<p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
+<p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
+<h2 id="bool-qpainter-end">bool QPainter::end()</h2>
+<p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
+<p>如果绘制器不再活动，则返回true;否则返回false。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QList</title>
+    <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
+    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
+<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
+<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
+<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
+<p>此函数要求值类型具有operator==()的实现。</p>
+<p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
+<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
+<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
+<p>这个函数非常快(常数时间)。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QAbstractButton</title>
+    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
+    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
+<h2 id="ischeck">isCheck()</h2>
+<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
+<h2 id="text"><strong>text()</strong></h2>
+<p>获取这个按钮的文字</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPixmap</title>
+    <url>/2022/03/05/QtAPI/2022-03-05-QPixmap/</url>
+    <content><![CDATA[<h2 id="bool-qpixmap-load-const-qstring-filename-const-char-format-nullptr-qt-imageconversionflags-flags-qt-autocolor">*<em>bool QPixmap::load(const QString &amp;fileName, const char <em>format = nullptr, Qt::ImageConversionFlags flags = Qt::AutoColor)</em></em></h2>
+<p>从指定文件名的文件中加载位图。如果位图成功加载，返回true;否则位图无效并返回false。</p>
+<h2 id="qpixmap-qpixmap-scaled-const-qsize-size-qt-aspectratiomode-aspectratiomode-qt-ignoreaspectratio-qt-transformationmode-transformmode-qt-fasttransformation-const"><strong>QPixmap QPixmap::scaled(const QSize &amp;size, Qt::AspectRatioMode aspectRatioMode = Qt::IgnoreAspectRatio, Qt::TransformationMode transformMode = Qt::FastTransformation) const</strong></h2>
+<p>使用由aspectRatioMode和transformMode指定的宽高比和转换模式，将位图缩放到给定的大小</p>
+<p><strong>注意：此函数是使用值传递，因此不会改变传进去的pixmap,要想真正对pixmap改变，还请另赋值</strong></p>
+<h3 id="qt-aspectratiomode">Qt::AspectRatioMode</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Qt::IgnoreAspectRatio</strong></th>
+<th><strong>0</strong></th>
+<th><strong>大小可以自由缩放。长宽比没有限制。</strong></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qt::KeepAspectRatio</strong></td>
+<td><strong>1</strong></td>
+<td><strong>在给定的矩形内，将尺寸缩放为尽可能大的矩形，并保留长宽比。</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Qt::KeepAspectRatioByExpanding</strong></td>
+<td><strong>2</strong></td>
+<td><strong>尺寸被缩放到一个矩形，在给定的矩形之外尽可能小，并保持长宽比。</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="transformmode">transformMode</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Qt::FastTransformation</strong></th>
+<th><strong>0</strong></th>
+<th><strong>转换是快速执行的，没有平滑处理。</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qt::SmoothTransformation</strong></td>
+<td><strong>1</strong></td>
+<td><strong>得到的图像使用双线性滤波进行变换。(平滑处理了)</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="void-qpixmap-fill-const-qcolor-color-qt-white">void QPixmap::fill(const QColor &amp;color = Qt::white)</h2>
+<p>用给定的颜色填充像素图。</p>
+<p>当pixmap已经被绘制在设备上时，此函数的行为是未定义的</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QFont</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QFont/</url>
+    <content><![CDATA[<h2 id="void-qfont-sethintingpreference-qfont-hintingpreference-hintingpreference"><strong>void QFont::setHintingPreference(QFont::HintingPreference hintingPreference)</strong></h2>
+<p><strong>将符号的提示级别的首选项设置为hintingPreference。这是对底层字体渲染系统使用某种程度的提示的提示，并且跨平台有不同的支持。</strong></p>
+<p><strong>QFont::HintingPreference</strong></p>
+<table>
+<thead>
+<tr>
+<th>QFont::PreferDefaultHinting</th>
+<th>0</th>
+<th>使用目标平台的默认提示级别。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QFont::PreferNoHinting</td>
+<td>1</td>
+<td>如果可能的话,在渲染文本时不要提示字形的轮廓。文本布局将是排版准确和可扩展的,使用与打印时相同的指标。</td>
+</tr>
+<tr>
+<td>QFont::PreferVerticalHinting</td>
+<td>2</td>
+<td>如果可能的话,渲染文本时不要有水平提示,但在垂直方向上将字形与像素网格对齐。在密度过低而无法准确渲染字形的显示器上,文字会显得更清晰。但由于字形的水平度量是没有提示的,所以文本的布局将可以扩展到更高密度的设备上(如打印机),而不会影响换行符等细节。</td>
+</tr>
+<tr>
+<td>QFont::PreferFullHinting</td>
+<td>3</td>
+<td>如果可能的话,在水平和垂直方向上渲染带有提示的文本。文本将被改变,以优化目标设备上的可读性,但由于指标将取决于文本的目标尺寸,字形、换行符和其他排版细节的位置将不按比例排列,这意味着文本布局在不同像素密度的设备上可能会有不同的外观。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>翻译不够精准还请看官方文档</strong></p>
+<h2 id="void-qfont-setpixelsize-int-pixelsize">void QFont::setPixelSize(int pixelSize)</h2>
+<p>将字体大小设置为pixelSize像素。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QFontDatabase</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QFontDatabase/</url>
+    <content><![CDATA[<h2 id="qstringlist-qfontdatabase-families-qfontdatabase-writingsystem-writingsystem-any-const"><strong>QStringList QFontDatabase::families(QFontDatabase::WritingSystem writingSystem = Any) const</strong></h2>
+<p>返回支持writingSystem的可用字体族的排序列表。</p>
+<p>如果一个字体族的名字对应着不同公司出的字体，则该字体返回的名称为family [foundry]。例如:Times [Adobe]，Times [Cronyx]，Palatino。</p>
+<h2 id="int-qfontdatabase-addapplicationfont-const-qstring-filename"><strong>int QFontDatabase::addApplicationFont(const QString &amp;fileName)</strong></h2>
+<p>从fileName指定的文件加载字体，并使其可用于应用程序。返回一个ID，可以使用removeApplicationFont()再次删除字体，或者检索字体中包含的家族名称列表。</p>
+<p>如果字体无法加载，函数返回-1。</p>
+<p>目前只支持TrueType字体、TrueType字体集合和OpenType字体。</p>
+<h2 id="qstringlist-qfontdatabase-applicationfontfamilies-int-id"><strong>QStringList QFontDatabase::applicationFontFamilies(int id)</strong></h2>
+<p>返回由id标识的给定应用程序字体的字体族列表。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPolygon</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
+    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
+<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
+<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
+<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QHostInfo</title>
+    <url>/2022/03/09/QtAPI/2022-03-09-QHostInfo/</url>
+    <content><![CDATA[<h1 id="qlist-qhostaddress-addresses"><strong>QList<QHostAddress>  addresses()</strong></h1>
+<p>返回与hostName()主机关联的IP地址列表</p>
+<h1 id="hostinfoerror-error"><strong>HostInfoError  error()</strong></h1>
+<p>如果主机查找失败，返回失败类型</p>
+<h1 id="qstring-errorstring"><strong>QString  errorString(）</strong></h1>
+<p>如果主机查找失败，返回错误描述字符串</p>
+<h1 id="qstring-hostname"><strong>QString  hostName()</strong></h1>
+<p>返回通过IP查找的主机名称</p>
+<h1 id="int-lookupid"><strong>int  lookupId()</strong></h1>
+<p>返回本次查找的ID</p>
+<h1 id="void-aborthostlookup-int-id"><strong>void abortHostLookup(int id)</strong></h1>
+<p>中断主机查找</p>
+<h1 id="qhostinfo-fromname-qstring-name"><strong>QHostInfo  fromName(QString&amp; name)</strong></h1>
+<p>返回指定主机名的IP地址</p>
+<h1 id="qstring-localdomainname"><strong>QString  localDomainName()</strong></h1>
+<p>返回本机DNS域名</p>
+<h1 id="qstring-localhostname"><strong>QString  localHostName()</strong></h1>
+<p>返回本机主机名</p>
+<h1 id="int-lookuphost-qstring-name-qobject-receiver-char-member"><em><em>int  lookupHost(QString&amp; name, QObject</em> receiver, char</em> member)**</h1>
+<p>以异步方式根据主机名查找主机的IP地址，并返回一个表示本次查找的ID,可用于abortHostLookup()</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QNetworkInterface</title>
+    <url>/2022/03/10/QtAPI/2022-03-10-QNetworkInterface/</url>
+    <content><![CDATA[<h1 id="qlist-qnetworkaddressentry-addressentries">QList<QNetworkAddressEntry> addressEntries()</h1>
+<p>返回该网络接口（包括子网掩码和广播地址）的IP地址列表</p>
+<h1 id="qstring-hardwareaddress">QString hardwareAddress()</h1>
+<p>返回该接口的低级硬件地址，以太网里就是MAC地址</p>
+<h1 id="qstring-humanreadablename">QString humanReadableName()</h1>
+<p>返回可以读懂的接口名称，若名称不确定，则会得到name()返回值</p>
+<h1 id="bool-isvalid">bool isValid()</h1>
+<p>如果接口信息有效返回true</p>
+<h1 id="qstring-name">QString name()</h1>
+<p>返回网络接口名称</p>
+<h1 id="qlist-qhostaddress-alladdresses">QList<QHostAddress> allAddresses()</h1>
+<p>返回主机上所有IP地址的列表</p>
+<h1 id="qlist-qnetworkinterface-allinterface">QList<QNetworkInterface> allInterface()</h1>
+<p><strong><strong>返回主机上所有接口的列表</strong></strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QNetworkAddressEntry</title>
+    <url>/2022/03/13/QtAPI/2022-03-13-QNetworkAddressEntry/</url>
+    <content><![CDATA[<h1 id="qhostaddress-qnetworkaddressentry-ip-const"><strong>QHostAddress QNetworkAddressEntry::ip() const</strong></h1>
+<p><strong>这个函数返回一个在网络接口中找到的IPv4或IPv6地址。</strong></p>
+<h1 id="qhostaddress-qnetworkaddressentry-netmask-const"><strong>QHostAddress QNetworkAddressEntry::netmask() const</strong></h1>
+<p>**返回与IP地址关联的子网掩码。子网掩码采用IP地址形式，**如255.255.0.0。</p>
+<p>对于IPv6地址，前缀长度转换为地址中位数为1的地址与前缀长度相等。如果前缀长度为64位(最常用的值)，netmask将被表示为QHostAddress，其中包含地址FFFF:FFFF:FFFF:FFFF::</p>
+<h1 id="qhostaddress-qnetworkaddressentry-broadcast-const"><strong>QHostAddress QNetworkAddressEntry::broadcast() const</strong></h1>
+<p>**返回与IPv4地址和子网掩码相关联的广播地址。**它通常可以通过将子网掩码包含0的IP地址位设置为1来派生。(换句话说，通过按位或者用网络掩码的逆来计算IP地址)</p>
+<p>这个成员对于IPv6地址来说总是空的，因为广播的概念在这个系统中已经被放弃了，取而代之的是组播。特别是，全节点专用组播组(地址FF02::1)可以到达本地网络中所有节点对应的主机组。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QAbstractSocket</title>
+    <url>/2022/03/14/QtAPI/2022-03-14-QAbstractSocket/</url>
+    <content><![CDATA[<p><strong>QTcpSocket除构造与析构外均从此类继承</strong></p>
+<h1 id="virtual-void-qabstractsocket-connecttohost-const-qhostaddress-address-quint16-port-qiodevice-openmode-openmode-readwrite">[virtual] void QAbstractSocket::connectToHost(const QHostAddress &amp;address, quint16 port, QIODevice::OpenMode openMode = ReadWrite)</h1>
+<p>以异步方式连接到指定IP地址和端口的TCP服务器，连接成功则发送connected()信号</p>
+<h1 id="virtual-void-qabstractsocket-disconnectfromhost">[virtual] void QAbstractSocket::disconnectFromHost()</h1>
+<p>断开socket,关闭成功后发射disconnected()信号</p>
+<h1 id="virtual-bool-qabstractsocket-waitforconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForConnected(int msecs = 30000)</h1>
+<p>等待知道建立socked连接，做多等msecs秒</p>
+<h1 id="virtual-bool-qabstractsocket-waitfordisconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForDisconnected(int msecs = 30000)</h1>
+<p>等待直到socket断开连接</p>
+<h1 id="qhostaddress-qabstractsocket-localaddress-const">QHostAddress QAbstractSocket::localAddress() const</h1>
+<p>返回本socket的地址</p>
+<h1 id="quint16-qabstractsocket-localport-const">quint16 QAbstractSocket::localPort() const</h1>
+<p>返回本socket的端口</p>
+<h1 id="qhostaddress-qabstractsocket-peeraddress-const">QHostAddress QAbstractSocket::peerAddress() const</h1>
+<p>在已连接状态下，返回对方socket的地址</p>
+<h1 id="quint16-qabstractsocket-peerport-const">quint16 QAbstractSocket::peerPort() const</h1>
+<p>在已连接状态下，返回对方socket的端口</p>
+<h1 id="qint64-qabstractsocket-readbuffersize-const">qint64 QAbstractSocket::readBufferSize() const</h1>
+<p>返回内部读取缓冲区的大小，该大小决定了read()和readAll()函数能读出的数据大小</p>
+<h1 id="virtual-void-qabstractsocket-setreadbuffersize-qint64-size">[virtual] void QAbstractSocket::setReadBufferSize(qint64 size)</h1>
+<p>设置内部读取缓冲区大小</p>
+<h1 id="override-virtual-qint64-qabstractsocket-bytesavailable-const">[override virtual] qint64 QAbstractSocket::bytesAvailable() const</h1>
+<p>返回需要读取的缓冲区数据的字节数</p>
+<h1 id="override-virtual-bool-qabstractsocket-canreadline-const">[override virtual] bool QAbstractSocket::canReadLine() const</h1>
+<p>如果有行数据要从socket缓冲区读取，返回true</p>
+<h1 id="qabstractsocket-socketstate-qabstractsocket-state-const">QAbstractSocket::SocketState QAbstractSocket::state() const</h1>
+<p>返回socket当前状态</p>
+<p>signals:</p>
+<h1 id="void-connected">void connected()</h1>
+<p>connectToHost()成功连接到服务器后发射</p>
+<h1 id="void-disconnected">void disconnected()**</h1>
+<p>socket断开后发射</p>
+<h1 id="void-error-qabstractsocket-socketerror-socketerror">void error(QAbstractSocket::SocketError socketError)</h1>
+<p>socket错误后发射</p>
+<h1 id="void-hostfound">void hostFound()</h1>
+<p>调用connectToHost()找到主机后发射</p>
+<h1 id="void-proxyauthenticationrequired-const-qnetworkproxy-proxy-qauthenticator-authenticator">** void proxyAuthenticationRequired(const QNetworkProxy &amp;proxy, QAuthenticator <em>authenticator)</em>*</h1>
+<p><strong>当使用需要身份验证的代理时，可以发出此信号。然后，可以在验证器对象中填充所需的详细信息，以允许验证并继续连接。</strong></p>
+<p><strong>注意:不可能使用QueuedConnection连接到这个信号，因为当信号返回时，如果未将新信息填充到验证器，则连接将失败。</strong></p>
+<h1 id="void-statechanged-qabstractsocket-socketstate-socketstate">** void stateChanged(QAbstractSocket::SocketState socketState)**</h1>
+<p><strong><strong>当socket状态变化是发射，socketState表示了socket当前状态</strong></strong></p>
+<h1 id="void-readyread"><strong>void readyRead()</strong></h1>
+<p><strong><strong>当缓冲区有新数据需要读取时发射,在此信号的槽函数里读取缓冲区数据</strong></strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Qt动画框架使用</title>
     <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
     <content><![CDATA[<h2 id="前言">前言</h2>
@@ -92,8 +1126,8 @@
         <category>Qt具体使用</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt使用</tag>
       </tags>
   </entry>
@@ -396,446 +1430,9 @@ int main(int argc, char *argv[])
         <category>Qt具体使用</category>
       </categories>
       <tags>
+        <tag>C++</tag>
         <tag>Qt</tag>
-        <tag>C++</tag>
         <tag>Qt使用</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EffectiveC++(2)(5~12)</title>
-    <url>/2022/03/05/Effective%20C++/2022-03-05-EffectiveC++(2)(5~12)/</url>
-    <content><![CDATA[<h2 id="05-了解c-默默编写并调用了哪些函数">05:了解C++默默编写并调用了哪些函数</h2>
-<p>如果定义一个类</p>
-<pre class="line-numbers language-none"><code class="language-none">class Empty&#123;&#125;；
-<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>相当于定义了</p>
-<pre class="line-numbers language-none"><code class="language-none">class Empty&#123;
-    public:
-    Empty()&#123;&#125;;　　&#x2F;&#x2F;default构造
-    Empty(const Empty&amp; rhs)&#123;&#125;;　　&#x2F;&#x2F;拷贝构造
-    ~Empty();　　&#x2F;&#x2F;编译器合成的析构函数　　Empty&amp; operator&#x3D;(const Empty&amp; rhs)&#123;&#125;;&#x2F;&#x2F;拷贝赋值运算符
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>由于这本书标准不是C++11，有关默认移动构造和移动赋值函数等我了解了之后再补充</p>
-<p>如果定义了带有参数的构造函数，则不再合成默认构造函数，但可以显式要求编译器合成</p>
-<pre class="line-numbers language-none"><code class="language-none">Empty() &#x3D; default;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>当类内含有引用成员或cont的成员时，编译器拒绝生成默认拷贝赋值运算符。</p>
-<p>如果某个基类的拷贝赋值运算符为private,则编译器拒绝为其子类生成默认拷贝运算符</p>
-<p><strong>注意：引用只能定义一次，定义后不能改变它的指向</strong></p>
-<h2 id="06：若不想使用编译器自动生成的函数-就该明确拒绝"><strong>06：若不想使用编译器自动生成的函数，就该明确拒绝</strong></h2>
-<p>书上给出的方法是定义一个基类，该基类的拷贝构造和拷贝赋值为private，另你的类继承于该基类，则编译器无法合成默认拷贝构造和拷贝赋值函数。</p>
-<p>但是在C++11中，<strong>只需要这么在函数后加上delete</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">class Empty&#123;
-    public:
-    Empty()&#123;&#125;;
-    Empty(const Empty&amp;) &#x3D; delete;
-    Empty&amp; operator&#x3D;(const Empty&amp;) &#x3D; delete;
-    ~Empty();
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="07-为多态基类声明virtual析构函数">07:为多态基类声明virtual析构函数</h2>
-<p>多态基类是为了通过基类指针来控制派生类对象</p>
-<ul>
-<li><strong>polymorphic(多态)基类应声明一个virtual析构函数， 任何一个类带有任何virtual函数，它就应该用于一个virtual析构函数</strong></li>
-</ul>
-<p>带有虚构函数的类一般作为基类使用，而如果该类没有虚析构函数，当其派生类对象执行析构时，会导致局部销毁，进而导致内存泄漏</p>
-<pre class="line-numbers language-none"><code class="language-none">class Base
-&#123;
-public:
-    Base() &#x3D; default;
-    int testBase;
-&#125;;
-
-class Derived : public Base
-&#123;
-public:
-    int testDerived;
-&#125;;
-int main()
-&#123;
-    Base* A &#x3D; new Base;
-    Derived* B &#x3D; new Derived;
-    A &#x3D; B;  
-    delete A;       &#x2F;&#x2F;执行此语句时只会删掉Base部分的成员，而Derived的部分不会被删除
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>注意<strong>即使基类指针指向了派生类对象，该指针也只能操作基类成员，因此要定义虚函数来操作派生类对象。</strong></p>
-<ul>
-<li><strong>类的设计如不不是为了作为基类使用，或不是为了多态性，则不应声明virtual析构函数</strong></li>
-</ul>
-<p>因为会使对象占用内存增加。同时，为了让你的非基类、非多态用途的类不被继承，可以<strong>使用final关键字</strong>来禁止其派生。</p>
-<pre class="line-numbers language-none"><code class="language-none">class NoDerived final
-&#123;
-     ...  
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="08-别让异常逃离虚构函数">08:别让异常逃离虚构函数</h2>
-<ul>
-<li>
-<p><strong>析构函数觉得不能抛出异常，如果一个被析构函数调用的函数可能抛出异常，析构函数应该捕捉任何异常，然后吞下它们（不传播）或接受程序。</strong></p>
-</li>
-<li>
-<p><strong>如果客户需要对某个操作函数运行期间抛出的异常做出反应，那么class应提供一个普通函数（而非在析构函数中）执行该操作</strong></p>
-</li>
-</ul>
-<p>对于异常处理不熟悉，先记录，以后有机会补充</p>
-<h2 id="09-绝不在构造和析构过程中调用virtual函数">09:绝不在构造和析构过程中调用virtual函数</h2>
-<p>因为这类调用不会下降至派生类</p>
-<p>考虑：</p>
-<pre class="line-numbers language-none"><code class="language-none">class Transaction&#123;
-public:
-    Transaction();
-    virtual void logTransaction() const &#x3D; 0;
-&#125;;
-
-Transaction::Transaction()
-&#123;
-    logTransaction();
-&#125;
-
-class BuyTransaction : public Transaction&#123;
-public:
-    virtual void logTransaction() const;
-&#125;;
-
-BuyTransaction a;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在定义a时，会先构造基类Transaction，此时调用的将会是基类的logTransaction()，因为在派生类对象的基类构造期间对象类型为基类而非派生类。</p>
-<p>因此构造函数和析构函数都不能调用virtual函数</p>
-<p>一种解决方案：</p>
-<pre class="line-numbers language-none"><code class="language-none">class Transaction
-&#123;
-public:
-    explicit Transaction(const std::string &amp;logInfo);
-    void logTransaction(const std::string &amp;logInfo) const; &#x2F;&#x2F;非虚函数
-&#125;;
-
-Transaction::Transaction(const std::string &amp;logInfo)
-&#123;
-    &#x2F;&#x2F;...
-    logTransaction(logInfo);
-&#125;
-
-class BuyTransaction : public Transaction
-&#123;
-public:
-    BuyTransaction(parameters) : Transaction(createLogString(parameters)) &#123;&#125;
-
-private:
-    static std::string createLogString(parameters);
-&#125;;
-&#x2F;&#x2F;令派生类将必要构造信息向上传给基类狗在函数
-&#x2F;&#x2F;从而让构造函数拜托虚函数
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="10-令operator-返回一个reference-to-this">10:令operator=返回一个reference to *this</h2>
-<p>为了实现连锁赋值，即<strong>a = b = c = 15</strong>这种赋值，则需要这么做</p>
-<pre class="line-numbers language-none"><code class="language-none">class Widget&#123;
-public:
-    Widget&amp; operator&#x3D;(const Widget&amp; rhs)
-    &#123;
-         ...
-         return *this;
-    &#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>此协议使用于所有赋值运算，+= , -= , …</p>
-<h2 id="11-在operator-中处理-自我赋值">11:在operator=中处理&quot;自我赋值&quot;</h2>
-<pre class="line-numbers language-none"><code class="language-none">class widget
-&#123;
-public:
-    widget &amp;operator&#x3D;(const widget &amp;rhs);
-
-private:
-    widget *wp;
-&#125;;
-
-widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
-&#123;
-    delete wp;
-    wp &#x3D; new widget(*rhs.wp);
-    return *this;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>当自我赋值时，会造成未定义行为，因为rhs在被删掉后还在使用，有三种方法解决</p>
-<p><strong>使用证同测试来避免这个问题</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
-&#123;
-    if (this &#x3D;&#x3D; &amp;rhs)
-    &#123;
-        return *this;
-    &#125;
-    
-    delete wp;
-    wp &#x3D; new widget(*rhs.wp);
-    return *this;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>精心周到的语句排序</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
-&#123;
-    widget* old &#x3D; wp;
-    wp &#x3D; new widget(*rhs.wp);
-    delete old;
-    return *this;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>copy and swap技术</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">class widget
-&#123;
-public:
-    widget &amp;operator&#x3D;(const widget &amp;rhs);
-    void swap(widget&amp; rhs); &#x2F;&#x2F;交换*this和rhs的数据
-
-private:
-    widget *wp;
-&#125;;
-
-widget &amp;widget::operator&#x3D;(const widget &amp;rhs)
-&#123;
-    widget temp(rhs);
-    swap(temp);
-    return *this;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>或使用值传递的方式，这里会产生副本，并让*this与副本的数据互换</p>
-<pre class="line-numbers language-none"><code class="language-none">widget&amp; operator&#x3D;(widget rhs)
-&#123;
-    swap(rhs);
-    return *this;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="12-复制对象时勿忘其每一个成分">12:复制对象时勿忘其每一个成分</h2>
-<p>考虑如下代码</p>
-<pre class="line-numbers language-none"><code class="language-none">class Base
-&#123;
-private:
-    int base;
-&#125;;
-
-class Derived : public Base
-&#123;
-public:
-    Derived(const Derived &amp;rhs);
-    Derived &amp;operator&#x3D;(const Derived &amp;rhs);
-
-private:
-    int derived;
-&#125;;
-
-Derived::Derived(const Derived &amp;rhs) : derived(rhs.derived)
-&#123;
-    &#x2F;&#x2F;do something
-&#125;
-
-Derived&amp; Derived::operator&#x3D;(const Derived&amp; rhs)
-&#123;
-    &#x2F;&#x2F;do something
-    derived &#x3D; rhs.derived;
-    return *this;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>它们并未对Base部分进行初始化，会调用默认构造函数，而这往往造成不想要的结果。</p>
-<p>考虑到Base部分往往是private的，可以使用相应base部分的拷贝构造函数</p>
-<pre class="line-numbers language-none"><code class="language-none">Derived::Derived(const Derived &amp;rhs) : Base(rhs), derived(rhs.derived)
-&#123;
-    &#x2F;&#x2F;do something
-&#125;
-
-Derived&amp; Derived::operator&#x3D;(const Derived&amp; rhs)
-&#123;
-    &#x2F;&#x2F;do something
-    Base::operator&#x3D;(rhs);
-    derived &#x3D; rhs.derived;
-    return *this;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-]]></content>
-      <categories>
-        <category>Effective C++</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Effective C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EffectiveC++(1)(1~4)</title>
-    <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
-    <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
-<p><strong>四个次语言:</strong></p>
-<ul>
-<li>C</li>
-<li>Object-Oriented C++（面向对象C++）</li>
-<li>Template C++</li>
-<li>STL</li>
-</ul>
-<h2 id="02-尽量以-const-enum-inline代替-define">02:尽量以 const, enum, inline代替 #define</h2>
-<p>使用#define时，编译器看不到你所define的变量，那么当报错时，为了查找理解你所定义的，就需要耗费大量时间</p>
-<pre class="line-numbers language-none"><code class="language-none">#define ASPECT_RATIO 1.653　　　　&#x2F;&#x2F;aspect_ratio并未进入符号表<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>当以常量代替#define时，有两种特殊情况</p>
-<ul>
-<li><strong>定义常量指针</strong></li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">const char* const authoerNameo &#x3D; &quot;ScottMeyers&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<ul>
-<li><strong><strong>定义class专有常量</strong></strong></li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;为了将常量作用域限制于class内，需要static
-class GamePlayer&#123;
-    static const int NumTurns &#x3D; 5;&#x2F;&#x2F;常量声明式
-    int scores[NumTurns];&#x2F;&#x2F;使用常量    
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>对于形似函数的宏(如#definr Test(a,b) f((a)&gt;(b)?(a):(b)))，可以用inline代替</p>
-<pre class="line-numbers language-none"><code class="language-none">template&lt;typename T&gt;
-inline void callWithMax(const T&amp; a, const T&amp; b)
-&#123;
-    f(a &gt; b ? a: b);
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="03-尽可能使用const">03:尽可能使用const</h2>
-<p>const的几种不同用法</p>
-<pre class="line-numbers language-none"><code class="language-none">char greeting[] &#x3D; &quot;hewwl&quot;;
-char* p &#x3D; greeting;
-const char* p &#x3D;greeting;    &#x2F;&#x2F;non-const pointer, const data
-char* const p &#x3D; greeting;   &#x2F;&#x2F;const pointer, non-const data
-const char* const p &#x3D; greeting; &#x2F;&#x2F;const pointer, const data
-&#x2F;&#x2F;注: const Widget* pw与Widget const* pw等价<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>令函数返回一个常量值，可以降低因错误而造成的意外，如：</p>
-<pre class="line-numbers language-none"><code class="language-none">class Rational&#123;&#125;;
-const Rational operator*(const Rational&amp; lhs, const Rational&amp; rhs);
-&#x2F;&#x2F;如果没有const可能会造成
-Rational a,b,c;
-if (a*b &#x3D; c)
-&#123;
-    &#x2F;* code *&#x2F;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>另：双目运算符operator*想拥有两个参数，必须在类外定义，因为类内有隐式this指针</strong></p>
-<p><strong>当const 和 non-const成员函数有着实质等价的实现时，令non-const版本调用const版本来避免代码重复</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">class TextBlock &#123; public: const char&amp; operator[](std::size_t position) const&#123; &#x2F;&#x2F;过程1 &#x2F;&#x2F;过程2 &#x2F;&#x2F;过程3 return text[position]; &#125; char&amp; operator[](std::size_t position)&#123; return const_cast&lt;char&amp;&gt; (static_cast&lt;const TextBlock&amp;&gt; (*this)[position]); &#125; &#125;; &#x2F;&#x2F;注:不能用const调用non-const,因为non-const可能改变对象<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h2 id="04-确定对象使用前已被初始化">04:确定对象使用前已被初始化</h2>
-<li>
-<p><strong>为内置对象进行手工初始化</strong></p>
-</li>
-<p>内置对象不进行手工初始化的话很可能得到随机值，而浪费性能</p>
-<li>
-<p><strong>构造函数使用成员初始化列表，而不是赋值</strong></p>
-</li>
-<pre class="line-numbers language-none"><code class="language-none">class A
-&#123;
-private:
-    int member1;
-    double member2;
-    std::string member3;
-
-public:
-    &#x2F;&#x2F;使用初始值列表
-    A() : member1(0), member2(0), member3(std::string())&#123;&#125;
-    &#x2F;&#x2F;赋值初始化
-    A()&#123;
-        member1 &#x3D; 0;
-        member2 &#x3D; 0;
-        member3 &#x3D; &quot;&quot;;
-    &#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>使用赋值初始化的构造函数在赋值前还会调用default的构造函数，因此会造成性能流失</p>
-<li>
-<p><strong>以本地静态对象代替非本地静态对象</strong></p>
-</li>
-<p>这是为避免跨编译单元初始化次序问题而提出的解决方案，简单来说就是：</p>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
-class hen&#123;
-    public:
-    std::size_t makeEggs();
-&#125;;
-hen ji;&#x2F;&#x2F;non-local static
-
-&#x2F;&#x2F;b.cpp
-extern hen ji;
-class eggs&#123;
-    public:
-    void eggs()
-    &#123;
-        ji.makeEggs();
-    &#125;
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>此时若调用eggs构造函数，而ji未初始化，则会造成严重问题（多编译文件初始化次序不确定）</p>
-<p>而</p>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
-class hen&#123;
-    public:
-    std::size_t makeEggs();
-&#125;;
-hen&amp; chicken()
-&#123;
-    static hen ji
-    return ji;
-&#125;;
-
-&#x2F;&#x2F;b.cpp
-extern hen ji;
-class eggs&#123;
-    public:
-    eggs()
-    &#123;
-        chicken().makeEggs();
-    &#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>不存在问题，原因简单分析:</p>
-<p>local static 的做法 &gt; 调用 eggs() &gt; 调用 egg 构造函数 &gt; 调用 ji() &gt; 调用 ji 的构造函数 &gt; 成功</p>
-<p><a href="https://blog.csdn.net/pursue_my_life/article/details/80950580">参考链接</a></p>
-]]></content>
-      <categories>
-        <category>Effective C++</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Effective C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>EffectiveC++(3)</title>
-    <url>/2022/03/07/Effective%20C++/2022-03-07-EffectiveC++(3)/</url>
-    <content><![CDATA[<h2 id="13-以对象管理资源">13:以对象管理资源</h2>
-<p>考虑：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">class test&#123;
-    public:
-    test* createTets();     &#x2F;&#x2F;创建一个指向对象的指针
-    void f();   &#x2F;&#x2F;用于删除使用完毕之后的对象
-&#125;;
-
-void test::f()
-&#123;
-    test* newTett &#x3D; createTets();
-    &#x2F;&#x2F;...
-    delete newTett;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这样的做法看似稳妥，但是假如在…部分有return语句使函数提前结束，则资源无法释放，久而久之造成内存泄漏。</p>
-<p>有时候也会有无我们个人的原因，忘记析构某个对象之类的，为此我们的解决方案是<strong>利用对象管理资源</strong></p>
-<p>如使用 <strong>shared_ptr</strong> 或 <strong>unique_ptr.</strong></p>
-<p>但仍要注意，在使用shared_ptr时可能会造成的错误。</p>
-<p>如：</p>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;memory&gt;
-#include &lt;iostream&gt;
-int main()
-&#123;
-    int a &#x3D; 52;
-    &#123;
-        std::shared_ptr&lt;int&gt; test(&amp;a);
-    &#125;
-    std::cout &lt;&lt; a;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在test退出程序块时会释放掉内存，因此之前定义的变量a就不能使用了，需时刻注意。</p>
-<p><strong>注意：shared_ptr在析构时调用的是delete而不是delete[ ],若想改变这一状况可自行传入删除器</strong></p>
-<p><font size=5>请记住:</font></p>
-<ol>
-<li>为防止资源泄漏，请使用RAII对象，它们在构造函数中获得资源并在析构函数中释放资源</li>
-<li>两个常用的RAII类为shared_ptr与unique_ptr,前者通常为较佳选择，因为其复制行为比较直观，若选择unique_ptr,复制动作会报错，但是可以通过右值来转移所有权（即std::move)</li>
-</ol>
-<h2 id="14：在资源管理类中小心copying行为">14：在资源管理类中小心copying行为</h2>
-]]></content>
-      <categories>
-        <category>Effective C++</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Effective C++</tag>
       </tags>
   </entry>
   <entry>
@@ -1084,6 +1681,193 @@ int main()
       </tags>
   </entry>
   <entry>
+    <title>双链表</title>
+    <url>/2022/02/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-14-%E5%8F%8C%E9%93%BE%E8%A1%A8/</url>
+    <content><![CDATA[<p>相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
+<h2 id="前言：">前言：</h2>
+<p>1.这里的双链表使用C++实现</p>
+<p>2.只完成了插入删除操作</p>
+<h2 id="思路：">思路：</h2>
+<p><img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png" alt=""></p>
+<p>如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
+<h2 id="实现：">实现：</h2>
+<p>首先，需要定义表示节点的结构体:</p>
+<pre class="line-numbers language-none"><code class="language-none">struct node
+&#123;
+	string data;
+	node* next;		&#x2F;&#x2F;指向下一个元素
+	node* prev;		&#x2F;&#x2F;指向前一个元素
+	node()                　&#x2F;&#x2F;构造函数，用于在创建新节点时自动初始化    
+	&#123;
+		data &#x3D; &quot;&quot;;
+		prev &#x3D; NULL;
+		next &#x3D; NULL;
+	&#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这里我为了在字面上区分节点和链表的区别，使用了</p>
+<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png" alt=""></p>
+<p>接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
+<pre class="line-numbers language-none"><code class="language-none">doubleLinkedList* createList()
+&#123;
+	node* list &#x3D; new node();　　&#x2F;&#x2F;这种方式返回不会存在局部变量内存销毁的问题，因为它是new出来的
+	return list;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>插入操作</p>
+<pre class="line-numbers language-none"><code class="language-none">void insert(node* position, string input)
+&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
+	node* newNode &#x3D; new node();
+	&lt;strong&gt;newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
+	newNode-&gt;next &#x3D; position-&gt;next;		　　　　 &#x2F;&#x2F;如果不对新节点优先处理，会造成找不到节点的清空，造成野指针
+	newNode-&gt;prev &#x3D; position;
+	if (position-&gt;next !&#x3D; NULL) &#123;　　　　　　　　　　　　&#x2F;&#x2F;如果不进行判断，可能会对NULL操作而错误
+		position-&gt;next-&gt;prev &#x3D; newNode;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+	else &#123;
+		position-&gt;next &#x3D; newNode;
+	&#125;&lt;&#x2F;strong&gt;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+<pre class="line-numbers language-none"><code class="language-none">void deleteElement(node* ele)
+&#123;
+	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
+	if (ele-&gt;next !&#x3D; NULL)
+	&#123;
+		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
+	&#125;
+	else
+	&#123;&#x2F;&#x2F;ele-&gt;next为空时不需要做什么了
+	&#125;
+	delete ele;　　　　&#x2F;&#x2F;必须删除，否则长时间可能造成内存泄漏
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+<p>查找操作</p>
+<pre class="line-numbers language-none"><code class="language-none">node* find(string input, doubleLinkedList* list)
+&#123;&#x2F;&#x2F;与单链表差不多
+	doubleLinkedList* L &#x3D; list;
+	while (L !&#x3D; NULL)
+	&#123;
+		if (L-&gt;data &#x3D;&#x3D; input)
+		&#123;
+			return L;
+		&#125;
+		else
+		&#123;
+			L &#x3D; L-&gt;next;
+		&#125;
+	&#125;
+	return NULL;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>完整代码</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+struct node
+&#123;
+	string data;
+	node* next;		&#x2F;&#x2F;指向下一个元素
+	node* prev;		&#x2F;&#x2F;指向前一个元素
+	node()
+	&#123;
+		data &#x3D; &quot;&quot;;
+		prev &#x3D; NULL;
+		next &#x3D; NULL;
+	&#125;
+&#125;;
+
+using doubleLinkedList &#x3D; node;
+
+void insert(node* position, string input)
+&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
+	node* newNode &#x3D; new node();
+	newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
+	newNode-&gt;next &#x3D; position-&gt;next;		
+	newNode-&gt;prev &#x3D; position;
+	if (position-&gt;next !&#x3D; NULL) &#123;
+		position-&gt;next-&gt;prev &#x3D; newNode;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+	else &#123;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+&#125;
+
+void deleteElement(node* ele)
+&#123;
+	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
+	if (ele-&gt;next !&#x3D; NULL)
+	&#123;
+		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
+	&#125;
+	else
+	&#123;
+	&#125;
+	delete ele;
+&#125;
+
+node* find(string input, doubleLinkedList* list)
+&#123;
+	doubleLinkedList* L &#x3D; list;
+	while (L !&#x3D; NULL)
+	&#123;
+		if (L-&gt;data &#x3D;&#x3D; input)
+		&#123;
+			return L;
+		&#125;
+		else
+		&#123;
+			L &#x3D; L-&gt;next;
+		&#125;
+	&#125;
+	return NULL;
+&#125;
+
+doubleLinkedList* createList()
+&#123;
+	node* list &#x3D; new node();
+	return list;
+&#125;
+
+int main()
+&#123;
+	doubleLinkedList* list &#x3D; createList();
+	while (true)
+	&#123;
+		int j;
+		cin &gt;&gt; j;
+		if (j &#x3D;&#x3D; 1)
+		&#123;
+			string query, input;
+			cin &gt;&gt; input;
+			insert(list, input);
+		&#125;
+		else
+		&#123;
+			string query;
+			cin &gt;&gt; query;
+			deleteElement(find(query, list));
+		&#125;
+	&#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此代码已经本人VS调试测试，暂时没有发现什么问题</p>
+<p>如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>数据结构</tag>
+        <tag>线性表</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>栈</title>
     <url>/2022/03/10/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-10-%E6%A0%88/</url>
     <content><![CDATA[<h1 id="关于栈">关于栈</h1>
@@ -1295,193 +2079,6 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>双链表</title>
-    <url>/2022/02/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-14-%E5%8F%8C%E9%93%BE%E8%A1%A8/</url>
-    <content><![CDATA[<p>相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
-<h2 id="前言：">前言：</h2>
-<p>1.这里的双链表使用C++实现</p>
-<p>2.只完成了插入删除操作</p>
-<h2 id="思路：">思路：</h2>
-<p><img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png" alt=""></p>
-<p>如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
-<h2 id="实现：">实现：</h2>
-<p>首先，需要定义表示节点的结构体:</p>
-<pre class="line-numbers language-none"><code class="language-none">struct node
-&#123;
-	string data;
-	node* next;		&#x2F;&#x2F;指向下一个元素
-	node* prev;		&#x2F;&#x2F;指向前一个元素
-	node()                　&#x2F;&#x2F;构造函数，用于在创建新节点时自动初始化    
-	&#123;
-		data &#x3D; &quot;&quot;;
-		prev &#x3D; NULL;
-		next &#x3D; NULL;
-	&#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这里我为了在字面上区分节点和链表的区别，使用了</p>
-<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png" alt=""></p>
-<p>接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
-<pre class="line-numbers language-none"><code class="language-none">doubleLinkedList* createList()
-&#123;
-	node* list &#x3D; new node();　　&#x2F;&#x2F;这种方式返回不会存在局部变量内存销毁的问题，因为它是new出来的
-	return list;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>插入操作</p>
-<pre class="line-numbers language-none"><code class="language-none">void insert(node* position, string input)
-&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
-	node* newNode &#x3D; new node();
-	&lt;strong&gt;newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
-	newNode-&gt;next &#x3D; position-&gt;next;		　　　　 &#x2F;&#x2F;如果不对新节点优先处理，会造成找不到节点的清空，造成野指针
-	newNode-&gt;prev &#x3D; position;
-	if (position-&gt;next !&#x3D; NULL) &#123;　　　　　　　　　　　　&#x2F;&#x2F;如果不进行判断，可能会对NULL操作而错误
-		position-&gt;next-&gt;prev &#x3D; newNode;
-		position-&gt;next &#x3D; newNode;
-	&#125;
-	else &#123;
-		position-&gt;next &#x3D; newNode;
-	&#125;&lt;&#x2F;strong&gt;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-<pre class="line-numbers language-none"><code class="language-none">void deleteElement(node* ele)
-&#123;
-	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
-	if (ele-&gt;next !&#x3D; NULL)
-	&#123;
-		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
-	&#125;
-	else
-	&#123;&#x2F;&#x2F;ele-&gt;next为空时不需要做什么了
-	&#125;
-	delete ele;　　　　&#x2F;&#x2F;必须删除，否则长时间可能造成内存泄漏
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-<p>查找操作</p>
-<pre class="line-numbers language-none"><code class="language-none">node* find(string input, doubleLinkedList* list)
-&#123;&#x2F;&#x2F;与单链表差不多
-	doubleLinkedList* L &#x3D; list;
-	while (L !&#x3D; NULL)
-	&#123;
-		if (L-&gt;data &#x3D;&#x3D; input)
-		&#123;
-			return L;
-		&#125;
-		else
-		&#123;
-			L &#x3D; L-&gt;next;
-		&#125;
-	&#125;
-	return NULL;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>完整代码</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
-#include &lt;string&gt;
-using namespace std;
-struct node
-&#123;
-	string data;
-	node* next;		&#x2F;&#x2F;指向下一个元素
-	node* prev;		&#x2F;&#x2F;指向前一个元素
-	node()
-	&#123;
-		data &#x3D; &quot;&quot;;
-		prev &#x3D; NULL;
-		next &#x3D; NULL;
-	&#125;
-&#125;;
-
-using doubleLinkedList &#x3D; node;
-
-void insert(node* position, string input)
-&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
-	node* newNode &#x3D; new node();
-	newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
-	newNode-&gt;next &#x3D; position-&gt;next;		
-	newNode-&gt;prev &#x3D; position;
-	if (position-&gt;next !&#x3D; NULL) &#123;
-		position-&gt;next-&gt;prev &#x3D; newNode;
-		position-&gt;next &#x3D; newNode;
-	&#125;
-	else &#123;
-		position-&gt;next &#x3D; newNode;
-	&#125;
-&#125;
-
-void deleteElement(node* ele)
-&#123;
-	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
-	if (ele-&gt;next !&#x3D; NULL)
-	&#123;
-		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
-	&#125;
-	else
-	&#123;
-	&#125;
-	delete ele;
-&#125;
-
-node* find(string input, doubleLinkedList* list)
-&#123;
-	doubleLinkedList* L &#x3D; list;
-	while (L !&#x3D; NULL)
-	&#123;
-		if (L-&gt;data &#x3D;&#x3D; input)
-		&#123;
-			return L;
-		&#125;
-		else
-		&#123;
-			L &#x3D; L-&gt;next;
-		&#125;
-	&#125;
-	return NULL;
-&#125;
-
-doubleLinkedList* createList()
-&#123;
-	node* list &#x3D; new node();
-	return list;
-&#125;
-
-int main()
-&#123;
-	doubleLinkedList* list &#x3D; createList();
-	while (true)
-	&#123;
-		int j;
-		cin &gt;&gt; j;
-		if (j &#x3D;&#x3D; 1)
-		&#123;
-			string query, input;
-			cin &gt;&gt; input;
-			insert(list, input);
-		&#125;
-		else
-		&#123;
-			string query;
-			cin &gt;&gt; query;
-			deleteElement(find(query, list));
-		&#125;
-	&#125;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>此代码已经本人VS调试测试，暂时没有发现什么问题</p>
-<p>如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>数据结构</tag>
-        <tag>线性表</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>链栈</title>
     <url>/2022/03/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-11-%E9%93%BE%E6%A0%88/</url>
     <content><![CDATA[<p>链栈与栈的逻辑结构相同，只不过存储结构不同。</p>
@@ -1552,6 +2149,128 @@ int main()
 &#125;
 <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 <p></p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>数据结构</tag>
+        <tag>线性表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>双端栈</title>
+    <url>/2022/03/13/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-13-%E5%8F%8C%E7%AB%AF%E6%A0%88/</url>
+    <content><![CDATA[<h1 id="关于双端栈">关于双端栈</h1>
+<p>为了节省数组空间并增加栈的个数，可以使用双端栈。</p>
+<p>双端栈的基本操作都和栈没太大区别，因此不再赘述。</p>
+<p><img src="https://s2.loli.net/2022/06/02/bPtMmgiWrusSUqH.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/06/02/vVXl2szPheikYnw.png" alt="2.png"></p>
+<h1 id="实现">实现</h1>
+<p>仅实现双端栈的插入删除初始化操作。</p>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+#include &lt;iostream&gt;
+#define STACK_SIZE 100
+template &lt;typename ElementType&gt;
+struct DoubleSideStack
+&#123;
+    int top[2];
+    ElementType Stack[STACK_SIZE];
+
+    DoubleSideStack();  &#x2F;&#x2F;初始化（构造函数）
+    bool push(ElementType x, int i);    &#x2F;&#x2F;压栈
+    bool pop(ElementType *x, int i);    &#x2F;&#x2F;出栈
+&#125;;
+
+template &lt;typename ElementType&gt;
+DoubleSideStack&lt;ElementType&gt;::DoubleSideStack()
+&#123;&#x2F;&#x2F;初始化
+    top[0] &#x3D; -1;
+    top[1] &#x3D; STACK_SIZE;
+&#125;
+
+template &lt;typename ElementType&gt;
+bool DoubleSideStack&lt;ElementType&gt;::push(ElementType x, int i)
+&#123;&#x2F;&#x2F;压栈
+    if (this-&gt;top[0] + 1 &#x3D;&#x3D; this-&gt;top[1])
+    &#123; &#x2F;&#x2F;判断栈满与否
+        std::cout &lt;&lt; &quot;栈满&quot;;
+        return false;
+    &#125;
+
+    switch (i)
+    &#123;
+    case 0:
+    &#123;
+        this-&gt;top[0]++;
+        this-&gt;Stack[this-&gt;top[0]] &#x3D; x;
+        return true;
+        break;
+    &#125;
+    case 1:
+    &#123;
+        this-&gt;top[1]--;
+        this-&gt;Stack[this-&gt;top[1]] &#x3D; x;
+        return true;
+        break;
+    &#125;
+    default:
+    &#123;
+        std::cout &lt;&lt; &quot;out of range&quot; &lt;&lt; std::endl;
+        return false;
+        break;
+    &#125;
+    &#125;
+&#125;
+
+template &lt;typename ElementType&gt;
+bool DoubleSideStack&lt;ElementType&gt;::pop(ElementType *x, int i)
+&#123;&#x2F;&#x2F;出栈
+    switch (i)
+    &#123;
+    case 0:
+    &#123;
+        if (this-&gt;top[0] &#x3D;&#x3D; -1)
+        &#123;&#x2F;&#x2F;判断栈空与否
+            std::cout &lt;&lt; &quot;out of range&quot; &lt;&lt; std::endl;
+            return false;
+        &#125;
+        *x &#x3D; this-&gt;Stack[this-&gt;top[0]];
+        this-&gt;top[0]--;
+        return true;
+        break;
+    &#125;
+    case 1:
+    &#123;
+        if (this-&gt;top[1] &#x3D;&#x3D; STACK_SIZE)
+        &#123;&#x2F;&#x2F;判断栈空与否
+            std::cout &lt;&lt; &quot;out of range&quot; &lt;&lt; std::endl;
+            return false;
+        &#125;
+        *x &#x3D; this-&gt;Stack[this-&gt;top[1]];
+        this-&gt;top[1]++;
+        return true;
+        break;
+    &#125;
+    default:
+    &#123;
+        return false;
+        break;
+    &#125;
+    &#125;
+&#125;
+
+int main()
+&#123;
+    DoubleSideStack&lt;std::string&gt; testStack;
+    testStack.push(&quot;this is a test&quot;, 0);
+    testStack.push(&quot;this is a end test&quot;, 1);
+    std::string newString;
+    testStack.pop(&amp;newString, 1);
+    testStack.pop(&amp;newString, 1);
+    std::cout &lt;&lt; newString;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
@@ -1828,125 +2547,63 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>双端栈</title>
-    <url>/2022/03/13/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-13-%E5%8F%8C%E7%AB%AF%E6%A0%88/</url>
-    <content><![CDATA[<h1 id="关于双端栈">关于双端栈</h1>
-<p>为了节省数组空间并增加栈的个数，可以使用双端栈。</p>
-<p>双端栈的基本操作都和栈没太大区别，因此不再赘述。</p>
-<p><img src="https://s2.loli.net/2022/06/02/bPtMmgiWrusSUqH.png" alt="1.png"></p>
-<p><img src="https://s2.loli.net/2022/06/02/vVXl2szPheikYnw.png" alt="2.png"></p>
-<h1 id="实现">实现</h1>
-<p>仅实现双端栈的插入删除初始化操作。</p>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
-#include &lt;iostream&gt;
-#define STACK_SIZE 100
-template &lt;typename ElementType&gt;
-struct DoubleSideStack
-&#123;
-    int top[2];
-    ElementType Stack[STACK_SIZE];
-
-    DoubleSideStack();  &#x2F;&#x2F;初始化（构造函数）
-    bool push(ElementType x, int i);    &#x2F;&#x2F;压栈
-    bool pop(ElementType *x, int i);    &#x2F;&#x2F;出栈
+    <title>关于函数体内指针指向问题</title>
+    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
+<p>下面来诠释此问题。</p>
+<p></p>
+<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
+<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
+	int data;
+	test* next &#x3D; NULL;
 &#125;;
 
-template &lt;typename ElementType&gt;
-DoubleSideStack&lt;ElementType&gt;::DoubleSideStack()
-&#123;&#x2F;&#x2F;初始化
-    top[0] &#x3D; -1;
-    top[1] &#x3D; STACK_SIZE;
+test* createList()
+&#123;
+	test* list &#x3D; new test;
+	test* ret &#x3D; list;
+	for (int i &#x3D; 0; i &lt; 10; i++)
+	&#123;
+		test* newNode &#x3D; new test;
+		newNode-&gt;data &#x3D; i;
+		list-&gt;next &#x3D; newNode;
+		list &#x3D; list-&gt;next;
+	&#125;
+	return ret;
 &#125;
-
-template &lt;typename ElementType&gt;
-bool DoubleSideStack&lt;ElementType&gt;::push(ElementType x, int i)
-&#123;&#x2F;&#x2F;压栈
-    if (this-&gt;top[0] + 1 &#x3D;&#x3D; this-&gt;top[1])
-    &#123; &#x2F;&#x2F;判断栈满与否
-        std::cout &lt;&lt; &quot;栈满&quot;;
-        return false;
-    &#125;
-
-    switch (i)
-    &#123;
-    case 0:
-    &#123;
-        this-&gt;top[0]++;
-        this-&gt;Stack[this-&gt;top[0]] &#x3D; x;
-        return true;
-        break;
-    &#125;
-    case 1:
-    &#123;
-        this-&gt;top[1]--;
-        this-&gt;Stack[this-&gt;top[1]] &#x3D; x;
-        return true;
-        break;
-    &#125;
-    default:
-    &#123;
-        std::cout &lt;&lt; &quot;out of range&quot; &lt;&lt; std::endl;
-        return false;
-        break;
-    &#125;
-    &#125;
-&#125;
-
-template &lt;typename ElementType&gt;
-bool DoubleSideStack&lt;ElementType&gt;::pop(ElementType *x, int i)
-&#123;&#x2F;&#x2F;出栈
-    switch (i)
-    &#123;
-    case 0:
-    &#123;
-        if (this-&gt;top[0] &#x3D;&#x3D; -1)
-        &#123;&#x2F;&#x2F;判断栈空与否
-            std::cout &lt;&lt; &quot;out of range&quot; &lt;&lt; std::endl;
-            return false;
-        &#125;
-        *x &#x3D; this-&gt;Stack[this-&gt;top[0]];
-        this-&gt;top[0]--;
-        return true;
-        break;
-    &#125;
-    case 1:
-    &#123;
-        if (this-&gt;top[1] &#x3D;&#x3D; STACK_SIZE)
-        &#123;&#x2F;&#x2F;判断栈空与否
-            std::cout &lt;&lt; &quot;out of range&quot; &lt;&lt; std::endl;
-            return false;
-        &#125;
-        *x &#x3D; this-&gt;Stack[this-&gt;top[1]];
-        this-&gt;top[1]++;
-        return true;
-        break;
-    &#125;
-    default:
-    &#123;
-        return false;
-        break;
-    &#125;
-    &#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们有一个测试函数来改变指针：</p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
+&#123;
+	list &#x3D; list-&gt;next;
 &#125;
 
 int main()
 &#123;
-    DoubleSideStack&lt;std::string&gt; testStack;
-    testStack.push(&quot;this is a test&quot;, 0);
-    testStack.push(&quot;this is a end test&quot;, 1);
-    std::string newString;
-    testStack.pop(&amp;newString, 1);
-    testStack.pop(&amp;newString, 1);
-    std::cout &lt;&lt; newString;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+	test* testlist &#x3D; createList();
+	changePoint(testlist);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
+<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
+<p>可见在函数体内部，指针是被改变了的。</p>
+<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
+<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
+<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以发现，指针被顺利改写。</p>
+<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
+<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
+<p></p>
 ]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
       <tags>
         <tag>C++</tag>
-        <tag>数据结构</tag>
-        <tag>线性表</tag>
+        <tag>细节问题</tag>
       </tags>
   </entry>
   <entry>
@@ -2162,475 +2819,6 @@ int main()
         <tag>C++</tag>
         <tag>算法</tag>
         <tag>最小生成树</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QGuiApplication</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
-    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
-<p>获取应用主屏幕</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QScreen</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
-    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
-<p>获取应用程序可用区域</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QSystemTrayIcon</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QSystemTrayIcon/</url>
-    <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
-<h1 id="tooltip">toolTip</h1>
-<p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
-<p>使用setTooTip()设置</p>
-<h1 id="show">show()</h1>
-<p>在托盘显示你对象拥有的图标</p>
-<h1 id="setcontextmenu-qmenu">setContextMenu(Qmenu*)</h1>
-<p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QWebEngineView</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
-    <content><![CDATA[<h1 id="page">page()</h1>
-<p>返回一个指向页面的指针，为QWebEnginePage*</p>
-<h1 id="load">load()</h1>
-<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QWidget</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QWidget/</url>
-    <content><![CDATA[<h1 id="qt-wa-translucentbackground">Qt::WA_TranslucentBackground</h1>
-<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
-<h1 id="qt-wa-nosystembackground">Qt::WA_NoSystemBackground</h1>
-<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
-<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
-<h1 id="qt-wa-opaquepaintevent">Qt::WA_OpaquePaintEvent</h1>
-<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPainter</title>
-    <url>/2022/03/02/QtAPI/2022-03-02-QPainter/</url>
-    <content><![CDATA[<h2 id="void-translate-const-qpointf-offset">void translate(const QPointF &amp;offset)</h2>
-<p>按照给定偏移量平移坐标系(重设坐标原点)</p>
-<h2 id="void-scale-qreal-sx-qreal-sy">void scale(qreal sx, qreal sy)</h2>
-<p>按 （sx， sy） 缩放坐标系。</p>
-<h2 id="void-qpainter-rotate-qreal-angle">void QPainter::rotate(qreal angle)</h2>
-<p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
-<h2 id="void-qpainter-drawpixmap-const-qrectf-target-const-qpixmap-pixmap-const-qrectf-source">void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2>
-<p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
-<p>此函数有重载，详请查看帮助文档</p>
-<p>此函数主要用于绘制图片</p>
-<h2 id="void-qpainter-drawpolygon-const-qpointf-points-int-pointcount-qt-fillrule-fillrule-qt-oddevenfill">void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule = Qt::OddEvenFill)</h2>
-<p>使用points里的前pointCount个点进行多边形绘图</p>
-<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong></p>
-<table>
-<thead>
-<tr>
-<th>Qt::OddEvenFill</th>
-<th>0</th>
-<th>指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Qt::WindingFill</td>
-<td>1</td>
-<td>Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="bool-qpainter-begin-qpaintdevice-device">bool QPainter::begin(QPaintDevice *device)</h2>
-<p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
-<p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
-<p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
-<p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
-<p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
-<h2 id="bool-qpainter-end">bool QPainter::end()</h2>
-<p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
-<p>如果绘制器不再活动，则返回true;否则返回false。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QList</title>
-    <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
-    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
-<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
-<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
-<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
-<p>此函数要求值类型具有operator==()的实现。</p>
-<p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
-<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
-<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
-<p>这个函数非常快(常数时间)。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QAbstractButton</title>
-    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
-    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
-<h2 id="ischeck">isCheck()</h2>
-<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
-<h2 id="text"><strong>text()</strong></h2>
-<p>获取这个按钮的文字</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPixmap</title>
-    <url>/2022/03/05/QtAPI/2022-03-05-QPixmap/</url>
-    <content><![CDATA[<h2 id="bool-qpixmap-load-const-qstring-filename-const-char-format-nullptr-qt-imageconversionflags-flags-qt-autocolor">*<em>bool QPixmap::load(const QString &amp;fileName, const char <em>format = nullptr, Qt::ImageConversionFlags flags = Qt::AutoColor)</em></em></h2>
-<p>从指定文件名的文件中加载位图。如果位图成功加载，返回true;否则位图无效并返回false。</p>
-<h2 id="qpixmap-qpixmap-scaled-const-qsize-size-qt-aspectratiomode-aspectratiomode-qt-ignoreaspectratio-qt-transformationmode-transformmode-qt-fasttransformation-const"><strong>QPixmap QPixmap::scaled(const QSize &amp;size, Qt::AspectRatioMode aspectRatioMode = Qt::IgnoreAspectRatio, Qt::TransformationMode transformMode = Qt::FastTransformation) const</strong></h2>
-<p>使用由aspectRatioMode和transformMode指定的宽高比和转换模式，将位图缩放到给定的大小</p>
-<p><strong>注意：此函数是使用值传递，因此不会改变传进去的pixmap,要想真正对pixmap改变，还请另赋值</strong></p>
-<h3 id="qt-aspectratiomode">Qt::AspectRatioMode</h3>
-<table>
-<thead>
-<tr>
-<th><strong>Qt::IgnoreAspectRatio</strong></th>
-<th><strong>0</strong></th>
-<th><strong>大小可以自由缩放。长宽比没有限制。</strong></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Qt::KeepAspectRatio</strong></td>
-<td><strong>1</strong></td>
-<td><strong>在给定的矩形内，将尺寸缩放为尽可能大的矩形，并保留长宽比。</strong></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>Qt::KeepAspectRatioByExpanding</strong></td>
-<td><strong>2</strong></td>
-<td><strong>尺寸被缩放到一个矩形，在给定的矩形之外尽可能小，并保持长宽比。</strong></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h3 id="transformmode">transformMode</h3>
-<table>
-<thead>
-<tr>
-<th><strong>Qt::FastTransformation</strong></th>
-<th><strong>0</strong></th>
-<th><strong>转换是快速执行的，没有平滑处理。</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Qt::SmoothTransformation</strong></td>
-<td><strong>1</strong></td>
-<td><strong>得到的图像使用双线性滤波进行变换。(平滑处理了)</strong></td>
-</tr>
-</tbody>
-</table>
-<h2 id="void-qpixmap-fill-const-qcolor-color-qt-white">void QPixmap::fill(const QColor &amp;color = Qt::white)</h2>
-<p>用给定的颜色填充像素图。</p>
-<p>当pixmap已经被绘制在设备上时，此函数的行为是未定义的</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QFont</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QFont/</url>
-    <content><![CDATA[<h2 id="void-qfont-sethintingpreference-qfont-hintingpreference-hintingpreference"><strong>void QFont::setHintingPreference(QFont::HintingPreference hintingPreference)</strong></h2>
-<p><strong>将符号的提示级别的首选项设置为hintingPreference。这是对底层字体渲染系统使用某种程度的提示的提示，并且跨平台有不同的支持。</strong></p>
-<p><strong>QFont::HintingPreference</strong></p>
-<table>
-<thead>
-<tr>
-<th>QFont::PreferDefaultHinting</th>
-<th>0</th>
-<th>使用目标平台的默认提示级别。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QFont::PreferNoHinting</td>
-<td>1</td>
-<td>如果可能的话,在渲染文本时不要提示字形的轮廓。文本布局将是排版准确和可扩展的,使用与打印时相同的指标。</td>
-</tr>
-<tr>
-<td>QFont::PreferVerticalHinting</td>
-<td>2</td>
-<td>如果可能的话,渲染文本时不要有水平提示,但在垂直方向上将字形与像素网格对齐。在密度过低而无法准确渲染字形的显示器上,文字会显得更清晰。但由于字形的水平度量是没有提示的,所以文本的布局将可以扩展到更高密度的设备上(如打印机),而不会影响换行符等细节。</td>
-</tr>
-<tr>
-<td>QFont::PreferFullHinting</td>
-<td>3</td>
-<td>如果可能的话,在水平和垂直方向上渲染带有提示的文本。文本将被改变,以优化目标设备上的可读性,但由于指标将取决于文本的目标尺寸,字形、换行符和其他排版细节的位置将不按比例排列,这意味着文本布局在不同像素密度的设备上可能会有不同的外观。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>翻译不够精准还请看官方文档</strong></p>
-<h2 id="void-qfont-setpixelsize-int-pixelsize">void QFont::setPixelSize(int pixelSize)</h2>
-<p>将字体大小设置为pixelSize像素。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QFontDatabase</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QFontDatabase/</url>
-    <content><![CDATA[<h2 id="qstringlist-qfontdatabase-families-qfontdatabase-writingsystem-writingsystem-any-const"><strong>QStringList QFontDatabase::families(QFontDatabase::WritingSystem writingSystem = Any) const</strong></h2>
-<p>返回支持writingSystem的可用字体族的排序列表。</p>
-<p>如果一个字体族的名字对应着不同公司出的字体，则该字体返回的名称为family [foundry]。例如:Times [Adobe]，Times [Cronyx]，Palatino。</p>
-<h2 id="int-qfontdatabase-addapplicationfont-const-qstring-filename"><strong>int QFontDatabase::addApplicationFont(const QString &amp;fileName)</strong></h2>
-<p>从fileName指定的文件加载字体，并使其可用于应用程序。返回一个ID，可以使用removeApplicationFont()再次删除字体，或者检索字体中包含的家族名称列表。</p>
-<p>如果字体无法加载，函数返回-1。</p>
-<p>目前只支持TrueType字体、TrueType字体集合和OpenType字体。</p>
-<h2 id="qstringlist-qfontdatabase-applicationfontfamilies-int-id"><strong>QStringList QFontDatabase::applicationFontFamilies(int id)</strong></h2>
-<p>返回由id标识的给定应用程序字体的字体族列表。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPolygon</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
-    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
-<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
-<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
-<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QNetworkInterface</title>
-    <url>/2022/03/10/QtAPI/2022-03-10-QNetworkInterface/</url>
-    <content><![CDATA[<h1 id="qlist-qnetworkaddressentry-addressentries">QList<QNetworkAddressEntry> addressEntries()</h1>
-<p>返回该网络接口（包括子网掩码和广播地址）的IP地址列表</p>
-<h1 id="qstring-hardwareaddress">QString hardwareAddress()</h1>
-<p>返回该接口的低级硬件地址，以太网里就是MAC地址</p>
-<h1 id="qstring-humanreadablename">QString humanReadableName()</h1>
-<p>返回可以读懂的接口名称，若名称不确定，则会得到name()返回值</p>
-<h1 id="bool-isvalid">bool isValid()</h1>
-<p>如果接口信息有效返回true</p>
-<h1 id="qstring-name">QString name()</h1>
-<p>返回网络接口名称</p>
-<h1 id="qlist-qhostaddress-alladdresses">QList<QHostAddress> allAddresses()</h1>
-<p>返回主机上所有IP地址的列表</p>
-<h1 id="qlist-qnetworkinterface-allinterface">QList<QNetworkInterface> allInterface()</h1>
-<p><strong><strong>返回主机上所有接口的列表</strong></strong></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QNetworkAddressEntry</title>
-    <url>/2022/03/13/QtAPI/2022-03-13-QNetworkAddressEntry/</url>
-    <content><![CDATA[<h1 id="qhostaddress-qnetworkaddressentry-ip-const"><strong>QHostAddress QNetworkAddressEntry::ip() const</strong></h1>
-<p><strong>这个函数返回一个在网络接口中找到的IPv4或IPv6地址。</strong></p>
-<h1 id="qhostaddress-qnetworkaddressentry-netmask-const"><strong>QHostAddress QNetworkAddressEntry::netmask() const</strong></h1>
-<p>**返回与IP地址关联的子网掩码。子网掩码采用IP地址形式，**如255.255.0.0。</p>
-<p>对于IPv6地址，前缀长度转换为地址中位数为1的地址与前缀长度相等。如果前缀长度为64位(最常用的值)，netmask将被表示为QHostAddress，其中包含地址FFFF:FFFF:FFFF:FFFF::</p>
-<h1 id="qhostaddress-qnetworkaddressentry-broadcast-const"><strong>QHostAddress QNetworkAddressEntry::broadcast() const</strong></h1>
-<p>**返回与IPv4地址和子网掩码相关联的广播地址。**它通常可以通过将子网掩码包含0的IP地址位设置为1来派生。(换句话说，通过按位或者用网络掩码的逆来计算IP地址)</p>
-<p>这个成员对于IPv6地址来说总是空的，因为广播的概念在这个系统中已经被放弃了，取而代之的是组播。特别是，全节点专用组播组(地址FF02::1)可以到达本地网络中所有节点对应的主机组。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QHostInfo</title>
-    <url>/2022/03/09/QtAPI/2022-03-09-QHostInfo/</url>
-    <content><![CDATA[<h1 id="qlist-qhostaddress-addresses"><strong>QList<QHostAddress>  addresses()</strong></h1>
-<p>返回与hostName()主机关联的IP地址列表</p>
-<h1 id="hostinfoerror-error"><strong>HostInfoError  error()</strong></h1>
-<p>如果主机查找失败，返回失败类型</p>
-<h1 id="qstring-errorstring"><strong>QString  errorString(）</strong></h1>
-<p>如果主机查找失败，返回错误描述字符串</p>
-<h1 id="qstring-hostname"><strong>QString  hostName()</strong></h1>
-<p>返回通过IP查找的主机名称</p>
-<h1 id="int-lookupid"><strong>int  lookupId()</strong></h1>
-<p>返回本次查找的ID</p>
-<h1 id="void-aborthostlookup-int-id"><strong>void abortHostLookup(int id)</strong></h1>
-<p>中断主机查找</p>
-<h1 id="qhostinfo-fromname-qstring-name"><strong>QHostInfo  fromName(QString&amp; name)</strong></h1>
-<p>返回指定主机名的IP地址</p>
-<h1 id="qstring-localdomainname"><strong>QString  localDomainName()</strong></h1>
-<p>返回本机DNS域名</p>
-<h1 id="qstring-localhostname"><strong>QString  localHostName()</strong></h1>
-<p>返回本机主机名</p>
-<h1 id="int-lookuphost-qstring-name-qobject-receiver-char-member"><em><em>int  lookupHost(QString&amp; name, QObject</em> receiver, char</em> member)**</h1>
-<p>以异步方式根据主机名查找主机的IP地址，并返回一个表示本次查找的ID,可用于abortHostLookup()</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QAbstractSocket</title>
-    <url>/2022/03/14/QtAPI/2022-03-14-QAbstractSocket/</url>
-    <content><![CDATA[<p><strong>QTcpSocket除构造与析构外均从此类继承</strong></p>
-<h1 id="virtual-void-qabstractsocket-connecttohost-const-qhostaddress-address-quint16-port-qiodevice-openmode-openmode-readwrite">[virtual] void QAbstractSocket::connectToHost(const QHostAddress &amp;address, quint16 port, QIODevice::OpenMode openMode = ReadWrite)</h1>
-<p>以异步方式连接到指定IP地址和端口的TCP服务器，连接成功则发送connected()信号</p>
-<h1 id="virtual-void-qabstractsocket-disconnectfromhost">[virtual] void QAbstractSocket::disconnectFromHost()</h1>
-<p>断开socket,关闭成功后发射disconnected()信号</p>
-<h1 id="virtual-bool-qabstractsocket-waitforconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForConnected(int msecs = 30000)</h1>
-<p>等待知道建立socked连接，做多等msecs秒</p>
-<h1 id="virtual-bool-qabstractsocket-waitfordisconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForDisconnected(int msecs = 30000)</h1>
-<p>等待直到socket断开连接</p>
-<h1 id="qhostaddress-qabstractsocket-localaddress-const">QHostAddress QAbstractSocket::localAddress() const</h1>
-<p>返回本socket的地址</p>
-<h1 id="quint16-qabstractsocket-localport-const">quint16 QAbstractSocket::localPort() const</h1>
-<p>返回本socket的端口</p>
-<h1 id="qhostaddress-qabstractsocket-peeraddress-const">QHostAddress QAbstractSocket::peerAddress() const</h1>
-<p>在已连接状态下，返回对方socket的地址</p>
-<h1 id="quint16-qabstractsocket-peerport-const">quint16 QAbstractSocket::peerPort() const</h1>
-<p>在已连接状态下，返回对方socket的端口</p>
-<h1 id="qint64-qabstractsocket-readbuffersize-const">qint64 QAbstractSocket::readBufferSize() const</h1>
-<p>返回内部读取缓冲区的大小，该大小决定了read()和readAll()函数能读出的数据大小</p>
-<h1 id="virtual-void-qabstractsocket-setreadbuffersize-qint64-size">[virtual] void QAbstractSocket::setReadBufferSize(qint64 size)</h1>
-<p>设置内部读取缓冲区大小</p>
-<h1 id="override-virtual-qint64-qabstractsocket-bytesavailable-const">[override virtual] qint64 QAbstractSocket::bytesAvailable() const</h1>
-<p>返回需要读取的缓冲区数据的字节数</p>
-<h1 id="override-virtual-bool-qabstractsocket-canreadline-const">[override virtual] bool QAbstractSocket::canReadLine() const</h1>
-<p>如果有行数据要从socket缓冲区读取，返回true</p>
-<h1 id="qabstractsocket-socketstate-qabstractsocket-state-const">QAbstractSocket::SocketState QAbstractSocket::state() const</h1>
-<p>返回socket当前状态</p>
-<p>signals:</p>
-<h1 id="void-connected">void connected()</h1>
-<p>connectToHost()成功连接到服务器后发射</p>
-<h1 id="void-disconnected">void disconnected()**</h1>
-<p>socket断开后发射</p>
-<h1 id="void-error-qabstractsocket-socketerror-socketerror">void error(QAbstractSocket::SocketError socketError)</h1>
-<p>socket错误后发射</p>
-<h1 id="void-hostfound">void hostFound()</h1>
-<p>调用connectToHost()找到主机后发射</p>
-<h1 id="void-proxyauthenticationrequired-const-qnetworkproxy-proxy-qauthenticator-authenticator">** void proxyAuthenticationRequired(const QNetworkProxy &amp;proxy, QAuthenticator <em>authenticator)</em>*</h1>
-<p><strong>当使用需要身份验证的代理时，可以发出此信号。然后，可以在验证器对象中填充所需的详细信息，以允许验证并继续连接。</strong></p>
-<p><strong>注意:不可能使用QueuedConnection连接到这个信号，因为当信号返回时，如果未将新信息填充到验证器，则连接将失败。</strong></p>
-<h1 id="void-statechanged-qabstractsocket-socketstate-socketstate">** void stateChanged(QAbstractSocket::SocketState socketState)**</h1>
-<p><strong><strong>当socket状态变化是发射，socketState表示了socket当前状态</strong></strong></p>
-<h1 id="void-readyread"><strong>void readyRead()</strong></h1>
-<p><strong><strong>当缓冲区有新数据需要读取时发射,在此信号的槽函数里读取缓冲区数据</strong></strong></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt API</tag>
       </tags>
   </entry>
   <entry>
@@ -2903,66 +3091,6 @@ int main()
       <tags>
         <tag>C++</tag>
         <tag>题解</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于函数体内指针指向问题</title>
-    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
-<p>下面来诠释此问题。</p>
-<p></p>
-<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
-<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
-	int data;
-	test* next &#x3D; NULL;
-&#125;;
-
-test* createList()
-&#123;
-	test* list &#x3D; new test;
-	test* ret &#x3D; list;
-	for (int i &#x3D; 0; i &lt; 10; i++)
-	&#123;
-		test* newNode &#x3D; new test;
-		newNode-&gt;data &#x3D; i;
-		list-&gt;next &#x3D; newNode;
-		list &#x3D; list-&gt;next;
-	&#125;
-	return ret;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我们有一个测试函数来改变指针：</p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-
-int main()
-&#123;
-	test* testlist &#x3D; createList();
-	changePoint(testlist);
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
-<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
-<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
-<p>可见在函数体内部，指针是被改变了的。</p>
-<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
-<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
-<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>可以发现，指针被顺利改写。</p>
-<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
-<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
-<p></p>
-]]></content>
-      <tags>
-        <tag>C++</tag>
-        <tag>细节问题</tag>
       </tags>
   </entry>
   <entry>
