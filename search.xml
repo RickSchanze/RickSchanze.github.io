@@ -566,6 +566,103 @@ a(pw, priority());<span aria-hidden="true" class="line-numbers-rows"><span></spa
       </tags>
   </entry>
   <entry>
+    <title>Qt动画框架使用</title>
+    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
+　　本文算是一篇转载文章。<br>
+　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
+<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
+<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
+<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
+<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
+　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
+<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
+<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
+<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
+<table>
+<thead>
+<tr>
+<th>QAbstractAnimation</th>
+<th>所有动画类的基类</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QAnimationGroup</td>
+<td>动画容器类的抽象基类</td>
+</tr>
+<tr>
+<td>QEasingCurve</td>
+<td>动画控制的缓和曲线类</td>
+</tr>
+<tr>
+<td>QParallelAnimationGroup</td>
+<td>并行动画容器</td>
+</tr>
+<tr>
+<td>QPauseAnimation</td>
+<td>QSequentialAnimationGroup对象暂停延迟</td>
+</tr>
+<tr>
+<td>QPropertyAnimation</td>
+<td>Qt动画属性操作</td>
+</tr>
+<tr>
+<td>QSequentialAnimationGroup</td>
+<td>串行动画容器</td>
+</tr>
+<tr>
+<td>QTimeLine</td>
+<td>动画控制的时间片类</td>
+</tr>
+<tr>
+<td>QVariantAnimation</td>
+<td>动画类的抽象基类</td>
+</tr>
+</tbody>
+</table>
+<h2 id="qt动画属性">Qt动画属性</h2>
+<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
+　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
+　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
+<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
+　　也可以做到类似CSS中的@keyframe效果，例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
+　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
+　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
+&#123;
+    Q_OBJECT
+    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
+]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>EffectiveC++(4)</title>
     <url>/2022/06/03/Effective%20C++/2022-06-03-EffectiveC++(4)/</url>
     <content><![CDATA[<h2 id="18：让接口容易被正确使用-不易被误用">18：让接口容易被正确使用，不易被误用</h2>
@@ -671,1072 +768,6 @@ public:
       <tags>
         <tag>C++</tag>
         <tag>Effective C++</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QGuiApplication</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
-    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
-<p>获取应用主屏幕</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QScreen</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
-    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
-<p>获取应用程序可用区域</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QSystemTrayIcon</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QSystemTrayIcon/</url>
-    <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
-<h1 id="tooltip">toolTip</h1>
-<p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
-<p>使用setTooTip()设置</p>
-<h1 id="show">show()</h1>
-<p>在托盘显示你对象拥有的图标</p>
-<h1 id="setcontextmenu-qmenu">setContextMenu(Qmenu*)</h1>
-<p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QWebEngineView</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
-    <content><![CDATA[<h1 id="page">page()</h1>
-<p>返回一个指向页面的指针，为QWebEnginePage*</p>
-<h1 id="load">load()</h1>
-<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPainter</title>
-    <url>/2022/03/02/QtAPI/2022-03-02-QPainter/</url>
-    <content><![CDATA[<h2 id="void-translate-const-qpointf-offset">void translate(const QPointF &amp;offset)</h2>
-<p>按照给定偏移量平移坐标系(重设坐标原点)</p>
-<h2 id="void-scale-qreal-sx-qreal-sy">void scale(qreal sx, qreal sy)</h2>
-<p>按 （sx， sy） 缩放坐标系。</p>
-<h2 id="void-qpainter-rotate-qreal-angle">void QPainter::rotate(qreal angle)</h2>
-<p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
-<h2 id="void-qpainter-drawpixmap-const-qrectf-target-const-qpixmap-pixmap-const-qrectf-source">void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2>
-<p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
-<p>此函数有重载，详请查看帮助文档</p>
-<p>此函数主要用于绘制图片</p>
-<h2 id="void-qpainter-drawpolygon-const-qpointf-points-int-pointcount-qt-fillrule-fillrule-qt-oddevenfill">void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule = Qt::OddEvenFill)</h2>
-<p>使用points里的前pointCount个点进行多边形绘图</p>
-<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong></p>
-<table>
-<thead>
-<tr>
-<th>Qt::OddEvenFill</th>
-<th>0</th>
-<th>指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Qt::WindingFill</td>
-<td>1</td>
-<td>Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</td>
-</tr>
-</tbody>
-</table>
-<h2 id="bool-qpainter-begin-qpaintdevice-device">bool QPainter::begin(QPaintDevice *device)</h2>
-<p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
-<p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
-<p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
-<p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
-<p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
-<h2 id="bool-qpainter-end">bool QPainter::end()</h2>
-<p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
-<p>如果绘制器不再活动，则返回true;否则返回false。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QAbstractButton</title>
-    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
-    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
-<h2 id="ischeck">isCheck()</h2>
-<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
-<h2 id="text"><strong>text()</strong></h2>
-<p>获取这个按钮的文字</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QList</title>
-    <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
-    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
-<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
-<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
-<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
-<p>此函数要求值类型具有operator==()的实现。</p>
-<p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
-<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
-<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
-<p>这个函数非常快(常数时间)。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPixmap</title>
-    <url>/2022/03/05/QtAPI/2022-03-05-QPixmap/</url>
-    <content><![CDATA[<h2 id="bool-qpixmap-load-const-qstring-filename-const-char-format-nullptr-qt-imageconversionflags-flags-qt-autocolor">*<em>bool QPixmap::load(const QString &amp;fileName, const char <em>format = nullptr, Qt::ImageConversionFlags flags = Qt::AutoColor)</em></em></h2>
-<p>从指定文件名的文件中加载位图。如果位图成功加载，返回true;否则位图无效并返回false。</p>
-<h2 id="qpixmap-qpixmap-scaled-const-qsize-size-qt-aspectratiomode-aspectratiomode-qt-ignoreaspectratio-qt-transformationmode-transformmode-qt-fasttransformation-const"><strong>QPixmap QPixmap::scaled(const QSize &amp;size, Qt::AspectRatioMode aspectRatioMode = Qt::IgnoreAspectRatio, Qt::TransformationMode transformMode = Qt::FastTransformation) const</strong></h2>
-<p>使用由aspectRatioMode和transformMode指定的宽高比和转换模式，将位图缩放到给定的大小</p>
-<p><strong>注意：此函数是使用值传递，因此不会改变传进去的pixmap,要想真正对pixmap改变，还请另赋值</strong></p>
-<h3 id="qt-aspectratiomode">Qt::AspectRatioMode</h3>
-<table>
-<thead>
-<tr>
-<th><strong>Qt::IgnoreAspectRatio</strong></th>
-<th><strong>0</strong></th>
-<th><strong>大小可以自由缩放。长宽比没有限制。</strong></th>
-<th></th>
-<th></th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Qt::KeepAspectRatio</strong></td>
-<td><strong>1</strong></td>
-<td><strong>在给定的矩形内，将尺寸缩放为尽可能大的矩形，并保留长宽比。</strong></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td><strong>Qt::KeepAspectRatioByExpanding</strong></td>
-<td><strong>2</strong></td>
-<td><strong>尺寸被缩放到一个矩形，在给定的矩形之外尽可能小，并保持长宽比。</strong></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-</tbody>
-</table>
-<h3 id="transformmode">transformMode</h3>
-<table>
-<thead>
-<tr>
-<th><strong>Qt::FastTransformation</strong></th>
-<th><strong>0</strong></th>
-<th><strong>转换是快速执行的，没有平滑处理。</strong></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Qt::SmoothTransformation</strong></td>
-<td><strong>1</strong></td>
-<td><strong>得到的图像使用双线性滤波进行变换。(平滑处理了)</strong></td>
-</tr>
-</tbody>
-</table>
-<h2 id="void-qpixmap-fill-const-qcolor-color-qt-white">void QPixmap::fill(const QColor &amp;color = Qt::white)</h2>
-<p>用给定的颜色填充像素图。</p>
-<p>当pixmap已经被绘制在设备上时，此函数的行为是未定义的</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QWidget</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QWidget/</url>
-    <content><![CDATA[<h1 id="qt-wa-translucentbackground">Qt::WA_TranslucentBackground</h1>
-<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
-<h1 id="qt-wa-nosystembackground">Qt::WA_NoSystemBackground</h1>
-<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
-<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
-<h1 id="qt-wa-opaquepaintevent">Qt::WA_OpaquePaintEvent</h1>
-<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QFont</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QFont/</url>
-    <content><![CDATA[<h2 id="void-qfont-sethintingpreference-qfont-hintingpreference-hintingpreference"><strong>void QFont::setHintingPreference(QFont::HintingPreference hintingPreference)</strong></h2>
-<p><strong>将符号的提示级别的首选项设置为hintingPreference。这是对底层字体渲染系统使用某种程度的提示的提示，并且跨平台有不同的支持。</strong></p>
-<p><strong>QFont::HintingPreference</strong></p>
-<table>
-<thead>
-<tr>
-<th>QFont::PreferDefaultHinting</th>
-<th>0</th>
-<th>使用目标平台的默认提示级别。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QFont::PreferNoHinting</td>
-<td>1</td>
-<td>如果可能的话,在渲染文本时不要提示字形的轮廓。文本布局将是排版准确和可扩展的,使用与打印时相同的指标。</td>
-</tr>
-<tr>
-<td>QFont::PreferVerticalHinting</td>
-<td>2</td>
-<td>如果可能的话,渲染文本时不要有水平提示,但在垂直方向上将字形与像素网格对齐。在密度过低而无法准确渲染字形的显示器上,文字会显得更清晰。但由于字形的水平度量是没有提示的,所以文本的布局将可以扩展到更高密度的设备上(如打印机),而不会影响换行符等细节。</td>
-</tr>
-<tr>
-<td>QFont::PreferFullHinting</td>
-<td>3</td>
-<td>如果可能的话,在水平和垂直方向上渲染带有提示的文本。文本将被改变,以优化目标设备上的可读性,但由于指标将取决于文本的目标尺寸,字形、换行符和其他排版细节的位置将不按比例排列,这意味着文本布局在不同像素密度的设备上可能会有不同的外观。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>翻译不够精准还请看官方文档</strong></p>
-<h2 id="void-qfont-setpixelsize-int-pixelsize">void QFont::setPixelSize(int pixelSize)</h2>
-<p>将字体大小设置为pixelSize像素。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QFontDatabase</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QFontDatabase/</url>
-    <content><![CDATA[<h2 id="qstringlist-qfontdatabase-families-qfontdatabase-writingsystem-writingsystem-any-const"><strong>QStringList QFontDatabase::families(QFontDatabase::WritingSystem writingSystem = Any) const</strong></h2>
-<p>返回支持writingSystem的可用字体族的排序列表。</p>
-<p>如果一个字体族的名字对应着不同公司出的字体，则该字体返回的名称为family [foundry]。例如:Times [Adobe]，Times [Cronyx]，Palatino。</p>
-<h2 id="int-qfontdatabase-addapplicationfont-const-qstring-filename"><strong>int QFontDatabase::addApplicationFont(const QString &amp;fileName)</strong></h2>
-<p>从fileName指定的文件加载字体，并使其可用于应用程序。返回一个ID，可以使用removeApplicationFont()再次删除字体，或者检索字体中包含的家族名称列表。</p>
-<p>如果字体无法加载，函数返回-1。</p>
-<p>目前只支持TrueType字体、TrueType字体集合和OpenType字体。</p>
-<h2 id="qstringlist-qfontdatabase-applicationfontfamilies-int-id"><strong>QStringList QFontDatabase::applicationFontFamilies(int id)</strong></h2>
-<p>返回由id标识的给定应用程序字体的字体族列表。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPolygon</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
-    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
-<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
-<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
-<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QHostInfo</title>
-    <url>/2022/03/09/QtAPI/2022-03-09-QHostInfo/</url>
-    <content><![CDATA[<h1 id="qlist-qhostaddress-addresses"><strong>QList<QHostAddress>  addresses()</strong></h1>
-<p>返回与hostName()主机关联的IP地址列表</p>
-<h1 id="hostinfoerror-error"><strong>HostInfoError  error()</strong></h1>
-<p>如果主机查找失败，返回失败类型</p>
-<h1 id="qstring-errorstring"><strong>QString  errorString(）</strong></h1>
-<p>如果主机查找失败，返回错误描述字符串</p>
-<h1 id="qstring-hostname"><strong>QString  hostName()</strong></h1>
-<p>返回通过IP查找的主机名称</p>
-<h1 id="int-lookupid"><strong>int  lookupId()</strong></h1>
-<p>返回本次查找的ID</p>
-<h1 id="void-aborthostlookup-int-id"><strong>void abortHostLookup(int id)</strong></h1>
-<p>中断主机查找</p>
-<h1 id="qhostinfo-fromname-qstring-name"><strong>QHostInfo  fromName(QString&amp; name)</strong></h1>
-<p>返回指定主机名的IP地址</p>
-<h1 id="qstring-localdomainname"><strong>QString  localDomainName()</strong></h1>
-<p>返回本机DNS域名</p>
-<h1 id="qstring-localhostname"><strong>QString  localHostName()</strong></h1>
-<p>返回本机主机名</p>
-<h1 id="int-lookuphost-qstring-name-qobject-receiver-char-member"><em><em>int  lookupHost(QString&amp; name, QObject</em> receiver, char</em> member)**</h1>
-<p>以异步方式根据主机名查找主机的IP地址，并返回一个表示本次查找的ID,可用于abortHostLookup()</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QNetworkAddressEntry</title>
-    <url>/2022/03/13/QtAPI/2022-03-13-QNetworkAddressEntry/</url>
-    <content><![CDATA[<h1 id="qhostaddress-qnetworkaddressentry-ip-const"><strong>QHostAddress QNetworkAddressEntry::ip() const</strong></h1>
-<p><strong>这个函数返回一个在网络接口中找到的IPv4或IPv6地址。</strong></p>
-<h1 id="qhostaddress-qnetworkaddressentry-netmask-const"><strong>QHostAddress QNetworkAddressEntry::netmask() const</strong></h1>
-<p>**返回与IP地址关联的子网掩码。子网掩码采用IP地址形式，**如255.255.0.0。</p>
-<p>对于IPv6地址，前缀长度转换为地址中位数为1的地址与前缀长度相等。如果前缀长度为64位(最常用的值)，netmask将被表示为QHostAddress，其中包含地址FFFF:FFFF:FFFF:FFFF::</p>
-<h1 id="qhostaddress-qnetworkaddressentry-broadcast-const"><strong>QHostAddress QNetworkAddressEntry::broadcast() const</strong></h1>
-<p>**返回与IPv4地址和子网掩码相关联的广播地址。**它通常可以通过将子网掩码包含0的IP地址位设置为1来派生。(换句话说，通过按位或者用网络掩码的逆来计算IP地址)</p>
-<p>这个成员对于IPv6地址来说总是空的，因为广播的概念在这个系统中已经被放弃了，取而代之的是组播。特别是，全节点专用组播组(地址FF02::1)可以到达本地网络中所有节点对应的主机组。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QAbstractSocket</title>
-    <url>/2022/03/14/QtAPI/2022-03-14-QAbstractSocket/</url>
-    <content><![CDATA[<p><strong>QTcpSocket除构造与析构外均从此类继承</strong></p>
-<h1 id="virtual-void-qabstractsocket-connecttohost-const-qhostaddress-address-quint16-port-qiodevice-openmode-openmode-readwrite">[virtual] void QAbstractSocket::connectToHost(const QHostAddress &amp;address, quint16 port, QIODevice::OpenMode openMode = ReadWrite)</h1>
-<p>以异步方式连接到指定IP地址和端口的TCP服务器，连接成功则发送connected()信号</p>
-<h1 id="virtual-void-qabstractsocket-disconnectfromhost">[virtual] void QAbstractSocket::disconnectFromHost()</h1>
-<p>断开socket,关闭成功后发射disconnected()信号</p>
-<h1 id="virtual-bool-qabstractsocket-waitforconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForConnected(int msecs = 30000)</h1>
-<p>等待知道建立socked连接，做多等msecs秒</p>
-<h1 id="virtual-bool-qabstractsocket-waitfordisconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForDisconnected(int msecs = 30000)</h1>
-<p>等待直到socket断开连接</p>
-<h1 id="qhostaddress-qabstractsocket-localaddress-const">QHostAddress QAbstractSocket::localAddress() const</h1>
-<p>返回本socket的地址</p>
-<h1 id="quint16-qabstractsocket-localport-const">quint16 QAbstractSocket::localPort() const</h1>
-<p>返回本socket的端口</p>
-<h1 id="qhostaddress-qabstractsocket-peeraddress-const">QHostAddress QAbstractSocket::peerAddress() const</h1>
-<p>在已连接状态下，返回对方socket的地址</p>
-<h1 id="quint16-qabstractsocket-peerport-const">quint16 QAbstractSocket::peerPort() const</h1>
-<p>在已连接状态下，返回对方socket的端口</p>
-<h1 id="qint64-qabstractsocket-readbuffersize-const">qint64 QAbstractSocket::readBufferSize() const</h1>
-<p>返回内部读取缓冲区的大小，该大小决定了read()和readAll()函数能读出的数据大小</p>
-<h1 id="virtual-void-qabstractsocket-setreadbuffersize-qint64-size">[virtual] void QAbstractSocket::setReadBufferSize(qint64 size)</h1>
-<p>设置内部读取缓冲区大小</p>
-<h1 id="override-virtual-qint64-qabstractsocket-bytesavailable-const">[override virtual] qint64 QAbstractSocket::bytesAvailable() const</h1>
-<p>返回需要读取的缓冲区数据的字节数</p>
-<h1 id="override-virtual-bool-qabstractsocket-canreadline-const">[override virtual] bool QAbstractSocket::canReadLine() const</h1>
-<p>如果有行数据要从socket缓冲区读取，返回true</p>
-<h1 id="qabstractsocket-socketstate-qabstractsocket-state-const">QAbstractSocket::SocketState QAbstractSocket::state() const</h1>
-<p>返回socket当前状态</p>
-<p>signals:</p>
-<h1 id="void-connected">void connected()</h1>
-<p>connectToHost()成功连接到服务器后发射</p>
-<h1 id="void-disconnected">void disconnected()**</h1>
-<p>socket断开后发射</p>
-<h1 id="void-error-qabstractsocket-socketerror-socketerror">void error(QAbstractSocket::SocketError socketError)</h1>
-<p>socket错误后发射</p>
-<h1 id="void-hostfound">void hostFound()</h1>
-<p>调用connectToHost()找到主机后发射</p>
-<h1 id="void-proxyauthenticationrequired-const-qnetworkproxy-proxy-qauthenticator-authenticator">** void proxyAuthenticationRequired(const QNetworkProxy &amp;proxy, QAuthenticator <em>authenticator)</em>*</h1>
-<p><strong>当使用需要身份验证的代理时，可以发出此信号。然后，可以在验证器对象中填充所需的详细信息，以允许验证并继续连接。</strong></p>
-<p><strong>注意:不可能使用QueuedConnection连接到这个信号，因为当信号返回时，如果未将新信息填充到验证器，则连接将失败。</strong></p>
-<h1 id="void-statechanged-qabstractsocket-socketstate-socketstate">** void stateChanged(QAbstractSocket::SocketState socketState)**</h1>
-<p><strong><strong>当socket状态变化是发射，socketState表示了socket当前状态</strong></strong></p>
-<h1 id="void-readyread"><strong>void readyRead()</strong></h1>
-<p><strong><strong>当缓冲区有新数据需要读取时发射,在此信号的槽函数里读取缓冲区数据</strong></strong></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QNetworkInterface</title>
-    <url>/2022/03/10/QtAPI/2022-03-10-QNetworkInterface/</url>
-    <content><![CDATA[<h1 id="qlist-qnetworkaddressentry-addressentries">QList<QNetworkAddressEntry> addressEntries()</h1>
-<p>返回该网络接口（包括子网掩码和广播地址）的IP地址列表</p>
-<h1 id="qstring-hardwareaddress">QString hardwareAddress()</h1>
-<p>返回该接口的低级硬件地址，以太网里就是MAC地址</p>
-<h1 id="qstring-humanreadablename">QString humanReadableName()</h1>
-<p>返回可以读懂的接口名称，若名称不确定，则会得到name()返回值</p>
-<h1 id="bool-isvalid">bool isValid()</h1>
-<p>如果接口信息有效返回true</p>
-<h1 id="qstring-name">QString name()</h1>
-<p>返回网络接口名称</p>
-<h1 id="qlist-qhostaddress-alladdresses">QList<QHostAddress> allAddresses()</h1>
-<p>返回主机上所有IP地址的列表</p>
-<h1 id="qlist-qnetworkinterface-allinterface">QList<QNetworkInterface> allInterface()</h1>
-<p><strong><strong>返回主机上所有接口的列表</strong></strong></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QHostAddress</title>
-    <url>/2022/03/14/QtAPI/2022-03-14-QHostAddress/</url>
-    <content><![CDATA[<p>QHostAddress类提供一个IP地址。</p>
-<p>这个类提供一种独立于平台和协议的方式来保存IPv4和IPv6地址。</p>
-<h1 id="bool-isloopback-const">bool isLoopback() const</h1>
-<p>如果地址是IPv6的环回地址，或任何IPv4的环回地址，则返回true。</p>
-<h1 id="bool-isnull-const">bool isNull() const</h1>
-<p>如果主机地址为空（INADDR_ANY 或 in6addr_any），返回true。默认的构造函数创建一个空的地址，这个地址对于任何主机或接口是无效的。</p>
-<h1 id="qabstractsocket-networklayerprotocol-protocol-const">QAbstractSocket::NetworkLayerProtocol protocol() const</h1>
-<p>返回主机地址的网络层协议。</p>
-<h1 id="qstring-scopeid-const">QString scopeId() const</h1>
-<p>返回IPv6地址的范围ID。对于IPv4地址，如果该地址不包含范围ID，则返回一个空字符串。</p>
-<p>IPv6的范围ID指定非全球IPv6地址范围的可达性，限制地址可以被使用的区域。所有IPv6地址与这种可达范围相关联。范围ID用于消除那些不能保证是全局唯一性的地址。</p>
-<h1 id="枚举-qhostaddress-specialaddress"><strong>枚举 QHostAddress::SpecialAddress</strong></h1>
-<table>
-<thead>
-<tr>
-<th>QHostAddress::Null</th>
-<th>0</th>
-<th>空地址对象，相当于QHostAddress()。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>QHostAddress::LocalHost</strong></td>
-<td><strong>2</strong></td>
-<td><strong>IPv4本地主机地址，相当于QHostAddress(127.0.0.1)。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::LocalHostIPv6</strong></td>
-<td><strong>3</strong></td>
-<td><strong>Pv6本地主机地址，相当于 QHostAddress(::1)。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::Broadcast</strong></td>
-<td><strong>1</strong></td>
-<td><strong>IPv4广播地址，相当于QHostAddress(255.255.255.255)。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::AnyIPv4</strong></td>
-<td><strong>6</strong></td>
-<td><strong>IPv4 any-address，相当于QHostAddress(0.0.0.0)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::AnyIPv6</strong></td>
-<td><strong>5</strong></td>
-<td><strong>IPv6 any-address，相当于QHostAddress(::)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::Any</strong></td>
-<td><strong>4</strong></td>
-<td><strong>双any-address栈，与该地址绑定的socket将侦听IPv4和IPv6接口。</strong></td>
-</tr>
-</tbody>
-</table>
-<p><a href="https://blog.csdn.net/iamplane/article/details/70738406">参考地址</a></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>基本命令与热键</title>
-    <url>/2022/03/06/linux/2022-03-06-%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E4%B8%8E%E7%83%AD%E9%94%AE/</url>
-    <content><![CDATA[<h1 id="命令">命令</h1>
-<h1 id="cal-month-year">cal [month] [year]</h1>
-<p>显示某年某月的日历</p>
-<h1 id="date">**date **</h1>
-<p>显示时间日期</p>
-<h1 id="bc"><strong>bc</strong></h1>
-<p>命令行下的计算器，默认仅输出整数，如果要输出小数点下位数可以使用</p>
-<p><strong>scale=number</strong></p>
-<p>使用<strong>quit</strong>退出</p>
-<h1 id="可选参数-help"><strong>可选参数–help</strong></h1>
-<p>大多数命令都有这个参数，用于查询命令所具有的选项和参数</p>
-<h1 id="man-命令"><strong>man 命令</strong></h1>
-<p>用于查看命令的详细说明，按下【空格键】翻页，按下【q】离开</p>
-<p>命令后可能有数字，如date(1)，最重要的三个为</p>
-<ul>
-<li>1：用户在shell环境中可以操作的命令和可执行文件</li>
-<li>5：配置文件或是某些文件的格式</li>
-<li>8：系统管理员可用的管理命令</li>
-</ul>
-<p>其余自行查阅</p>
-<p>在man页面，使用 **/word **来向下查找所有word所在地，用？word来向上查找</p>
-<p><strong>热键</strong></p>
-<h1 id="tab">[tab]</h1>
-<p>如果跟在一串命令的第一个字段后，则会显示所有以输入数据开头的命令</p>
-<p>如果跟在一串命令的第二个字段后，则为【文件补齐】</p>
-<h1 id="ctrl-c"><strong>[ctrl]+c</strong></h1>
-<p>中断目前程序</p>
-<h1 id="ctrl-d"><strong>[ctrl]+d</strong></h1>
-<p>键盘输入结束，可以离开命令行模式</p>
-<h1 id="shift-page-up-page-down"><strong>[shift]+{[Page Up]|[Page Down]}</strong></h1>
-<p>前后翻页</p>
-]]></content>
-      <categories>
-        <category>Linux</category>
-      </categories>
-      <tags>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mat - The Basic Image Container</title>
-    <url>/2022/06/02/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/Mat/</url>
-    <content><![CDATA[<h2 id="mat">Mat</h2>
-<p>使用Mat对象无需再自己手动分配和释放内存</p>
-<p>Mat对象由两个数据部分组成：</p>
-<ol>
-<li>
-<p><strong>矩阵头</strong></p>
-<p>包含着一些信息，例如矩阵尺寸，用于记录矩阵存储位置的方法等等</p>
-</li>
-<li>
-<p><strong>矩阵指针</strong></p>
-<p>包含像素值(根据选择的存储方式决定维度)</p>
-</li>
-</ol>
-<p>其中，矩阵头大小恒定，但矩阵实际尺寸视情况而定。</p>
-<p>为了加快程序的运算速度，每一个Mat对象都有自己的头，而一个矩阵有可能通过共享矩阵指针的方式来被两个Mat对象使用。并且，拷贝运算符<strong>只会拷贝矩阵头与矩阵指针，而不会拷贝矩阵本身</strong>。</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat A, C;                          &#x2F;&#x2F; creates just the header parts
-A &#x3D; imread(argv[1], IMREAD_COLOR); &#x2F;&#x2F; here we&#39;ll know the method used (allocate matrix)
-Mat B(A);                                 &#x2F;&#x2F; Use the copy constructor
-C &#x3D; A;                                    &#x2F;&#x2F; Assignment operator<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>上面例子中的<strong>所有Mat对象均指向同一矩阵，改变其中一个会影响到其他的</strong>。</p>
-<p>可以创建一个只含部分数据的矩阵头，例如，要在图像中创建感兴趣区域 （<em>ROI</em>），只需创建一个具有新边界的新标头:</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat D (A, Rect(10, 10, 100, 100) ); &#x2F;&#x2F; using a rectangle
-Mat E &#x3D; A(Range::all(), Range(1,3)); &#x2F;&#x2F; using row and column boundaries<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>Mat对象使用引用计数来负责内存的释放。</p>
-<p>赋值矩阵本身时，可以使用<strong>cv::Mat::clone()<strong>或</strong>cv::Mat::copyTo()</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat F &#x3D; A.clone();
-Mat G;
-A.copyTo(G);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<hr>
-<h2 id="存储方法">存储方法</h2>
-<p><strong>色彩空间是</strong>指我们如何组合颜色分量以编码给定的颜色。最简单的一个是灰度，我们可以支配的颜色是黑色和白色。这些的组合使我们能够创建许多灰色阴影。</p>
-<p>最受欢迎的色彩空间是<strong>RGB</strong>,因为这也是我们眼睛建立颜色感受的方式，其基色为<strong>红，绿，蓝</strong>，有时候为了对颜色透明度进行区分，会加入第四个元素<strong>alpha</strong>。</p>
-<p>还有许多其他色彩空间，例如:</p>
-<ul>
-<li>RGB是最常见的，因为我们的眼睛使用类似的东西，但请记住，OpenCV标准显示系统使用BGR色彩空间组成颜色(而非RGB)</li>
-<li>HSV和HLS将颜色分解为它们的<strong>色调</strong>，<strong>饱和度</strong>和<strong>明度/亮度</strong>分量，这是我们描述颜色的更自然的方式。例如，您可能会忽略最后一个分量，从而使算法对输入图像的光照条件不那么敏感。</li>
-<li>YCrCb被流行的JPEG图像格式使用。</li>
-<li>CIE L<em>a</em>b* 是一个感知上均匀的色彩空间，如果您需要测量给定颜色到另一种颜色的<em>距离</em>，它会派上用场。</li>
-</ul>
-<p>每个色彩空间都有自己的有效域。这将决定我们使用的数据类型。我们如何存储颜色决定了我们对其有效域的控制。可能的最小数据类型是<strong>char</strong>，这意味着 1 个字节或 8 位。这可能是无符号（因此可以存储从 0 到 255 的值）或有符号（从 -127 到 +127 的值）。尽管在三个分量（如RGB）的情况下，这种宽度已经给出了1600万种可能的颜色来表示，但我们可以通过为每个分量使用浮点数（4字节= 32位）或双精度（8字节= 64位）数据类型来获得更精细的控制。但是，请记住，增加组件的大小也会增加内存中整个画面的大小。</p>
-<hr>
-<h2 id="显示创建mat对象">显示创建Mat对象</h2>
-<p>可以使用**&quot;&lt;&lt;&quot;**来查看矩阵具体的值，但该方式仅适用于二维矩阵。</p>
-<ul>
-<li>
-<p><strong>使用Mat构造函数进行创建</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat m(2, 2, CV_8UC3, Scalar(0, 0, 255));
-cout &lt;&lt; &quot;M &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; m &lt;&lt; endl&lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>对于二维和多通道图像，我们首先定义它们的大小：行数和列数。</p>
-<p>然后，我们需要指定用于存储元素的数据类型以及每个矩阵点的通道数。为此，我们根据以下约定构造了多个定义：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_[每个项目的位数][有符号或无符号][类型前缀]C[通道号]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>例如，<strong>CV_8UC3</strong>意味着我们使用长度为 8 位的无符号 char 类型，每个像素有三个<strong>uchar</strong>来形成三个通道。</p>
-</li>
-<li>
-<p><strong>使用 C/C++数组并通过构造函数进行初始化</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">int sz[3] &#x3D; &#123;2, 2, 2&#125;;
-Mat L(3, sz, CV_8UC1, Scalar::all(0));  &#x2F;&#x2F; 三维，sz数组决定了每个维度的而大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p><strong>使用cv::Mat::create函数</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat M;
-M.create(4, 4, CV_8UC(2));
-cout &lt;&lt; M;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><strong>注意</strong>:这个创建方法不能为矩阵设初值，它只是在改变尺寸时重新为矩阵数据开辟内存。</p>
-</li>
-<li>
-<p><strong>使用Matlab风格的初始化函数：cv::Mat::zeros(), cv::Mat::ones(), cv::Mat::eye()</strong></p>
-<p>需要提供大小和数据类型来创建矩阵：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat E &#x3D; Mat::eye(4, 4, CV_64F);
-cout &lt;&lt; &quot;E &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;
-Mat O &#x3D; Mat::ones(2, 2, CV_32F);
-cout &lt;&lt; &quot;O &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; O &lt;&lt; endl &lt;&lt; endl;
-Mat Z &#x3D; Mat::zeros(3, 3, CV_8UC1);
-cout &lt;&lt; &quot;Z &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>对于小型矩阵，可以使用逗号分隔的初始值项或初始值列表：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">   Mat C &#x3D; (Mat_&lt;double&gt;(3, 3) &lt;&lt; 0, -1, 0, -1, 5, -1, 0, -1, 0);
-   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
-   C &#x3D; (Mat_&lt;double&gt;(&#123;0, -1, 0, -1, 5, -1, 0, -1, 0&#125;)).reshape(3);
-   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
-&#x2F;&#x2F; reshape(cn, rows):在不改变数据的情况下，将矩阵更改为
-&#x2F;&#x2F; 具有cn个通道，rows行的矩阵<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>为现有Mat对象创建新的头，并对齐使用<strong>cv::Mat::clone</strong>或<strong>cv::Mat::copyTo</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat RowClone &#x3D; C.row(1).clone();
-   cout &lt;&lt; &quot;RowClone &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; RowClone &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-</ul>
-<p><strong>注意</strong>：可以使用**cv::randu()**来随机填充一个矩阵，在使用时需要为随机值提供一个上下限</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat R &#x3D; Mat(3, 2, CV_8UC3);
-randu(R, Scalar::all(0), Scalar::all(255));<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<hr>
-<h2 id="格式化输出">格式化输出</h2>
-<p>有不同的格式，这里不再展示，可以使用的有</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; M为需要输出的矩阵
-cout &lt;&lt; R;								 &#x2F;&#x2F; 默认
-cout &lt;&lt; format(R, Formatter::FMT_PYTHON); 	&#x2F;&#x2F; python
-cout &lt;&lt; format(R, Formatter::FMT_CSV);	    &#x2F;&#x2F; Comma separated values (CSV)
-cout &lt;&lt; format(R, Formatter::FMT_NUMPY);	&#x2F;&#x2F; numpy
-cout &lt;&lt; format(R, Formatter::FMT_C);        &#x2F;&#x2F; C<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<hr>
-<h2 id="其他常用输出">其他常用输出</h2>
-<p>OpenCV也通过&lt;&lt;运算符支持其他常见OpenCV数据结构的输出：</p>
-<ul>
-<li>
-<p>2D Point</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point2f P(5, 1);
-cout &lt;&lt; &quot;Point(2d) &#x3D; &quot; &lt;&lt; P &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>3D Point</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point3f P3F(2, 6, 7);
-cout &lt;&lt; &quot;Point(3d) &#x3D; &quot; &lt;&lt; P3F &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>通过cv::Mat输出std::vector</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;float&gt; v;
-v.push_back((float)CV_PI);
-v.push_back(2);
-cout &lt;&lt; &quot;Vector of floats via Mat &#x3D; &quot; &lt;&lt; Mat(v) &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>由points组成的std::vector</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;Point2f&gt; vPoints(20);
-int j &#x3D; 0;
-for (auto i &#x3D; vPoints.begin(); i !&#x3D; vPoints.end(); ++i)
-&#123;
-    *i &#x3D; Point2f((float)(j * 5), float(j % 7));
-    j++;
-&#125;
-cout &lt;&lt; &quot;A vector of 2D Points &#x3D; &quot; &lt;&lt; vPoints &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>图像处理</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>图像处理</tag>
-        <tag>OpenCV</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QTcpServer</title>
-    <url>/2022/03/14/QtAPI/2022-03-14-QTcpServer/</url>
-    <content><![CDATA[<p><strong>该类用于服务器端建立网络监听，创建网络Socket连接</strong></p>
-<h1 id="public"><strong>public:</strong></h1>
-<h1 id="void-qtcpserver-close">void QTcpServer::close()</h1>
-<p>关闭服务器，停止网络监听</p>
-<h1 id="bool-qtcpserver-listen-const-qhostaddress-address-qhostaddress-any-quint16-port-0">bool QTcpServer::listen(const QHostAddress &amp;address = QHostAddress::Any, quint16 port = 0)</h1>
-<p>在给定IP地址和端口上开始监听，若成功就返回true</p>
-<h1 id="bool-qtcpserver-islistening-const">bool QTcpServer::isListening() const</h1>
-<p>返回true表示服务器处于监听状态</p>
-<h1 id="virtual-qtcpsocket-qtcpserver-nextpendingconnection">[virtual] QTcpSocket *QTcpServer::nextPendingConnection()</h1>
-<p>返回下一个等待接入的连接</p>
-<h1 id="qhostaddress-qtcpserver-serveraddress-const">QHostAddress QTcpServer::serverAddress() const</h1>
-<p>如果服务器处于监听状态，返回服务器地址</p>
-<h1 id="quint16-qtcpserver-serverport-const">quint16 QTcpServer::serverPort() const</h1>
-<p>如果服务器处于监听状态，返回监听端口</p>
-<h1 id="bool-qtcpserver-waitfornewconnection-int-msec-0-bool-timedout-nullptr">bool QTcpServer::waitForNewConnection(int msec = 0, bool *timedOut = nullptr)</h1>
-<p>以阻塞方式等待新的连接</p>
-<h1 id="signals"><strong>signals:</strong></h1>
-<h1 id="signal-void-qtcpserver-accepterror-qabstractsocket-socketerror-socketerror"><strong>[signal] void QTcpServer::acceptError(QAbstractSocket::SocketError socketError)</strong></h1>
-<p>当接受一个新的连接发生错误时发射此信号，参数socketError描述了错误信息</p>
-<h1 id="signal-void-qtcpserver-newconnection">[signal] void QTcpServer::newConnection()</h1>
-<p><strong>当有新的连接时发射此信号</strong></p>
-<h1 id="protected"><strong>protected:</strong></h1>
-<h1 id="virtual-protected-void-qtcpserver-incomingconnection-qintptr-socketdescriptor"><strong>[virtual protected] void QTcpServer::incomingConnection(qintptr socketDescriptor)</strong></h1>
-<p><strong>当有一个新的连接可用时，QTcpServer内部调用此函数，创建一个QTcpSocket对象，添加到内部可用新连接列表，然后发送newConnection()信号。用户若从QTcpServer继承定义类，可以重定义此函数，但必须调用</strong></p>
-<p><strong>addPendingConnection()</strong></p>
-<h1 id="protected-void-qtcpserver-addpendingconnection-qtcpsocket-socket">*<em>[protected] void QTcpServer::addPendingConnection(QTcpSocket <em>socket)</em></em></h1>
-<p><strong>由incomingConnection()调用，将创建的QTcpServer添加到内部新可用连接列表</strong></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Qt动画框架使用</title>
-    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
-　　本文算是一篇转载文章。<br>
-　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
-<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
-<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
-<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
-<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
-　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
-<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
-<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
-<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
-<table>
-<thead>
-<tr>
-<th>QAbstractAnimation</th>
-<th>所有动画类的基类</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QAnimationGroup</td>
-<td>动画容器类的抽象基类</td>
-</tr>
-<tr>
-<td>QEasingCurve</td>
-<td>动画控制的缓和曲线类</td>
-</tr>
-<tr>
-<td>QParallelAnimationGroup</td>
-<td>并行动画容器</td>
-</tr>
-<tr>
-<td>QPauseAnimation</td>
-<td>QSequentialAnimationGroup对象暂停延迟</td>
-</tr>
-<tr>
-<td>QPropertyAnimation</td>
-<td>Qt动画属性操作</td>
-</tr>
-<tr>
-<td>QSequentialAnimationGroup</td>
-<td>串行动画容器</td>
-</tr>
-<tr>
-<td>QTimeLine</td>
-<td>动画控制的时间片类</td>
-</tr>
-<tr>
-<td>QVariantAnimation</td>
-<td>动画类的抽象基类</td>
-</tr>
-</tbody>
-</table>
-<h2 id="qt动画属性">Qt动画属性</h2>
-<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
-　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
-　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
-<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
-　　也可以做到类似CSS中的@keyframe效果，例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
-　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
-　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
-&#123;
-    Q_OBJECT
-    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
-]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt使用</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>静态链表</title>
-    <url>/2022/02/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-11-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8/</url>
-    <content><![CDATA[<p>虽然我不知道静态链表什么时候用，但学了总有好处</p>
-<h3 id="前言：">前言：</h3>
-<p>1.老师仅仅布置了静态链表的初始化、插入和删除操作，因此我只做这几个。</p>
-<p>2.本文使用cpp完成。</p>
-<h3 id="思路：">思路：</h3>
-<p>Component中有两个元素，一个是DataType,这里我使用了string,用来表示存储的元素，另一个是cursor，它的作用与链表节点中的指针一样，用来指出下一个元素的位置</p>
-<p>不同的是，cursor指出的不再是地址，而是下一个元素在数组中的下标。</p>
-<p>由此可以看出，<strong>静态链表本质还是链表，我们仍需用出来链表的方式处理静态链表，不能被数组所迷惑。</strong></p>
-<p>下面开始实现。</p>
-<h3 id="实现：">实现：</h3>
-<p>静态链表，归根结底还是链表，因此首先我们要定义节点。</p>
-<pre class="line-numbers language-none"><code class="language-none">#define MAXSIZE 1000     &#x2F;&#x2F;数组最大长度
-
-struct Component
-&#123;
-    string data &#x3D;  &quot;&quot; ;         &#x2F;&#x2F;数据
-    int cursor &#x3D; 0;            &#x2F;&#x2F;游标
-&#125;;    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在main函数中，我们定义静态链表</p>
-<pre class="line-numbers language-none"><code class="language-none">int main()
-&#123;
-    Component StaticLinkedList[MAXSIZE];      &#x2F;&#x2F;静态链表
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>接下来，我们需要进行初始化</p>
-<pre class="line-numbers language-none"><code class="language-none">void initLinkedList(Component* list)
-&#123;
-    int cnt &#x3D; 1;
-    for ( int i &#x3D; 0; i &lt; MAXSIZE - 1; i++)
-    &#123;
-        list[i].cursor &#x3D; i++;                  &#x2F;&#x2F;初始化时每个节点的cursor指出
-    &#125;                                                     &#x2F;&#x2F;下一个节点的位置，而最后一个
-    list[MAXSIZE - 1].cursor &#x3D; 0;            &#x2F;&#x2F;节点的cursor为0，指向头节点
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>无论插入还是删除，我们都需要找到元素。</p>
-<pre class="line-numbers language-none"><code class="language-none">Component&amp; find(string input, Component* list)
-&#123; &#x2F;&#x2F;返回component的引用，这样可以修改数组中的元素，而无需使用指针
-    int curEle &#x3D; list[0].cursor;
-    while (list[curEle].cursor !&#x3D; 0 &amp;&amp; list[curEle].data !&#x3D;  &quot;&quot; )　　　　 &#x2F;&#x2F;初始化时每个元素都为空，因此以此为条件
-    &#123;
-        if (list[curEle].data &#x3D;&#x3D; input)
-        &#123;
-            return list[curEle];
-        &#125;
-        else
-        &#123;
-            curEle &#x3D; list[curEle].cursor;
-        &#125;
-    &#125;
-    return list[curEle];　　 &#x2F;&#x2F;当找不到时返回的元素
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-<p>当我们插入元素时，我们需要将最后一个非空元素后面的那一个元素使用，将数据保存在那个元素里。</p>
-<p><img src="https://s2.loli.net/2022/05/25/DzMxsWebVGNQjS2.png" alt="当前长度" title="当前长度"></p>
-<p>这里是将元素出入指定元素之后</p>
-<pre class="line-numbers language-none"><code class="language-none">void insertAfter(string input, string query, Component* list)
-&#123; &#x2F;&#x2F;与链表插入几乎一样的手法，无需多言
-    currenLength++;
-    Component&amp; target &#x3D; find(query, list);
-    list[currenLength].data &#x3D; input;
-    list[currenLength].cursor &#x3D; target.cursor;
-    target.cursor &#x3D; currenLength;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>删除元素</p>
-<pre class="line-numbers language-none"><code class="language-none">void deleteElement(string query, Component* list)
-&#123;
-    if (query &#x3D;&#x3D;  &quot;&quot; )
-    &#123;
-        cout &lt;&lt;  &quot;you didn&#39;t input anything.&quot; ;
-        return ;
-    &#125;
-    Component&amp; target &#x3D; find(query, list);
-    if (target.data !&#x3D; query)
-    &#123;
-        cout &lt;&lt;  &quot;the element you input does not exist in the list.&quot; ;
-        return ;
-    &#125;
-    int curEle &#x3D; 0;
-    int pre;
-    while (1)　　 &#x2F;&#x2F;需要寻找指定元素之前的元素
-    &#123;
-        if (list[curEle].data &#x3D;&#x3D; query)
-        &#123;
-            list[pre].cursor &#x3D; list[curEle].cursor;
-            list[curEle].cursor &#x3D; -1;
-            list[curEle].data &#x3D;  &quot;&quot; ;
-            break ;
-        &#125;
-        else
-        &#123;
-            pre &#x3D; curEle;
-            curEle &#x3D; list[curEle].cursor;
-        &#125;
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>完整代码：</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">#include 
-#include 
-using namespace std;
-#define MAXSIZE 1000
-struct Component
-&#123;
-    string data &#x3D;  &quot;&quot; ;
-    int cursor &#x3D; 0;
-&#125;;
-
-static int currenLength &#x3D; 0;
-
-Component&amp; find(string input, Component* list)
-&#123;
-    int curEle &#x3D; list[0].cursor;
-    while (list[curEle].cursor !&#x3D; 0 &amp;&amp; list[curEle].data !&#x3D;  &quot;&quot; )
-    &#123;
-        if (list[curEle].data &#x3D;&#x3D; input)
-        &#123;
-            return list[curEle];
-        &#125;
-        else
-        &#123;
-            curEle &#x3D; list[curEle].cursor;
-        &#125;
-    &#125;
-    return list[curEle];
-&#125;
-
-void insertAfter(string input, string query, Component* list)
-&#123;
-    currenLength++;
-    Component&amp; target &#x3D; find(query, list);
-    list[currenLength].data &#x3D; input;
-    list[currenLength].cursor &#x3D; target.cursor;
-    target.cursor &#x3D; currenLength;
-&#125;
-
-void deleteElement(string query, Component* list)
-&#123;
-    if (query &#x3D;&#x3D;  &quot;&quot; )
-    &#123;
-        cout &lt;&lt;  &quot;you didn&#39;t input anything.&quot; ;
-        return ;
-    &#125;
-    Component&amp; target &#x3D; find(query, list);
-    if (target.data !&#x3D; query)
-    &#123;
-        cout &lt;&lt;  &quot;the element you input does not exist in the list.&quot; ;
-        return ;
-    &#125;
-    int curEle &#x3D; 0;
-    int pre;
-    while (1)
-    &#123;
-        if (list[curEle].data &#x3D;&#x3D; query)
-        &#123;
-            list[pre].cursor &#x3D; list[curEle].cursor;
-            list[curEle].cursor &#x3D; -1;
-            list[curEle].data &#x3D;  &quot;&quot; ;
-            break ;
-        &#125;
-        else
-        &#123;
-            pre &#x3D; curEle;
-            curEle &#x3D; list[curEle].cursor;
-        &#125;
-    &#125;
-&#125;
-
-void initLinkedList(Component* list)
-&#123;
-    int cnt &#x3D; 1;
-    for ( int i &#x3D; 0; i &lt; MAXSIZE - 1; i++)
-    &#123;
-        list[i].cursor &#x3D; i++;
-    &#125;
-    list[MAXSIZE - 1].cursor &#x3D; 0;
-&#125;
-int main()
-&#123;
-   
-    Component StaticLinkedList[MAXSIZE];
-    initLinkedList(StaticLinkedList);
-    string input, query, deleteMent;
-    while (1) &#123;
-        cin &gt;&gt; input &gt;&gt; query &gt;&gt; deleteMent;
-        insertAfter(input, query, StaticLinkedList);
-        deleteElement(deleteMent, StaticLinkedList);
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-<h3 id="结语：">结语：</h3>
-<p>这就是静态链表这几个操作了，我经过VS调试后并未出现异常</p>
-<p>如有看不懂，或错误的地方，欢迎讨论。</p>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>数据结构</tag>
-        <tag>线性表</tag>
       </tags>
   </entry>
   <entry>
@@ -2041,6 +1072,868 @@ int main(int argc, char *argv[])
         <tag>C++</tag>
         <tag>Qt</tag>
         <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
+<p>获取应用主屏幕</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QScreen</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
+    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
+<p>获取应用程序可用区域</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWebEngineView</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
+    <content><![CDATA[<h1 id="page">page()</h1>
+<p>返回一个指向页面的指针，为QWebEnginePage*</p>
+<h1 id="load">load()</h1>
+<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QSystemTrayIcon</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QSystemTrayIcon/</url>
+    <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
+<h1 id="tooltip">toolTip</h1>
+<p>托盘工具提示，你把鼠标放在图标上时出现的文字</p>
+<p>使用setTooTip()设置</p>
+<h1 id="show">show()</h1>
+<p>在托盘显示你对象拥有的图标</p>
+<h1 id="setcontextmenu-qmenu">setContextMenu(Qmenu*)</h1>
+<p>设置用户通过鼠标事件来弹出的菜单（比如右键弹出菜单）</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWidget</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QWidget/</url>
+    <content><![CDATA[<h1 id="qt-wa-translucentbackground">Qt::WA_TranslucentBackground</h1>
+<p>为你的控件设置透明背景，因为这个标志会使你的控件拥有一个阿尔法通道。这个属性一旦被设置，<strong>WA_NoSystemBackground</strong>则也被设置。在Windows上你的控件也需要设置窗口标志<strong>Qt::FramelessWindowHint</strong></p>
+<h1 id="qt-wa-nosystembackground">Qt::WA_NoSystemBackground</h1>
+<p>这个标志被设置意味着你的控件没有背景，即当控件接受绘画事件时，背景不会被自动重绘。</p>
+<p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
+<h1 id="qt-wa-opaquepaintevent">Qt::WA_OpaquePaintEvent</h1>
+<p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPainter</title>
+    <url>/2022/03/02/QtAPI/2022-03-02-QPainter/</url>
+    <content><![CDATA[<h2 id="void-translate-const-qpointf-offset">void translate(const QPointF &amp;offset)</h2>
+<p>按照给定偏移量平移坐标系(重设坐标原点)</p>
+<h2 id="void-scale-qreal-sx-qreal-sy">void scale(qreal sx, qreal sy)</h2>
+<p>按 （sx， sy） 缩放坐标系。</p>
+<h2 id="void-qpainter-rotate-qreal-angle">void QPainter::rotate(qreal angle)</h2>
+<p>顺时针旋转坐标系。给定的角度参数以度为单位。</p>
+<h2 id="void-qpainter-drawpixmap-const-qrectf-target-const-qpixmap-pixmap-const-qrectf-source">void QPainter::drawPixmap(const QRectF &amp;target, const QPixmap &amp;pixmap, const QRectF &amp;source)</h2>
+<p>将给定位图的矩形部分源绘制到绘制设备中的给定目标中</p>
+<p>此函数有重载，详请查看帮助文档</p>
+<p>此函数主要用于绘制图片</p>
+<h2 id="void-qpainter-drawpolygon-const-qpointf-points-int-pointcount-qt-fillrule-fillrule-qt-oddevenfill">void QPainter::drawPolygon(const QPointF *points, int pointCount, Qt::FillRule fillRule = Qt::OddEvenFill)</h2>
+<p>使用points里的前pointCount个点进行多边形绘图</p>
+<p>第一个点隐式连接到最后一个点，并且多边形用当前画笔填充。<strong>Qt::FillRule</strong></p>
+<table>
+<thead>
+<tr>
+<th>Qt::OddEvenFill</th>
+<th>0</th>
+<th>指定该区域使用奇偶填充规则填充。有了这条规则，我们可以用下面的方法来确定一个点是否在形状内部。从这一点画一条水平线到形状外面的一个位置，并计算交点的数量。如果交点个数是奇数，则该点在形状内。此模式为默认模式。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Qt::WindingFill</td>
+<td>1</td>
+<td>Specifies that the region is filled using the non zero winding rule. With this rule, we determine whether a point is inside the shape by using the following method. Draw a horizontal line from the point to a location outside the shape. Determine whether the direction of the line at each intersection point is up or down. The winding number is determined by summing the direction of each intersection. If the number is non zero, the point is inside the shape. This fill mode can also in most cases be considered as the intersection of closed shapes.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="bool-qpainter-begin-qpaintdevice-device">bool QPainter::begin(QPaintDevice *device)</h2>
+<p>开始在绘图设备上绘图，如果成功返回true;否则返回false。</p>
+<p>请注意，当调用begin()时，所有的painter的设置(setPen()， setBrush()等)都被重置为默认值。</p>
+<p>请注意，大多数情况下，您可以使用其中一个构造函数来代替begin()，end()函数会在painter销毁时自动进行</p>
+<p><strong>警告:一个绘画装置一次只能由一个画家进行绘画。</strong></p>
+<p><strong>警告:不支持在QImage::Format_Indexed8格式的QImage上绘画。</strong></p>
+<h2 id="bool-qpainter-end">bool QPainter::end()</h2>
+<p>绘制结束。绘制时使用的任何资源将被释放。通常不需要调用它，因为它是由析构函数调用的。</p>
+<p>如果绘制器不再活动，则返回true;否则返回false。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QList</title>
+    <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
+    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
+<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
+<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
+<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
+<p>此函数要求值类型具有operator==()的实现。</p>
+<p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
+<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
+<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
+<p>这个函数非常快(常数时间)。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QAbstractButton</title>
+    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
+    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
+<h2 id="ischeck">isCheck()</h2>
+<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
+<h2 id="text"><strong>text()</strong></h2>
+<p>获取这个按钮的文字</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPixmap</title>
+    <url>/2022/03/05/QtAPI/2022-03-05-QPixmap/</url>
+    <content><![CDATA[<h2 id="bool-qpixmap-load-const-qstring-filename-const-char-format-nullptr-qt-imageconversionflags-flags-qt-autocolor">*<em>bool QPixmap::load(const QString &amp;fileName, const char <em>format = nullptr, Qt::ImageConversionFlags flags = Qt::AutoColor)</em></em></h2>
+<p>从指定文件名的文件中加载位图。如果位图成功加载，返回true;否则位图无效并返回false。</p>
+<h2 id="qpixmap-qpixmap-scaled-const-qsize-size-qt-aspectratiomode-aspectratiomode-qt-ignoreaspectratio-qt-transformationmode-transformmode-qt-fasttransformation-const"><strong>QPixmap QPixmap::scaled(const QSize &amp;size, Qt::AspectRatioMode aspectRatioMode = Qt::IgnoreAspectRatio, Qt::TransformationMode transformMode = Qt::FastTransformation) const</strong></h2>
+<p>使用由aspectRatioMode和transformMode指定的宽高比和转换模式，将位图缩放到给定的大小</p>
+<p><strong>注意：此函数是使用值传递，因此不会改变传进去的pixmap,要想真正对pixmap改变，还请另赋值</strong></p>
+<h3 id="qt-aspectratiomode">Qt::AspectRatioMode</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Qt::IgnoreAspectRatio</strong></th>
+<th><strong>0</strong></th>
+<th><strong>大小可以自由缩放。长宽比没有限制。</strong></th>
+<th></th>
+<th></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qt::KeepAspectRatio</strong></td>
+<td><strong>1</strong></td>
+<td><strong>在给定的矩形内，将尺寸缩放为尽可能大的矩形，并保留长宽比。</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Qt::KeepAspectRatioByExpanding</strong></td>
+<td><strong>2</strong></td>
+<td><strong>尺寸被缩放到一个矩形，在给定的矩形之外尽可能小，并保持长宽比。</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="transformmode">transformMode</h3>
+<table>
+<thead>
+<tr>
+<th><strong>Qt::FastTransformation</strong></th>
+<th><strong>0</strong></th>
+<th><strong>转换是快速执行的，没有平滑处理。</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Qt::SmoothTransformation</strong></td>
+<td><strong>1</strong></td>
+<td><strong>得到的图像使用双线性滤波进行变换。(平滑处理了)</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="void-qpixmap-fill-const-qcolor-color-qt-white">void QPixmap::fill(const QColor &amp;color = Qt::white)</h2>
+<p>用给定的颜色填充像素图。</p>
+<p>当pixmap已经被绘制在设备上时，此函数的行为是未定义的</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QFont</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QFont/</url>
+    <content><![CDATA[<h2 id="void-qfont-sethintingpreference-qfont-hintingpreference-hintingpreference"><strong>void QFont::setHintingPreference(QFont::HintingPreference hintingPreference)</strong></h2>
+<p><strong>将符号的提示级别的首选项设置为hintingPreference。这是对底层字体渲染系统使用某种程度的提示的提示，并且跨平台有不同的支持。</strong></p>
+<p><strong>QFont::HintingPreference</strong></p>
+<table>
+<thead>
+<tr>
+<th>QFont::PreferDefaultHinting</th>
+<th>0</th>
+<th>使用目标平台的默认提示级别。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QFont::PreferNoHinting</td>
+<td>1</td>
+<td>如果可能的话,在渲染文本时不要提示字形的轮廓。文本布局将是排版准确和可扩展的,使用与打印时相同的指标。</td>
+</tr>
+<tr>
+<td>QFont::PreferVerticalHinting</td>
+<td>2</td>
+<td>如果可能的话,渲染文本时不要有水平提示,但在垂直方向上将字形与像素网格对齐。在密度过低而无法准确渲染字形的显示器上,文字会显得更清晰。但由于字形的水平度量是没有提示的,所以文本的布局将可以扩展到更高密度的设备上(如打印机),而不会影响换行符等细节。</td>
+</tr>
+<tr>
+<td>QFont::PreferFullHinting</td>
+<td>3</td>
+<td>如果可能的话,在水平和垂直方向上渲染带有提示的文本。文本将被改变,以优化目标设备上的可读性,但由于指标将取决于文本的目标尺寸,字形、换行符和其他排版细节的位置将不按比例排列,这意味着文本布局在不同像素密度的设备上可能会有不同的外观。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>翻译不够精准还请看官方文档</strong></p>
+<h2 id="void-qfont-setpixelsize-int-pixelsize">void QFont::setPixelSize(int pixelSize)</h2>
+<p>将字体大小设置为pixelSize像素。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QFontDatabase</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QFontDatabase/</url>
+    <content><![CDATA[<h2 id="qstringlist-qfontdatabase-families-qfontdatabase-writingsystem-writingsystem-any-const"><strong>QStringList QFontDatabase::families(QFontDatabase::WritingSystem writingSystem = Any) const</strong></h2>
+<p>返回支持writingSystem的可用字体族的排序列表。</p>
+<p>如果一个字体族的名字对应着不同公司出的字体，则该字体返回的名称为family [foundry]。例如:Times [Adobe]，Times [Cronyx]，Palatino。</p>
+<h2 id="int-qfontdatabase-addapplicationfont-const-qstring-filename"><strong>int QFontDatabase::addApplicationFont(const QString &amp;fileName)</strong></h2>
+<p>从fileName指定的文件加载字体，并使其可用于应用程序。返回一个ID，可以使用removeApplicationFont()再次删除字体，或者检索字体中包含的家族名称列表。</p>
+<p>如果字体无法加载，函数返回-1。</p>
+<p>目前只支持TrueType字体、TrueType字体集合和OpenType字体。</p>
+<h2 id="qstringlist-qfontdatabase-applicationfontfamilies-int-id"><strong>QStringList QFontDatabase::applicationFontFamilies(int id)</strong></h2>
+<p>返回由id标识的给定应用程序字体的字体族列表。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPolygon</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
+    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
+<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
+<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
+<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QHostInfo</title>
+    <url>/2022/03/09/QtAPI/2022-03-09-QHostInfo/</url>
+    <content><![CDATA[<h1 id="qlist-qhostaddress-addresses"><strong>QList<QHostAddress>  addresses()</strong></h1>
+<p>返回与hostName()主机关联的IP地址列表</p>
+<h1 id="hostinfoerror-error"><strong>HostInfoError  error()</strong></h1>
+<p>如果主机查找失败，返回失败类型</p>
+<h1 id="qstring-errorstring"><strong>QString  errorString(）</strong></h1>
+<p>如果主机查找失败，返回错误描述字符串</p>
+<h1 id="qstring-hostname"><strong>QString  hostName()</strong></h1>
+<p>返回通过IP查找的主机名称</p>
+<h1 id="int-lookupid"><strong>int  lookupId()</strong></h1>
+<p>返回本次查找的ID</p>
+<h1 id="void-aborthostlookup-int-id"><strong>void abortHostLookup(int id)</strong></h1>
+<p>中断主机查找</p>
+<h1 id="qhostinfo-fromname-qstring-name"><strong>QHostInfo  fromName(QString&amp; name)</strong></h1>
+<p>返回指定主机名的IP地址</p>
+<h1 id="qstring-localdomainname"><strong>QString  localDomainName()</strong></h1>
+<p>返回本机DNS域名</p>
+<h1 id="qstring-localhostname"><strong>QString  localHostName()</strong></h1>
+<p>返回本机主机名</p>
+<h1 id="int-lookuphost-qstring-name-qobject-receiver-char-member"><em><em>int  lookupHost(QString&amp; name, QObject</em> receiver, char</em> member)**</h1>
+<p>以异步方式根据主机名查找主机的IP地址，并返回一个表示本次查找的ID,可用于abortHostLookup()</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QNetworkInterface</title>
+    <url>/2022/03/10/QtAPI/2022-03-10-QNetworkInterface/</url>
+    <content><![CDATA[<h1 id="qlist-qnetworkaddressentry-addressentries">QList<QNetworkAddressEntry> addressEntries()</h1>
+<p>返回该网络接口（包括子网掩码和广播地址）的IP地址列表</p>
+<h1 id="qstring-hardwareaddress">QString hardwareAddress()</h1>
+<p>返回该接口的低级硬件地址，以太网里就是MAC地址</p>
+<h1 id="qstring-humanreadablename">QString humanReadableName()</h1>
+<p>返回可以读懂的接口名称，若名称不确定，则会得到name()返回值</p>
+<h1 id="bool-isvalid">bool isValid()</h1>
+<p>如果接口信息有效返回true</p>
+<h1 id="qstring-name">QString name()</h1>
+<p>返回网络接口名称</p>
+<h1 id="qlist-qhostaddress-alladdresses">QList<QHostAddress> allAddresses()</h1>
+<p>返回主机上所有IP地址的列表</p>
+<h1 id="qlist-qnetworkinterface-allinterface">QList<QNetworkInterface> allInterface()</h1>
+<p><strong><strong>返回主机上所有接口的列表</strong></strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QNetworkAddressEntry</title>
+    <url>/2022/03/13/QtAPI/2022-03-13-QNetworkAddressEntry/</url>
+    <content><![CDATA[<h1 id="qhostaddress-qnetworkaddressentry-ip-const"><strong>QHostAddress QNetworkAddressEntry::ip() const</strong></h1>
+<p><strong>这个函数返回一个在网络接口中找到的IPv4或IPv6地址。</strong></p>
+<h1 id="qhostaddress-qnetworkaddressentry-netmask-const"><strong>QHostAddress QNetworkAddressEntry::netmask() const</strong></h1>
+<p>**返回与IP地址关联的子网掩码。子网掩码采用IP地址形式，**如255.255.0.0。</p>
+<p>对于IPv6地址，前缀长度转换为地址中位数为1的地址与前缀长度相等。如果前缀长度为64位(最常用的值)，netmask将被表示为QHostAddress，其中包含地址FFFF:FFFF:FFFF:FFFF::</p>
+<h1 id="qhostaddress-qnetworkaddressentry-broadcast-const"><strong>QHostAddress QNetworkAddressEntry::broadcast() const</strong></h1>
+<p>**返回与IPv4地址和子网掩码相关联的广播地址。**它通常可以通过将子网掩码包含0的IP地址位设置为1来派生。(换句话说，通过按位或者用网络掩码的逆来计算IP地址)</p>
+<p>这个成员对于IPv6地址来说总是空的，因为广播的概念在这个系统中已经被放弃了，取而代之的是组播。特别是，全节点专用组播组(地址FF02::1)可以到达本地网络中所有节点对应的主机组。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QAbstractSocket</title>
+    <url>/2022/03/14/QtAPI/2022-03-14-QAbstractSocket/</url>
+    <content><![CDATA[<p><strong>QTcpSocket除构造与析构外均从此类继承</strong></p>
+<h1 id="virtual-void-qabstractsocket-connecttohost-const-qhostaddress-address-quint16-port-qiodevice-openmode-openmode-readwrite">[virtual] void QAbstractSocket::connectToHost(const QHostAddress &amp;address, quint16 port, QIODevice::OpenMode openMode = ReadWrite)</h1>
+<p>以异步方式连接到指定IP地址和端口的TCP服务器，连接成功则发送connected()信号</p>
+<h1 id="virtual-void-qabstractsocket-disconnectfromhost">[virtual] void QAbstractSocket::disconnectFromHost()</h1>
+<p>断开socket,关闭成功后发射disconnected()信号</p>
+<h1 id="virtual-bool-qabstractsocket-waitforconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForConnected(int msecs = 30000)</h1>
+<p>等待知道建立socked连接，做多等msecs秒</p>
+<h1 id="virtual-bool-qabstractsocket-waitfordisconnected-int-msecs-30000">[virtual] bool QAbstractSocket::waitForDisconnected(int msecs = 30000)</h1>
+<p>等待直到socket断开连接</p>
+<h1 id="qhostaddress-qabstractsocket-localaddress-const">QHostAddress QAbstractSocket::localAddress() const</h1>
+<p>返回本socket的地址</p>
+<h1 id="quint16-qabstractsocket-localport-const">quint16 QAbstractSocket::localPort() const</h1>
+<p>返回本socket的端口</p>
+<h1 id="qhostaddress-qabstractsocket-peeraddress-const">QHostAddress QAbstractSocket::peerAddress() const</h1>
+<p>在已连接状态下，返回对方socket的地址</p>
+<h1 id="quint16-qabstractsocket-peerport-const">quint16 QAbstractSocket::peerPort() const</h1>
+<p>在已连接状态下，返回对方socket的端口</p>
+<h1 id="qint64-qabstractsocket-readbuffersize-const">qint64 QAbstractSocket::readBufferSize() const</h1>
+<p>返回内部读取缓冲区的大小，该大小决定了read()和readAll()函数能读出的数据大小</p>
+<h1 id="virtual-void-qabstractsocket-setreadbuffersize-qint64-size">[virtual] void QAbstractSocket::setReadBufferSize(qint64 size)</h1>
+<p>设置内部读取缓冲区大小</p>
+<h1 id="override-virtual-qint64-qabstractsocket-bytesavailable-const">[override virtual] qint64 QAbstractSocket::bytesAvailable() const</h1>
+<p>返回需要读取的缓冲区数据的字节数</p>
+<h1 id="override-virtual-bool-qabstractsocket-canreadline-const">[override virtual] bool QAbstractSocket::canReadLine() const</h1>
+<p>如果有行数据要从socket缓冲区读取，返回true</p>
+<h1 id="qabstractsocket-socketstate-qabstractsocket-state-const">QAbstractSocket::SocketState QAbstractSocket::state() const</h1>
+<p>返回socket当前状态</p>
+<p>signals:</p>
+<h1 id="void-connected">void connected()</h1>
+<p>connectToHost()成功连接到服务器后发射</p>
+<h1 id="void-disconnected">void disconnected()**</h1>
+<p>socket断开后发射</p>
+<h1 id="void-error-qabstractsocket-socketerror-socketerror">void error(QAbstractSocket::SocketError socketError)</h1>
+<p>socket错误后发射</p>
+<h1 id="void-hostfound">void hostFound()</h1>
+<p>调用connectToHost()找到主机后发射</p>
+<h1 id="void-proxyauthenticationrequired-const-qnetworkproxy-proxy-qauthenticator-authenticator">** void proxyAuthenticationRequired(const QNetworkProxy &amp;proxy, QAuthenticator <em>authenticator)</em>*</h1>
+<p><strong>当使用需要身份验证的代理时，可以发出此信号。然后，可以在验证器对象中填充所需的详细信息，以允许验证并继续连接。</strong></p>
+<p><strong>注意:不可能使用QueuedConnection连接到这个信号，因为当信号返回时，如果未将新信息填充到验证器，则连接将失败。</strong></p>
+<h1 id="void-statechanged-qabstractsocket-socketstate-socketstate">** void stateChanged(QAbstractSocket::SocketState socketState)**</h1>
+<p><strong><strong>当socket状态变化是发射，socketState表示了socket当前状态</strong></strong></p>
+<h1 id="void-readyread"><strong>void readyRead()</strong></h1>
+<p><strong><strong>当缓冲区有新数据需要读取时发射,在此信号的槽函数里读取缓冲区数据</strong></strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基本命令与热键</title>
+    <url>/2022/03/06/linux/2022-03-06-%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E4%B8%8E%E7%83%AD%E9%94%AE/</url>
+    <content><![CDATA[<h1 id="命令">命令</h1>
+<h1 id="cal-month-year">cal [month] [year]</h1>
+<p>显示某年某月的日历</p>
+<h1 id="date">**date **</h1>
+<p>显示时间日期</p>
+<h1 id="bc"><strong>bc</strong></h1>
+<p>命令行下的计算器，默认仅输出整数，如果要输出小数点下位数可以使用</p>
+<p><strong>scale=number</strong></p>
+<p>使用<strong>quit</strong>退出</p>
+<h1 id="可选参数-help"><strong>可选参数–help</strong></h1>
+<p>大多数命令都有这个参数，用于查询命令所具有的选项和参数</p>
+<h1 id="man-命令"><strong>man 命令</strong></h1>
+<p>用于查看命令的详细说明，按下【空格键】翻页，按下【q】离开</p>
+<p>命令后可能有数字，如date(1)，最重要的三个为</p>
+<ul>
+<li>1：用户在shell环境中可以操作的命令和可执行文件</li>
+<li>5：配置文件或是某些文件的格式</li>
+<li>8：系统管理员可用的管理命令</li>
+</ul>
+<p>其余自行查阅</p>
+<p>在man页面，使用 **/word **来向下查找所有word所在地，用？word来向上查找</p>
+<p><strong>热键</strong></p>
+<h1 id="tab">[tab]</h1>
+<p>如果跟在一串命令的第一个字段后，则会显示所有以输入数据开头的命令</p>
+<p>如果跟在一串命令的第二个字段后，则为【文件补齐】</p>
+<h1 id="ctrl-c"><strong>[ctrl]+c</strong></h1>
+<p>中断目前程序</p>
+<h1 id="ctrl-d"><strong>[ctrl]+d</strong></h1>
+<p>键盘输入结束，可以离开命令行模式</p>
+<h1 id="shift-page-up-page-down"><strong>[shift]+{[Page Up]|[Page Down]}</strong></h1>
+<p>前后翻页</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mat - The Basic Image Container</title>
+    <url>/2022/06/02/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/Mat/</url>
+    <content><![CDATA[<h2 id="mat">Mat</h2>
+<p>使用Mat对象无需再自己手动分配和释放内存</p>
+<p>Mat对象由两个数据部分组成：</p>
+<ol>
+<li>
+<p><strong>矩阵头</strong></p>
+<p>包含着一些信息，例如矩阵尺寸，用于记录矩阵存储位置的方法等等</p>
+</li>
+<li>
+<p><strong>矩阵指针</strong></p>
+<p>包含像素值(根据选择的存储方式决定维度)</p>
+</li>
+</ol>
+<p>其中，矩阵头大小恒定，但矩阵实际尺寸视情况而定。</p>
+<p>为了加快程序的运算速度，每一个Mat对象都有自己的头，而一个矩阵有可能通过共享矩阵指针的方式来被两个Mat对象使用。并且，拷贝运算符<strong>只会拷贝矩阵头与矩阵指针，而不会拷贝矩阵本身</strong>。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat A, C;                          &#x2F;&#x2F; creates just the header parts
+A &#x3D; imread(argv[1], IMREAD_COLOR); &#x2F;&#x2F; here we&#39;ll know the method used (allocate matrix)
+Mat B(A);                                 &#x2F;&#x2F; Use the copy constructor
+C &#x3D; A;                                    &#x2F;&#x2F; Assignment operator<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>上面例子中的<strong>所有Mat对象均指向同一矩阵，改变其中一个会影响到其他的</strong>。</p>
+<p>可以创建一个只含部分数据的矩阵头，例如，要在图像中创建感兴趣区域 （<em>ROI</em>），只需创建一个具有新边界的新标头:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat D (A, Rect(10, 10, 100, 100) ); &#x2F;&#x2F; using a rectangle
+Mat E &#x3D; A(Range::all(), Range(1,3)); &#x2F;&#x2F; using row and column boundaries<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>Mat对象使用引用计数来负责内存的释放。</p>
+<p>赋值矩阵本身时，可以使用<strong>cv::Mat::clone()<strong>或</strong>cv::Mat::copyTo()</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat F &#x3D; A.clone();
+Mat G;
+A.copyTo(G);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<hr>
+<h2 id="存储方法">存储方法</h2>
+<p><strong>色彩空间是</strong>指我们如何组合颜色分量以编码给定的颜色。最简单的一个是灰度，我们可以支配的颜色是黑色和白色。这些的组合使我们能够创建许多灰色阴影。</p>
+<p>最受欢迎的色彩空间是<strong>RGB</strong>,因为这也是我们眼睛建立颜色感受的方式，其基色为<strong>红，绿，蓝</strong>，有时候为了对颜色透明度进行区分，会加入第四个元素<strong>alpha</strong>。</p>
+<p>还有许多其他色彩空间，例如:</p>
+<ul>
+<li>RGB是最常见的，因为我们的眼睛使用类似的东西，但请记住，OpenCV标准显示系统使用BGR色彩空间组成颜色(而非RGB)</li>
+<li>HSV和HLS将颜色分解为它们的<strong>色调</strong>，<strong>饱和度</strong>和<strong>明度/亮度</strong>分量，这是我们描述颜色的更自然的方式。例如，您可能会忽略最后一个分量，从而使算法对输入图像的光照条件不那么敏感。</li>
+<li>YCrCb被流行的JPEG图像格式使用。</li>
+<li>CIE L<em>a</em>b* 是一个感知上均匀的色彩空间，如果您需要测量给定颜色到另一种颜色的<em>距离</em>，它会派上用场。</li>
+</ul>
+<p>每个色彩空间都有自己的有效域。这将决定我们使用的数据类型。我们如何存储颜色决定了我们对其有效域的控制。可能的最小数据类型是<strong>char</strong>，这意味着 1 个字节或 8 位。这可能是无符号（因此可以存储从 0 到 255 的值）或有符号（从 -127 到 +127 的值）。尽管在三个分量（如RGB）的情况下，这种宽度已经给出了1600万种可能的颜色来表示，但我们可以通过为每个分量使用浮点数（4字节= 32位）或双精度（8字节= 64位）数据类型来获得更精细的控制。但是，请记住，增加组件的大小也会增加内存中整个画面的大小。</p>
+<hr>
+<h2 id="显示创建mat对象">显示创建Mat对象</h2>
+<p>可以使用**&quot;&lt;&lt;&quot;**来查看矩阵具体的值，但该方式仅适用于二维矩阵。</p>
+<ul>
+<li>
+<p><strong>使用Mat构造函数进行创建</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat m(2, 2, CV_8UC3, Scalar(0, 0, 255));
+cout &lt;&lt; &quot;M &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; m &lt;&lt; endl&lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>对于二维和多通道图像，我们首先定义它们的大小：行数和列数。</p>
+<p>然后，我们需要指定用于存储元素的数据类型以及每个矩阵点的通道数。为此，我们根据以下约定构造了多个定义：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_[每个项目的位数][有符号或无符号][类型前缀]C[通道号]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>例如，<strong>CV_8UC3</strong>意味着我们使用长度为 8 位的无符号 char 类型，每个像素有三个<strong>uchar</strong>来形成三个通道。</p>
+</li>
+<li>
+<p><strong>使用 C/C++数组并通过构造函数进行初始化</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">int sz[3] &#x3D; &#123;2, 2, 2&#125;;
+Mat L(3, sz, CV_8UC1, Scalar::all(0));  &#x2F;&#x2F; 三维，sz数组决定了每个维度的而大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p><strong>使用cv::Mat::create函数</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat M;
+M.create(4, 4, CV_8UC(2));
+cout &lt;&lt; M;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><strong>注意</strong>:这个创建方法不能为矩阵设初值，它只是在改变尺寸时重新为矩阵数据开辟内存。</p>
+</li>
+<li>
+<p><strong>使用Matlab风格的初始化函数：cv::Mat::zeros(), cv::Mat::ones(), cv::Mat::eye()</strong></p>
+<p>需要提供大小和数据类型来创建矩阵：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat E &#x3D; Mat::eye(4, 4, CV_64F);
+cout &lt;&lt; &quot;E &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;
+Mat O &#x3D; Mat::ones(2, 2, CV_32F);
+cout &lt;&lt; &quot;O &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; O &lt;&lt; endl &lt;&lt; endl;
+Mat Z &#x3D; Mat::zeros(3, 3, CV_8UC1);
+cout &lt;&lt; &quot;Z &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>对于小型矩阵，可以使用逗号分隔的初始值项或初始值列表：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">   Mat C &#x3D; (Mat_&lt;double&gt;(3, 3) &lt;&lt; 0, -1, 0, -1, 5, -1, 0, -1, 0);
+   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
+   C &#x3D; (Mat_&lt;double&gt;(&#123;0, -1, 0, -1, 5, -1, 0, -1, 0&#125;)).reshape(3);
+   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
+&#x2F;&#x2F; reshape(cn, rows):在不改变数据的情况下，将矩阵更改为
+&#x2F;&#x2F; 具有cn个通道，rows行的矩阵<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>为现有Mat对象创建新的头，并对齐使用<strong>cv::Mat::clone</strong>或<strong>cv::Mat::copyTo</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat RowClone &#x3D; C.row(1).clone();
+   cout &lt;&lt; &quot;RowClone &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; RowClone &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<p><strong>注意</strong>：可以使用**cv::randu()**来随机填充一个矩阵，在使用时需要为随机值提供一个上下限</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat R &#x3D; Mat(3, 2, CV_8UC3);
+randu(R, Scalar::all(0), Scalar::all(255));<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<hr>
+<h2 id="格式化输出">格式化输出</h2>
+<p>有不同的格式，这里不再展示，可以使用的有</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; M为需要输出的矩阵
+cout &lt;&lt; R;								 &#x2F;&#x2F; 默认
+cout &lt;&lt; format(R, Formatter::FMT_PYTHON); 	&#x2F;&#x2F; python
+cout &lt;&lt; format(R, Formatter::FMT_CSV);	    &#x2F;&#x2F; Comma separated values (CSV)
+cout &lt;&lt; format(R, Formatter::FMT_NUMPY);	&#x2F;&#x2F; numpy
+cout &lt;&lt; format(R, Formatter::FMT_C);        &#x2F;&#x2F; C<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<h2 id="其他常用输出">其他常用输出</h2>
+<p>OpenCV也通过&lt;&lt;运算符支持其他常见OpenCV数据结构的输出：</p>
+<ul>
+<li>
+<p>2D Point</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point2f P(5, 1);
+cout &lt;&lt; &quot;Point(2d) &#x3D; &quot; &lt;&lt; P &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>3D Point</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point3f P3F(2, 6, 7);
+cout &lt;&lt; &quot;Point(3d) &#x3D; &quot; &lt;&lt; P3F &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>通过cv::Mat输出std::vector</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;float&gt; v;
+v.push_back((float)CV_PI);
+v.push_back(2);
+cout &lt;&lt; &quot;Vector of floats via Mat &#x3D; &quot; &lt;&lt; Mat(v) &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>由points组成的std::vector</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;Point2f&gt; vPoints(20);
+int j &#x3D; 0;
+for (auto i &#x3D; vPoints.begin(); i !&#x3D; vPoints.end(); ++i)
+&#123;
+    *i &#x3D; Point2f((float)(j * 5), float(j % 7));
+    j++;
+&#125;
+cout &lt;&lt; &quot;A vector of 2D Points &#x3D; &quot; &lt;&lt; vPoints &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>静态链表</title>
+    <url>/2022/02/11/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-11-%E9%9D%99%E6%80%81%E9%93%BE%E8%A1%A8/</url>
+    <content><![CDATA[<p>虽然我不知道静态链表什么时候用，但学了总有好处</p>
+<h3 id="前言：">前言：</h3>
+<p>1.老师仅仅布置了静态链表的初始化、插入和删除操作，因此我只做这几个。</p>
+<p>2.本文使用cpp完成。</p>
+<h3 id="思路：">思路：</h3>
+<p>Component中有两个元素，一个是DataType,这里我使用了string,用来表示存储的元素，另一个是cursor，它的作用与链表节点中的指针一样，用来指出下一个元素的位置</p>
+<p>不同的是，cursor指出的不再是地址，而是下一个元素在数组中的下标。</p>
+<p>由此可以看出，<strong>静态链表本质还是链表，我们仍需用出来链表的方式处理静态链表，不能被数组所迷惑。</strong></p>
+<p>下面开始实现。</p>
+<h3 id="实现：">实现：</h3>
+<p>静态链表，归根结底还是链表，因此首先我们要定义节点。</p>
+<pre class="line-numbers language-none"><code class="language-none">#define MAXSIZE 1000     &#x2F;&#x2F;数组最大长度
+
+struct Component
+&#123;
+    string data &#x3D;  &quot;&quot; ;         &#x2F;&#x2F;数据
+    int cursor &#x3D; 0;            &#x2F;&#x2F;游标
+&#125;;    <span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在main函数中，我们定义静态链表</p>
+<pre class="line-numbers language-none"><code class="language-none">int main()
+&#123;
+    Component StaticLinkedList[MAXSIZE];      &#x2F;&#x2F;静态链表
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>接下来，我们需要进行初始化</p>
+<pre class="line-numbers language-none"><code class="language-none">void initLinkedList(Component* list)
+&#123;
+    int cnt &#x3D; 1;
+    for ( int i &#x3D; 0; i &lt; MAXSIZE - 1; i++)
+    &#123;
+        list[i].cursor &#x3D; i++;                  &#x2F;&#x2F;初始化时每个节点的cursor指出
+    &#125;                                                     &#x2F;&#x2F;下一个节点的位置，而最后一个
+    list[MAXSIZE - 1].cursor &#x3D; 0;            &#x2F;&#x2F;节点的cursor为0，指向头节点
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>无论插入还是删除，我们都需要找到元素。</p>
+<pre class="line-numbers language-none"><code class="language-none">Component&amp; find(string input, Component* list)
+&#123; &#x2F;&#x2F;返回component的引用，这样可以修改数组中的元素，而无需使用指针
+    int curEle &#x3D; list[0].cursor;
+    while (list[curEle].cursor !&#x3D; 0 &amp;&amp; list[curEle].data !&#x3D;  &quot;&quot; )　　　　 &#x2F;&#x2F;初始化时每个元素都为空，因此以此为条件
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; input)
+        &#123;
+            return list[curEle];
+        &#125;
+        else
+        &#123;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+    return list[curEle];　　 &#x2F;&#x2F;当找不到时返回的元素
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+<p>当我们插入元素时，我们需要将最后一个非空元素后面的那一个元素使用，将数据保存在那个元素里。</p>
+<p><img src="https://s2.loli.net/2022/05/25/DzMxsWebVGNQjS2.png" alt="当前长度" title="当前长度"></p>
+<p>这里是将元素出入指定元素之后</p>
+<pre class="line-numbers language-none"><code class="language-none">void insertAfter(string input, string query, Component* list)
+&#123; &#x2F;&#x2F;与链表插入几乎一样的手法，无需多言
+    currenLength++;
+    Component&amp; target &#x3D; find(query, list);
+    list[currenLength].data &#x3D; input;
+    list[currenLength].cursor &#x3D; target.cursor;
+    target.cursor &#x3D; currenLength;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>删除元素</p>
+<pre class="line-numbers language-none"><code class="language-none">void deleteElement(string query, Component* list)
+&#123;
+    if (query &#x3D;&#x3D;  &quot;&quot; )
+    &#123;
+        cout &lt;&lt;  &quot;you didn&#39;t input anything.&quot; ;
+        return ;
+    &#125;
+    Component&amp; target &#x3D; find(query, list);
+    if (target.data !&#x3D; query)
+    &#123;
+        cout &lt;&lt;  &quot;the element you input does not exist in the list.&quot; ;
+        return ;
+    &#125;
+    int curEle &#x3D; 0;
+    int pre;
+    while (1)　　 &#x2F;&#x2F;需要寻找指定元素之前的元素
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; query)
+        &#123;
+            list[pre].cursor &#x3D; list[curEle].cursor;
+            list[curEle].cursor &#x3D; -1;
+            list[curEle].data &#x3D;  &quot;&quot; ;
+            break ;
+        &#125;
+        else
+        &#123;
+            pre &#x3D; curEle;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>完整代码：</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include 
+#include 
+using namespace std;
+#define MAXSIZE 1000
+struct Component
+&#123;
+    string data &#x3D;  &quot;&quot; ;
+    int cursor &#x3D; 0;
+&#125;;
+
+static int currenLength &#x3D; 0;
+
+Component&amp; find(string input, Component* list)
+&#123;
+    int curEle &#x3D; list[0].cursor;
+    while (list[curEle].cursor !&#x3D; 0 &amp;&amp; list[curEle].data !&#x3D;  &quot;&quot; )
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; input)
+        &#123;
+            return list[curEle];
+        &#125;
+        else
+        &#123;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+    return list[curEle];
+&#125;
+
+void insertAfter(string input, string query, Component* list)
+&#123;
+    currenLength++;
+    Component&amp; target &#x3D; find(query, list);
+    list[currenLength].data &#x3D; input;
+    list[currenLength].cursor &#x3D; target.cursor;
+    target.cursor &#x3D; currenLength;
+&#125;
+
+void deleteElement(string query, Component* list)
+&#123;
+    if (query &#x3D;&#x3D;  &quot;&quot; )
+    &#123;
+        cout &lt;&lt;  &quot;you didn&#39;t input anything.&quot; ;
+        return ;
+    &#125;
+    Component&amp; target &#x3D; find(query, list);
+    if (target.data !&#x3D; query)
+    &#123;
+        cout &lt;&lt;  &quot;the element you input does not exist in the list.&quot; ;
+        return ;
+    &#125;
+    int curEle &#x3D; 0;
+    int pre;
+    while (1)
+    &#123;
+        if (list[curEle].data &#x3D;&#x3D; query)
+        &#123;
+            list[pre].cursor &#x3D; list[curEle].cursor;
+            list[curEle].cursor &#x3D; -1;
+            list[curEle].data &#x3D;  &quot;&quot; ;
+            break ;
+        &#125;
+        else
+        &#123;
+            pre &#x3D; curEle;
+            curEle &#x3D; list[curEle].cursor;
+        &#125;
+    &#125;
+&#125;
+
+void initLinkedList(Component* list)
+&#123;
+    int cnt &#x3D; 1;
+    for ( int i &#x3D; 0; i &lt; MAXSIZE - 1; i++)
+    &#123;
+        list[i].cursor &#x3D; i++;
+    &#125;
+    list[MAXSIZE - 1].cursor &#x3D; 0;
+&#125;
+int main()
+&#123;
+   
+    Component StaticLinkedList[MAXSIZE];
+    initLinkedList(StaticLinkedList);
+    string input, query, deleteMent;
+    while (1) &#123;
+        cin &gt;&gt; input &gt;&gt; query &gt;&gt; deleteMent;
+        insertAfter(input, query, StaticLinkedList);
+        deleteElement(deleteMent, StaticLinkedList);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+<h3 id="结语：">结语：</h3>
+<p>这就是静态链表这几个操作了，我经过VS调试后并未出现异常</p>
+<p>如有看不懂，或错误的地方，欢迎讨论。</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>数据结构</tag>
+        <tag>线性表</tag>
       </tags>
   </entry>
   <entry>
@@ -2520,6 +2413,113 @@ int main()
         <tag>C++</tag>
         <tag>数据结构</tag>
         <tag>线性表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QHostAddress</title>
+    <url>/2022/03/14/QtAPI/2022-03-14-QHostAddress/</url>
+    <content><![CDATA[<p>QHostAddress类提供一个IP地址。</p>
+<p>这个类提供一种独立于平台和协议的方式来保存IPv4和IPv6地址。</p>
+<h1 id="bool-isloopback-const">bool isLoopback() const</h1>
+<p>如果地址是IPv6的环回地址，或任何IPv4的环回地址，则返回true。</p>
+<h1 id="bool-isnull-const">bool isNull() const</h1>
+<p>如果主机地址为空（INADDR_ANY 或 in6addr_any），返回true。默认的构造函数创建一个空的地址，这个地址对于任何主机或接口是无效的。</p>
+<h1 id="qabstractsocket-networklayerprotocol-protocol-const">QAbstractSocket::NetworkLayerProtocol protocol() const</h1>
+<p>返回主机地址的网络层协议。</p>
+<h1 id="qstring-scopeid-const">QString scopeId() const</h1>
+<p>返回IPv6地址的范围ID。对于IPv4地址，如果该地址不包含范围ID，则返回一个空字符串。</p>
+<p>IPv6的范围ID指定非全球IPv6地址范围的可达性，限制地址可以被使用的区域。所有IPv6地址与这种可达范围相关联。范围ID用于消除那些不能保证是全局唯一性的地址。</p>
+<h1 id="枚举-qhostaddress-specialaddress"><strong>枚举 QHostAddress::SpecialAddress</strong></h1>
+<table>
+<thead>
+<tr>
+<th>QHostAddress::Null</th>
+<th>0</th>
+<th>空地址对象，相当于QHostAddress()。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QHostAddress::LocalHost</strong></td>
+<td><strong>2</strong></td>
+<td><strong>IPv4本地主机地址，相当于QHostAddress(127.0.0.1)。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::LocalHostIPv6</strong></td>
+<td><strong>3</strong></td>
+<td><strong>Pv6本地主机地址，相当于 QHostAddress(::1)。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::Broadcast</strong></td>
+<td><strong>1</strong></td>
+<td><strong>IPv4广播地址，相当于QHostAddress(255.255.255.255)。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::AnyIPv4</strong></td>
+<td><strong>6</strong></td>
+<td><strong>IPv4 any-address，相当于QHostAddress(0.0.0.0)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::AnyIPv6</strong></td>
+<td><strong>5</strong></td>
+<td><strong>IPv6 any-address，相当于QHostAddress(::)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::Any</strong></td>
+<td><strong>4</strong></td>
+<td><strong>双any-address栈，与该地址绑定的socket将侦听IPv4和IPv6接口。</strong></td>
+</tr>
+</tbody>
+</table>
+<p><a href="https://blog.csdn.net/iamplane/article/details/70738406">参考地址</a></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QTcpServer</title>
+    <url>/2022/03/14/QtAPI/2022-03-14-QTcpServer/</url>
+    <content><![CDATA[<p><strong>该类用于服务器端建立网络监听，创建网络Socket连接</strong></p>
+<h1 id="public"><strong>public:</strong></h1>
+<h1 id="void-qtcpserver-close">void QTcpServer::close()</h1>
+<p>关闭服务器，停止网络监听</p>
+<h1 id="bool-qtcpserver-listen-const-qhostaddress-address-qhostaddress-any-quint16-port-0">bool QTcpServer::listen(const QHostAddress &amp;address = QHostAddress::Any, quint16 port = 0)</h1>
+<p>在给定IP地址和端口上开始监听，若成功就返回true</p>
+<h1 id="bool-qtcpserver-islistening-const">bool QTcpServer::isListening() const</h1>
+<p>返回true表示服务器处于监听状态</p>
+<h1 id="virtual-qtcpsocket-qtcpserver-nextpendingconnection">[virtual] QTcpSocket *QTcpServer::nextPendingConnection()</h1>
+<p>返回下一个等待接入的连接</p>
+<h1 id="qhostaddress-qtcpserver-serveraddress-const">QHostAddress QTcpServer::serverAddress() const</h1>
+<p>如果服务器处于监听状态，返回服务器地址</p>
+<h1 id="quint16-qtcpserver-serverport-const">quint16 QTcpServer::serverPort() const</h1>
+<p>如果服务器处于监听状态，返回监听端口</p>
+<h1 id="bool-qtcpserver-waitfornewconnection-int-msec-0-bool-timedout-nullptr">bool QTcpServer::waitForNewConnection(int msec = 0, bool *timedOut = nullptr)</h1>
+<p>以阻塞方式等待新的连接</p>
+<h1 id="signals"><strong>signals:</strong></h1>
+<h1 id="signal-void-qtcpserver-accepterror-qabstractsocket-socketerror-socketerror"><strong>[signal] void QTcpServer::acceptError(QAbstractSocket::SocketError socketError)</strong></h1>
+<p>当接受一个新的连接发生错误时发射此信号，参数socketError描述了错误信息</p>
+<h1 id="signal-void-qtcpserver-newconnection">[signal] void QTcpServer::newConnection()</h1>
+<p><strong>当有新的连接时发射此信号</strong></p>
+<h1 id="protected"><strong>protected:</strong></h1>
+<h1 id="virtual-protected-void-qtcpserver-incomingconnection-qintptr-socketdescriptor"><strong>[virtual protected] void QTcpServer::incomingConnection(qintptr socketDescriptor)</strong></h1>
+<p><strong>当有一个新的连接可用时，QTcpServer内部调用此函数，创建一个QTcpSocket对象，添加到内部可用新连接列表，然后发送newConnection()信号。用户若从QTcpServer继承定义类，可以重定义此函数，但必须调用</strong></p>
+<p><strong>addPendingConnection()</strong></p>
+<h1 id="protected-void-qtcpserver-addpendingconnection-qtcpsocket-socket">*<em>[protected] void QTcpServer::addPendingConnection(QTcpSocket <em>socket)</em></em></h1>
+<p><strong>由incomingConnection()调用，将创建的QTcpServer添加到内部新可用连接列表</strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
       </tags>
   </entry>
   <entry>
@@ -3390,6 +3390,66 @@ int main()
       </tags>
   </entry>
   <entry>
+    <title>关于函数体内指针指向问题</title>
+    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
+<p>下面来诠释此问题。</p>
+<p></p>
+<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
+<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
+	int data;
+	test* next &#x3D; NULL;
+&#125;;
+
+test* createList()
+&#123;
+	test* list &#x3D; new test;
+	test* ret &#x3D; list;
+	for (int i &#x3D; 0; i &lt; 10; i++)
+	&#123;
+		test* newNode &#x3D; new test;
+		newNode-&gt;data &#x3D; i;
+		list-&gt;next &#x3D; newNode;
+		list &#x3D; list-&gt;next;
+	&#125;
+	return ret;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们有一个测试函数来改变指针：</p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+
+int main()
+&#123;
+	test* testlist &#x3D; createList();
+	changePoint(testlist);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
+<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
+<p>可见在函数体内部，指针是被改变了的。</p>
+<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
+<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
+<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以发现，指针被顺利改写。</p>
+<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
+<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
+<p></p>
+]]></content>
+      <tags>
+        <tag>C++</tag>
+        <tag>细节问题</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【算法】插入类排序</title>
     <url>/2022/06/05/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-06-04-%E6%8F%92%E5%85%A5%E7%B1%BB%E6%8E%92%E5%BA%8F/</url>
     <content><![CDATA[<h2 id="简介">简介</h2>
@@ -3534,7 +3594,60 @@ void InsertSortion::shellSort(TargetType *data, int n, int *dalta, int m)
       <tags>
         <tag>C++</tag>
         <tag>算法</tag>
-        <tag>最小生成树</tag>
+        <tag>排序算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>C++类里静态成员链接错误</title>
+    <url>/2022/03/03/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-03-03-C++%E7%B1%BB%E9%87%8C%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E9%93%BE%E6%8E%A5%E9%94%99%E8%AF%AF/</url>
+    <content><![CDATA[<p>我现声明一个类内静态变量:</p>
+<pre class="line-numbers language-none"><code class="language-none">class test&#123;
+public:
+    static int a;
+    int get();
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在test.cpp中对a进行使用</p>
+<pre class="line-numbers language-none"><code class="language-none">#include&lt;test.h&gt;
+int test::get()
+&#123;
+    return a;                    
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>会产生链接错误</p>
+<p><img src="https://s2.loli.net/2022/05/29/MPGYQKLqogBn7uE.png" alt="1.png"><br>
+　　解决方案：</p>
+<p><strong>①在头文件中定义函数</strong></p>
+<p>**　　　　**</p>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+class test
+&#123;
+public:
+	static int a;
+	int get()
+	&#123;
+		return a;
+	&#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>②在源文件加上静态变量的声明</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;test.h&quot;
+
+int test::a;
+
+int test::get()
+&#123;
+	return a;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+]]></content>
+      <categories>
+        <category>细节问题</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>细节问题</tag>
       </tags>
   </entry>
   <entry>
@@ -4027,119 +4140,6 @@ int main()
         <tag>C++</tag>
         <tag>题解</tag>
         <tag>NOJ</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于函数体内指针指向问题</title>
-    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
-<p>下面来诠释此问题。</p>
-<p></p>
-<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
-<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
-	int data;
-	test* next &#x3D; NULL;
-&#125;;
-
-test* createList()
-&#123;
-	test* list &#x3D; new test;
-	test* ret &#x3D; list;
-	for (int i &#x3D; 0; i &lt; 10; i++)
-	&#123;
-		test* newNode &#x3D; new test;
-		newNode-&gt;data &#x3D; i;
-		list-&gt;next &#x3D; newNode;
-		list &#x3D; list-&gt;next;
-	&#125;
-	return ret;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我们有一个测试函数来改变指针：</p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-
-int main()
-&#123;
-	test* testlist &#x3D; createList();
-	changePoint(testlist);
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
-<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
-<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
-<p>可见在函数体内部，指针是被改变了的。</p>
-<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
-<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
-<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>可以发现，指针被顺利改写。</p>
-<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
-<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
-<p></p>
-]]></content>
-      <tags>
-        <tag>C++</tag>
-        <tag>细节问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>C++类里静态成员链接错误</title>
-    <url>/2022/03/03/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-03-03-C++%E7%B1%BB%E9%87%8C%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E9%93%BE%E6%8E%A5%E9%94%99%E8%AF%AF/</url>
-    <content><![CDATA[<p>我现声明一个类内静态变量:</p>
-<pre class="line-numbers language-none"><code class="language-none">class test&#123;
-public:
-    static int a;
-    int get();
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在test.cpp中对a进行使用</p>
-<pre class="line-numbers language-none"><code class="language-none">#include&lt;test.h&gt;
-int test::get()
-&#123;
-    return a;                    
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>会产生链接错误</p>
-<p><img src="https://s2.loli.net/2022/05/29/MPGYQKLqogBn7uE.png" alt="1.png"><br>
-　　解决方案：</p>
-<p><strong>①在头文件中定义函数</strong></p>
-<p>**　　　　**</p>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-class test
-&#123;
-public:
-	static int a;
-	int get()
-	&#123;
-		return a;
-	&#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>②在源文件加上静态变量的声明</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;test.h&quot;
-
-int test::a;
-
-int test::get()
-&#123;
-	return a;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-]]></content>
-      <categories>
-        <category>细节问题</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>细节问题</tag>
       </tags>
   </entry>
 </search>
