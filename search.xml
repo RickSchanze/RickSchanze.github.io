@@ -1,142 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>EffectiveC++(1)(1~4)</title>
-    <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
-    <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
-<p><strong>四个次语言:</strong></p>
-<ul>
-<li>C</li>
-<li>Object-Oriented C++（面向对象C++）</li>
-<li>Template C++</li>
-<li>STL</li>
-</ul>
-<h2 id="02-尽量以-const-enum-inline代替-define">02:尽量以 const, enum, inline代替 #define</h2>
-<p>使用#define时，编译器看不到你所define的变量，那么当报错时，为了查找理解你所定义的，就需要耗费大量时间</p>
-<pre class="line-numbers language-none"><code class="language-none">#define ASPECT_RATIO 1.653　　　　&#x2F;&#x2F;aspect_ratio并未进入符号表<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>当以常量代替#define时，有两种特殊情况</p>
-<ul>
-<li><strong>定义常量指针</strong></li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">const char* const authoerNameo &#x3D; &quot;ScottMeyers&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<ul>
-<li><strong><strong>定义class专有常量</strong></strong></li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;为了将常量作用域限制于class内，需要static
-class GamePlayer&#123;
-    static const int NumTurns &#x3D; 5;&#x2F;&#x2F;常量声明式
-    int scores[NumTurns];&#x2F;&#x2F;使用常量    
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>对于形似函数的宏(如#definr Test(a,b) f((a)&gt;(b)?(a):(b)))，可以用inline代替</p>
-<pre class="line-numbers language-none"><code class="language-none">template&lt;typename T&gt;
-inline void callWithMax(const T&amp; a, const T&amp; b)
-&#123;
-    f(a &gt; b ? a: b);
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="03-尽可能使用const">03:尽可能使用const</h2>
-<p>const的几种不同用法</p>
-<pre class="line-numbers language-none"><code class="language-none">char greeting[] &#x3D; &quot;hewwl&quot;;
-char* p &#x3D; greeting;
-const char* p &#x3D;greeting;    &#x2F;&#x2F;non-const pointer, const data
-char* const p &#x3D; greeting;   &#x2F;&#x2F;const pointer, non-const data
-const char* const p &#x3D; greeting; &#x2F;&#x2F;const pointer, const data
-&#x2F;&#x2F;注: const Widget* pw与Widget const* pw等价<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>令函数返回一个常量值，可以降低因错误而造成的意外，如：</p>
-<pre class="line-numbers language-none"><code class="language-none">class Rational&#123;&#125;;
-const Rational operator*(const Rational&amp; lhs, const Rational&amp; rhs);
-&#x2F;&#x2F;如果没有const可能会造成
-Rational a,b,c;
-if (a*b &#x3D; c)
-&#123;
-    &#x2F;* code *&#x2F;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>另：双目运算符operator*想拥有两个参数，必须在类外定义，因为类内有隐式this指针</strong></p>
-<p><strong>当const 和 non-const成员函数有着实质等价的实现时，令non-const版本调用const版本来避免代码重复</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">class TextBlock &#123; public: const char&amp; operator[](std::size_t position) const&#123; &#x2F;&#x2F;过程1 &#x2F;&#x2F;过程2 &#x2F;&#x2F;过程3 return text[position]; &#125; char&amp; operator[](std::size_t position)&#123; return const_cast&lt;char&amp;&gt; (static_cast&lt;const TextBlock&amp;&gt; (*this)[position]); &#125; &#125;; &#x2F;&#x2F;注:不能用const调用non-const,因为non-const可能改变对象<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h2 id="04-确定对象使用前已被初始化">04:确定对象使用前已被初始化</h2>
-<li>
-<p><strong>为内置对象进行手工初始化</strong></p>
-</li>
-<p>内置对象不进行手工初始化的话很可能得到随机值，而浪费性能</p>
-<li>
-<p><strong>构造函数使用成员初始化列表，而不是赋值</strong></p>
-</li>
-<pre class="line-numbers language-none"><code class="language-none">class A
-&#123;
-private:
-    int member1;
-    double member2;
-    std::string member3;
-
-public:
-    &#x2F;&#x2F;使用初始值列表
-    A() : member1(0), member2(0), member3(std::string())&#123;&#125;
-    &#x2F;&#x2F;赋值初始化
-    A()&#123;
-        member1 &#x3D; 0;
-        member2 &#x3D; 0;
-        member3 &#x3D; &quot;&quot;;
-    &#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>使用赋值初始化的构造函数在赋值前还会调用default的构造函数，因此会造成性能流失</p>
-<li>
-<p><strong>以本地静态对象代替非本地静态对象</strong></p>
-</li>
-<p>这是为避免跨编译单元初始化次序问题而提出的解决方案，简单来说就是：</p>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
-class hen&#123;
-    public:
-    std::size_t makeEggs();
-&#125;;
-hen ji;&#x2F;&#x2F;non-local static
-
-&#x2F;&#x2F;b.cpp
-extern hen ji;
-class eggs&#123;
-    public:
-    void eggs()
-    &#123;
-        ji.makeEggs();
-    &#125;
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>此时若调用eggs构造函数，而ji未初始化，则会造成严重问题（多编译文件初始化次序不确定）</p>
-<p>而</p>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
-class hen&#123;
-    public:
-    std::size_t makeEggs();
-&#125;;
-hen&amp; chicken()
-&#123;
-    static hen ji
-    return ji;
-&#125;;
-
-&#x2F;&#x2F;b.cpp
-extern hen ji;
-class eggs&#123;
-    public:
-    eggs()
-    &#123;
-        chicken().makeEggs();
-    &#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>不存在问题，原因简单分析:</p>
-<p>local static 的做法 &gt; 调用 eggs() &gt; 调用 egg 构造函数 &gt; 调用 ji() &gt; 调用 ji 的构造函数 &gt; 成功</p>
-<p><a href="https://blog.csdn.net/pursue_my_life/article/details/80950580">参考链接</a></p>
-]]></content>
-      <categories>
-        <category>Effective C++</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Effective C++</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>EffectiveC++(2)(5~12)</title>
     <url>/2022/03/05/Effective%20C++/2022-03-05-EffectiveC++(2)(5~12)/</url>
     <content><![CDATA[<h2 id="05-了解c-默默编写并调用了哪些函数">05:了解C++默默编写并调用了哪些函数</h2>
@@ -389,6 +253,142 @@ Derived&amp; Derived::operator&#x3D;(const Derived&amp; rhs)
       </tags>
   </entry>
   <entry>
+    <title>EffectiveC++(1)(1~4)</title>
+    <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
+    <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
+<p><strong>四个次语言:</strong></p>
+<ul>
+<li>C</li>
+<li>Object-Oriented C++（面向对象C++）</li>
+<li>Template C++</li>
+<li>STL</li>
+</ul>
+<h2 id="02-尽量以-const-enum-inline代替-define">02:尽量以 const, enum, inline代替 #define</h2>
+<p>使用#define时，编译器看不到你所define的变量，那么当报错时，为了查找理解你所定义的，就需要耗费大量时间</p>
+<pre class="line-numbers language-none"><code class="language-none">#define ASPECT_RATIO 1.653　　　　&#x2F;&#x2F;aspect_ratio并未进入符号表<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>当以常量代替#define时，有两种特殊情况</p>
+<ul>
+<li><strong>定义常量指针</strong></li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">const char* const authoerNameo &#x3D; &quot;ScottMeyers&quot;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<ul>
+<li><strong><strong>定义class专有常量</strong></strong></li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;为了将常量作用域限制于class内，需要static
+class GamePlayer&#123;
+    static const int NumTurns &#x3D; 5;&#x2F;&#x2F;常量声明式
+    int scores[NumTurns];&#x2F;&#x2F;使用常量    
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>对于形似函数的宏(如#definr Test(a,b) f((a)&gt;(b)?(a):(b)))，可以用inline代替</p>
+<pre class="line-numbers language-none"><code class="language-none">template&lt;typename T&gt;
+inline void callWithMax(const T&amp; a, const T&amp; b)
+&#123;
+    f(a &gt; b ? a: b);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="03-尽可能使用const">03:尽可能使用const</h2>
+<p>const的几种不同用法</p>
+<pre class="line-numbers language-none"><code class="language-none">char greeting[] &#x3D; &quot;hewwl&quot;;
+char* p &#x3D; greeting;
+const char* p &#x3D;greeting;    &#x2F;&#x2F;non-const pointer, const data
+char* const p &#x3D; greeting;   &#x2F;&#x2F;const pointer, non-const data
+const char* const p &#x3D; greeting; &#x2F;&#x2F;const pointer, const data
+&#x2F;&#x2F;注: const Widget* pw与Widget const* pw等价<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>令函数返回一个常量值，可以降低因错误而造成的意外，如：</p>
+<pre class="line-numbers language-none"><code class="language-none">class Rational&#123;&#125;;
+const Rational operator*(const Rational&amp; lhs, const Rational&amp; rhs);
+&#x2F;&#x2F;如果没有const可能会造成
+Rational a,b,c;
+if (a*b &#x3D; c)
+&#123;
+    &#x2F;* code *&#x2F;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>另：双目运算符operator*想拥有两个参数，必须在类外定义，因为类内有隐式this指针</strong></p>
+<p><strong>当const 和 non-const成员函数有着实质等价的实现时，令non-const版本调用const版本来避免代码重复</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">class TextBlock &#123; public: const char&amp; operator[](std::size_t position) const&#123; &#x2F;&#x2F;过程1 &#x2F;&#x2F;过程2 &#x2F;&#x2F;过程3 return text[position]; &#125; char&amp; operator[](std::size_t position)&#123; return const_cast&lt;char&amp;&gt; (static_cast&lt;const TextBlock&amp;&gt; (*this)[position]); &#125; &#125;; &#x2F;&#x2F;注:不能用const调用non-const,因为non-const可能改变对象<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="04-确定对象使用前已被初始化">04:确定对象使用前已被初始化</h2>
+<li>
+<p><strong>为内置对象进行手工初始化</strong></p>
+</li>
+<p>内置对象不进行手工初始化的话很可能得到随机值，而浪费性能</p>
+<li>
+<p><strong>构造函数使用成员初始化列表，而不是赋值</strong></p>
+</li>
+<pre class="line-numbers language-none"><code class="language-none">class A
+&#123;
+private:
+    int member1;
+    double member2;
+    std::string member3;
+
+public:
+    &#x2F;&#x2F;使用初始值列表
+    A() : member1(0), member2(0), member3(std::string())&#123;&#125;
+    &#x2F;&#x2F;赋值初始化
+    A()&#123;
+        member1 &#x3D; 0;
+        member2 &#x3D; 0;
+        member3 &#x3D; &quot;&quot;;
+    &#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>使用赋值初始化的构造函数在赋值前还会调用default的构造函数，因此会造成性能流失</p>
+<li>
+<p><strong>以本地静态对象代替非本地静态对象</strong></p>
+</li>
+<p>这是为避免跨编译单元初始化次序问题而提出的解决方案，简单来说就是：</p>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
+class hen&#123;
+    public:
+    std::size_t makeEggs();
+&#125;;
+hen ji;&#x2F;&#x2F;non-local static
+
+&#x2F;&#x2F;b.cpp
+extern hen ji;
+class eggs&#123;
+    public:
+    void eggs()
+    &#123;
+        ji.makeEggs();
+    &#125;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此时若调用eggs构造函数，而ji未初始化，则会造成严重问题（多编译文件初始化次序不确定）</p>
+<p>而</p>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;a.cpp
+class hen&#123;
+    public:
+    std::size_t makeEggs();
+&#125;;
+hen&amp; chicken()
+&#123;
+    static hen ji
+    return ji;
+&#125;;
+
+&#x2F;&#x2F;b.cpp
+extern hen ji;
+class eggs&#123;
+    public:
+    eggs()
+    &#123;
+        chicken().makeEggs();
+    &#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>不存在问题，原因简单分析:</p>
+<p>local static 的做法 &gt; 调用 eggs() &gt; 调用 egg 构造函数 &gt; 调用 ji() &gt; 调用 ji 的构造函数 &gt; 成功</p>
+<p><a href="https://blog.csdn.net/pursue_my_life/article/details/80950580">参考链接</a></p>
+]]></content>
+      <categories>
+        <category>Effective C++</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Effective C++</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>EffectiveC++(3)(13~17)</title>
     <url>/2022/06/02/Effective%20C++/2022-03-07-EffectiveC++(3)(13~17)/</url>
     <content><![CDATA[<h2 id="13-以对象管理资源">13:以对象管理资源</h2>
@@ -566,103 +566,6 @@ a(pw, priority());<span aria-hidden="true" class="line-numbers-rows"><span></spa
       </tags>
   </entry>
   <entry>
-    <title>Qt动画框架使用</title>
-    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
-　　本文算是一篇转载文章。<br>
-　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
-<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
-<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
-<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
-<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
-　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
-<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
-<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
-<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
-<table>
-<thead>
-<tr>
-<th>QAbstractAnimation</th>
-<th>所有动画类的基类</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QAnimationGroup</td>
-<td>动画容器类的抽象基类</td>
-</tr>
-<tr>
-<td>QEasingCurve</td>
-<td>动画控制的缓和曲线类</td>
-</tr>
-<tr>
-<td>QParallelAnimationGroup</td>
-<td>并行动画容器</td>
-</tr>
-<tr>
-<td>QPauseAnimation</td>
-<td>QSequentialAnimationGroup对象暂停延迟</td>
-</tr>
-<tr>
-<td>QPropertyAnimation</td>
-<td>Qt动画属性操作</td>
-</tr>
-<tr>
-<td>QSequentialAnimationGroup</td>
-<td>串行动画容器</td>
-</tr>
-<tr>
-<td>QTimeLine</td>
-<td>动画控制的时间片类</td>
-</tr>
-<tr>
-<td>QVariantAnimation</td>
-<td>动画类的抽象基类</td>
-</tr>
-</tbody>
-</table>
-<h2 id="qt动画属性">Qt动画属性</h2>
-<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
-　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
-　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
-<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
-　　也可以做到类似CSS中的@keyframe效果，例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
-　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
-　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
-&#123;
-    Q_OBJECT
-    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
-]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt使用</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>EffectiveC++(4)</title>
     <url>/2022/06/03/Effective%20C++/2022-06-03-EffectiveC++(4)/</url>
     <content><![CDATA[<h2 id="18：让接口容易被正确使用-不易被误用">18：让接口容易被正确使用，不易被误用</h2>
@@ -771,310 +674,6 @@ public:
       </tags>
   </entry>
   <entry>
-    <title>Qt图形视图框架</title>
-    <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
-　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
-<h2 id="图形视图框架概述">图形视图框架概述</h2>
-<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
-<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
-<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
-<h2 id="场景">场景</h2>
-<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
-<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
-<ul>
-<li>
-<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
-</li>
-<li>
-<p>键盘输入焦点和键盘事件</p>
-</li>
-<li>
-<p>拖放事件</p>
-</li>
-<li>
-<p>碰撞检测</p>
-</li>
-</ul>
-<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
-<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
-　　纯虚函数实现示例：</p>
-<pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
-&#123;
-    qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
-    return QRectF(0 - penWidth &#x2F; 2, 0 - penWidth &#x2F; 2,
-                  20 + penWidth, 20 + penWidth);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
-&#123;
-    painter-&gt;setBrush(Qt::red);
-    painter-&gt;drawRect(0, 0, 20, 20);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>##图形视图框架的坐标系统<br>
-　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
-<h3 id="图形项坐标">图形项坐标</h3>
-<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
-<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
-<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
-<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
-<h3 id="场景坐标">场景坐标</h3>
-<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
-<h3 id="视图坐标">视图坐标</h3>
-<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
-<h3 id="坐标映射">坐标映射</h3>
-<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
-<p>####图形视图框架的映射函数</p>
-<table>
-<thead>
-<tr>
-<th>映射函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QGraphicsView::mapToScene( )</td>
-<td>从视图坐标系统映射到场景坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsView::mapFromScene( )</td>
-<td>从场景坐标系统映射到视图坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToScene( )</td>
-<td>从图形项的坐标系统映射到场景的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromScene( )</td>
-<td>从场景的坐标系统映射到图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToParent( )</td>
-<td>从本图形项的坐标系统映射到其父图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromParent( )</td>
-<td>从父图形项的坐标系统映射到本图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToItem( )</td>
-<td>从本图形项的坐标系统映射到另一个图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromItem( )</td>
-<td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
-</tr>
-</tbody>
-</table>
-<h2 id="事件处理与传播">事件处理与传播</h2>
-<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
-<h2 id="示例">示例</h2>
-<h3 id="myitem">MyItem</h3>
-<ul>
-<li>MyItem.h</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-
-#include &lt;QGraphicsItem&gt;
-
-class MyTime : public QGraphicsItem
-&#123;
-
-public:
-	MyTime();
-	~MyTime();
-	QRectF boundingRect() const override;
-	void paint(QPainter* painter,
-		const QStyleOptionGraphicsItem* option,
-		QWidget* widget) override;
-	void setColor(const QColor&amp; color);
-
-private:
-	QColor brushColor;
-
-protected:
-	void KeyPressEvent(QKeyEvent* event);
-	void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>MyItem.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
-
-#include &lt;QPainter&gt;
-#include &lt;QCursor&gt;
-#include &lt;QKeyEvent&gt;
-#include &lt;QGraphicsSceneHoverEvent&gt;
-#include &lt;QGraphicsSceneContextMenuEvent&gt;
-#include &lt;QMenu&gt;
-
-MyTime::MyTime()
-&#123;
-	brushColor &#x3D; Qt::red;
-
-	setFlag(QGraphicsItem::ItemIsFocusable);
-	setFlag(QGraphicsItem::ItemIsMovable);
-
-	setAcceptHoverEvents(true);
-&#125;
-
-MyTime::~MyTime()
-&#123;
-&#125;
-
-QRectF MyTime::boundingRect() const
-&#123;
-	qreal adjust &#x3D; 0.5;
-	return QRectF(
-		-10 - adjust,
-		-10 - adjust,
-		20 + adjust,
-		20 + adjust
-	);
-&#125;
-
-void MyTime::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-&#123;
-	if (hasFocus())
-	&#123;
-		painter-&gt;setPen(QPen(QColor(255, 255, 255, 200)));
-	&#125;
-	else
-	&#123;
-		painter-&gt;setPen(QPen(QColor(100, 100, 100, 100)));
-	&#125;
-	painter-&gt;setBrush(brushColor);
-	painter-&gt;drawRect(-10, -10, 20, 20);
-&#125;
-
-void MyTime::setColor(const QColor&amp; color)
-&#123;
-	brushColor &#x3D; color;
-&#125;
-
-void MyTime::KeyPressEvent(QKeyEvent* event)
-&#123;
-	if (event-&gt;key() &#x3D;&#x3D; Qt::Key_Down)
-	&#123;
-		moveBy(0, 10);
-	&#125;
-&#125;
-
-void MyTime::mousePressEvent(QGraphicsSceneMouseEvent* event)
-&#123;
-	setFocus();
-	setCursor(Qt::ClosedHandCursor);
-&#125;
-
-void MyTime::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-&#123;
-	setCursor(Qt::OpenHandCursor);
-	setToolTip(&quot;I am a item&quot;);
-&#125;
-
-void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-&#123;
-	QMenu menu;
-	QAction* moveAction &#x3D; menu.addAction(&quot;move back&quot;);
-	QAction* selectedAction &#x3D; menu.exec(event-&gt;screenPos());
-	if (selectedAction &#x3D;&#x3D; moveAction)
-	&#123;
-		setPos(0, 0);
-	&#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="myview">MyView</h3>
-<ul>
-<li>MyView.h</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-
-#include &lt;QGraphicsView&gt;
-
-class MyView : public QGraphicsView
-&#123;
-
-public:
-	MyView();
-	~MyView();
-protected:
-	void keyPressEvent(QKeyEvent* event);
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>MyView.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
-#include &lt;QKeyEvent&gt;
-
-MyView::MyView()
-	
-&#123;
-&#125;
-
-MyView::~MyView()
-&#123;
-&#125;
-
-void MyView::keyPressEvent(QKeyEvent* event)
-&#123;
-	switch (event-&gt;key())
-	&#123;
-	case Qt::Key_Plus:
-		scale(1.2, 1.2);
-		break;
-	case Qt::Key_Minus:
-		scale(1 &#x2F; 1.2, 1 &#x2F; 1.2);
-		break;
-	case Qt::Key_Right:
-		rotate(30);
-	default:
-		break;
-	&#125;
-	QGraphicsView::keyPressEvent(event);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="main">main</h3>
-<ul>
-<li>main.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
-#include &lt;QTime&gt;
-#include &quot;MyTime.h&quot;
-#include &quot;MyView.h&quot;
-
-int main(int argc, char *argv[])
-&#123;
-    QApplication app(argc, argv);
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-    QGraphicsScene scene;
-    scene.setSceneRect(-200, -150, 400, 300);
-
-    for (int i &#x3D; 0; i &lt; 5; i++)
-    &#123;
-        MyTime* item &#x3D; new MyTime();
-        item-&gt;setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
-        item-&gt;setPos(i * 50 - 90, -50);
-        scene.addItem(item);
-    &#125;
-
-    MyView view;
-    view.setScene(&amp;scene);
-    view.setBackgroundBrush(QBrush(Qt::red));
-    view.show();
-    return app.exec();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt使用</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>QGuiApplication</title>
     <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
     <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
@@ -1094,23 +693,6 @@ int main(int argc, char *argv[])
     <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
     <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
 <p>获取应用程序可用区域</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QWebEngineView</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
-    <content><![CDATA[<h1 id="page">page()</h1>
-<p>返回一个指向页面的指针，为QWebEnginePage*</p>
-<h1 id="load">load()</h1>
-<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -1152,6 +734,23 @@ int main(int argc, char *argv[])
 <p>注意：不像<strong>WA_OpaquePaintEvent</strong>, 新曝光区域的背景永远不会被填充</p>
 <h1 id="qt-wa-opaquepaintevent">Qt::WA_OpaquePaintEvent</h1>
 <p>收到绘制事件时，绘制控件拥有的所有像素。但是不会重绘之前绘制的东西</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QWebEngineView</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QWebEngineView/</url>
+    <content><![CDATA[<h1 id="page">page()</h1>
+<p>返回一个指向页面的指针，为QWebEnginePage*</p>
+<h1 id="load">load()</h1>
+<p>加载特定URL并展示它，不过视图保持不变，直到到达足够的数据以显示新 URL</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -1541,6 +1140,514 @@ int main(int argc, char *argv[])
         <tag>C++</tag>
         <tag>Qt</tag>
         <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QHostAddress</title>
+    <url>/2022/03/14/QtAPI/2022-03-14-QHostAddress/</url>
+    <content><![CDATA[<p>QHostAddress类提供一个IP地址。</p>
+<p>这个类提供一种独立于平台和协议的方式来保存IPv4和IPv6地址。</p>
+<h1 id="bool-isloopback-const">bool isLoopback() const</h1>
+<p>如果地址是IPv6的环回地址，或任何IPv4的环回地址，则返回true。</p>
+<h1 id="bool-isnull-const">bool isNull() const</h1>
+<p>如果主机地址为空（INADDR_ANY 或 in6addr_any），返回true。默认的构造函数创建一个空的地址，这个地址对于任何主机或接口是无效的。</p>
+<h1 id="qabstractsocket-networklayerprotocol-protocol-const">QAbstractSocket::NetworkLayerProtocol protocol() const</h1>
+<p>返回主机地址的网络层协议。</p>
+<h1 id="qstring-scopeid-const">QString scopeId() const</h1>
+<p>返回IPv6地址的范围ID。对于IPv4地址，如果该地址不包含范围ID，则返回一个空字符串。</p>
+<p>IPv6的范围ID指定非全球IPv6地址范围的可达性，限制地址可以被使用的区域。所有IPv6地址与这种可达范围相关联。范围ID用于消除那些不能保证是全局唯一性的地址。</p>
+<h1 id="枚举-qhostaddress-specialaddress"><strong>枚举 QHostAddress::SpecialAddress</strong></h1>
+<table>
+<thead>
+<tr>
+<th>QHostAddress::Null</th>
+<th>0</th>
+<th>空地址对象，相当于QHostAddress()。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>QHostAddress::LocalHost</strong></td>
+<td><strong>2</strong></td>
+<td><strong>IPv4本地主机地址，相当于QHostAddress(127.0.0.1)。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::LocalHostIPv6</strong></td>
+<td><strong>3</strong></td>
+<td><strong>Pv6本地主机地址，相当于 QHostAddress(::1)。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::Broadcast</strong></td>
+<td><strong>1</strong></td>
+<td><strong>IPv4广播地址，相当于QHostAddress(255.255.255.255)。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::AnyIPv4</strong></td>
+<td><strong>6</strong></td>
+<td><strong>IPv4 any-address，相当于QHostAddress(0.0.0.0)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::AnyIPv6</strong></td>
+<td><strong>5</strong></td>
+<td><strong>IPv6 any-address，相当于QHostAddress(::)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
+</tr>
+<tr>
+<td><strong>QHostAddress::Any</strong></td>
+<td><strong>4</strong></td>
+<td><strong>双any-address栈，与该地址绑定的socket将侦听IPv4和IPv6接口。</strong></td>
+</tr>
+</tbody>
+</table>
+<p><a href="https://blog.csdn.net/iamplane/article/details/70738406">参考地址</a></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QTcpServer</title>
+    <url>/2022/03/14/QtAPI/2022-03-14-QTcpServer/</url>
+    <content><![CDATA[<p><strong>该类用于服务器端建立网络监听，创建网络Socket连接</strong></p>
+<h1 id="public"><strong>public:</strong></h1>
+<h1 id="void-qtcpserver-close">void QTcpServer::close()</h1>
+<p>关闭服务器，停止网络监听</p>
+<h1 id="bool-qtcpserver-listen-const-qhostaddress-address-qhostaddress-any-quint16-port-0">bool QTcpServer::listen(const QHostAddress &amp;address = QHostAddress::Any, quint16 port = 0)</h1>
+<p>在给定IP地址和端口上开始监听，若成功就返回true</p>
+<h1 id="bool-qtcpserver-islistening-const">bool QTcpServer::isListening() const</h1>
+<p>返回true表示服务器处于监听状态</p>
+<h1 id="virtual-qtcpsocket-qtcpserver-nextpendingconnection">[virtual] QTcpSocket *QTcpServer::nextPendingConnection()</h1>
+<p>返回下一个等待接入的连接</p>
+<h1 id="qhostaddress-qtcpserver-serveraddress-const">QHostAddress QTcpServer::serverAddress() const</h1>
+<p>如果服务器处于监听状态，返回服务器地址</p>
+<h1 id="quint16-qtcpserver-serverport-const">quint16 QTcpServer::serverPort() const</h1>
+<p>如果服务器处于监听状态，返回监听端口</p>
+<h1 id="bool-qtcpserver-waitfornewconnection-int-msec-0-bool-timedout-nullptr">bool QTcpServer::waitForNewConnection(int msec = 0, bool *timedOut = nullptr)</h1>
+<p>以阻塞方式等待新的连接</p>
+<h1 id="signals"><strong>signals:</strong></h1>
+<h1 id="signal-void-qtcpserver-accepterror-qabstractsocket-socketerror-socketerror"><strong>[signal] void QTcpServer::acceptError(QAbstractSocket::SocketError socketError)</strong></h1>
+<p>当接受一个新的连接发生错误时发射此信号，参数socketError描述了错误信息</p>
+<h1 id="signal-void-qtcpserver-newconnection">[signal] void QTcpServer::newConnection()</h1>
+<p><strong>当有新的连接时发射此信号</strong></p>
+<h1 id="protected"><strong>protected:</strong></h1>
+<h1 id="virtual-protected-void-qtcpserver-incomingconnection-qintptr-socketdescriptor"><strong>[virtual protected] void QTcpServer::incomingConnection(qintptr socketDescriptor)</strong></h1>
+<p><strong>当有一个新的连接可用时，QTcpServer内部调用此函数，创建一个QTcpSocket对象，添加到内部可用新连接列表，然后发送newConnection()信号。用户若从QTcpServer继承定义类，可以重定义此函数，但必须调用</strong></p>
+<p><strong>addPendingConnection()</strong></p>
+<h1 id="protected-void-qtcpserver-addpendingconnection-qtcpsocket-socket">*<em>[protected] void QTcpServer::addPendingConnection(QTcpSocket <em>socket)</em></em></h1>
+<p><strong>由incomingConnection()调用，将创建的QTcpServer添加到内部新可用连接列表</strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Qt动画框架使用</title>
+    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
+　　本文算是一篇转载文章。<br>
+　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
+<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
+<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
+<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
+<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
+　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
+<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
+<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
+<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
+<table>
+<thead>
+<tr>
+<th>QAbstractAnimation</th>
+<th>所有动画类的基类</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QAnimationGroup</td>
+<td>动画容器类的抽象基类</td>
+</tr>
+<tr>
+<td>QEasingCurve</td>
+<td>动画控制的缓和曲线类</td>
+</tr>
+<tr>
+<td>QParallelAnimationGroup</td>
+<td>并行动画容器</td>
+</tr>
+<tr>
+<td>QPauseAnimation</td>
+<td>QSequentialAnimationGroup对象暂停延迟</td>
+</tr>
+<tr>
+<td>QPropertyAnimation</td>
+<td>Qt动画属性操作</td>
+</tr>
+<tr>
+<td>QSequentialAnimationGroup</td>
+<td>串行动画容器</td>
+</tr>
+<tr>
+<td>QTimeLine</td>
+<td>动画控制的时间片类</td>
+</tr>
+<tr>
+<td>QVariantAnimation</td>
+<td>动画类的抽象基类</td>
+</tr>
+</tbody>
+</table>
+<h2 id="qt动画属性">Qt动画属性</h2>
+<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
+　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
+　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
+<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
+　　也可以做到类似CSS中的@keyframe效果，例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
+　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
+　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
+&#123;
+    Q_OBJECT
+    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
+]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Qt图形视图框架</title>
+    <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
+　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
+<h2 id="图形视图框架概述">图形视图框架概述</h2>
+<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
+<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
+<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
+<h2 id="场景">场景</h2>
+<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
+<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
+<ul>
+<li>
+<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
+</li>
+<li>
+<p>键盘输入焦点和键盘事件</p>
+</li>
+<li>
+<p>拖放事件</p>
+</li>
+<li>
+<p>碰撞检测</p>
+</li>
+</ul>
+<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
+<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
+　　纯虚函数实现示例：</p>
+<pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
+&#123;
+    qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
+    return QRectF(0 - penWidth &#x2F; 2, 0 - penWidth &#x2F; 2,
+                  20 + penWidth, 20 + penWidth);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+&#123;
+    painter-&gt;setBrush(Qt::red);
+    painter-&gt;drawRect(0, 0, 20, 20);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>##图形视图框架的坐标系统<br>
+　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
+<h3 id="图形项坐标">图形项坐标</h3>
+<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
+<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
+<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
+<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
+<h3 id="场景坐标">场景坐标</h3>
+<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
+<h3 id="视图坐标">视图坐标</h3>
+<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
+<h3 id="坐标映射">坐标映射</h3>
+<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
+<p>####图形视图框架的映射函数</p>
+<table>
+<thead>
+<tr>
+<th>映射函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QGraphicsView::mapToScene( )</td>
+<td>从视图坐标系统映射到场景坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsView::mapFromScene( )</td>
+<td>从场景坐标系统映射到视图坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToScene( )</td>
+<td>从图形项的坐标系统映射到场景的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromScene( )</td>
+<td>从场景的坐标系统映射到图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToParent( )</td>
+<td>从本图形项的坐标系统映射到其父图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromParent( )</td>
+<td>从父图形项的坐标系统映射到本图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToItem( )</td>
+<td>从本图形项的坐标系统映射到另一个图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromItem( )</td>
+<td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
+</tr>
+</tbody>
+</table>
+<h2 id="事件处理与传播">事件处理与传播</h2>
+<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
+<h2 id="示例">示例</h2>
+<h3 id="myitem">MyItem</h3>
+<ul>
+<li>MyItem.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+
+#include &lt;QGraphicsItem&gt;
+
+class MyTime : public QGraphicsItem
+&#123;
+
+public:
+	MyTime();
+	~MyTime();
+	QRectF boundingRect() const override;
+	void paint(QPainter* painter,
+		const QStyleOptionGraphicsItem* option,
+		QWidget* widget) override;
+	void setColor(const QColor&amp; color);
+
+private:
+	QColor brushColor;
+
+protected:
+	void KeyPressEvent(QKeyEvent* event);
+	void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyItem.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
+
+#include &lt;QPainter&gt;
+#include &lt;QCursor&gt;
+#include &lt;QKeyEvent&gt;
+#include &lt;QGraphicsSceneHoverEvent&gt;
+#include &lt;QGraphicsSceneContextMenuEvent&gt;
+#include &lt;QMenu&gt;
+
+MyTime::MyTime()
+&#123;
+	brushColor &#x3D; Qt::red;
+
+	setFlag(QGraphicsItem::ItemIsFocusable);
+	setFlag(QGraphicsItem::ItemIsMovable);
+
+	setAcceptHoverEvents(true);
+&#125;
+
+MyTime::~MyTime()
+&#123;
+&#125;
+
+QRectF MyTime::boundingRect() const
+&#123;
+	qreal adjust &#x3D; 0.5;
+	return QRectF(
+		-10 - adjust,
+		-10 - adjust,
+		20 + adjust,
+		20 + adjust
+	);
+&#125;
+
+void MyTime::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+&#123;
+	if (hasFocus())
+	&#123;
+		painter-&gt;setPen(QPen(QColor(255, 255, 255, 200)));
+	&#125;
+	else
+	&#123;
+		painter-&gt;setPen(QPen(QColor(100, 100, 100, 100)));
+	&#125;
+	painter-&gt;setBrush(brushColor);
+	painter-&gt;drawRect(-10, -10, 20, 20);
+&#125;
+
+void MyTime::setColor(const QColor&amp; color)
+&#123;
+	brushColor &#x3D; color;
+&#125;
+
+void MyTime::KeyPressEvent(QKeyEvent* event)
+&#123;
+	if (event-&gt;key() &#x3D;&#x3D; Qt::Key_Down)
+	&#123;
+		moveBy(0, 10);
+	&#125;
+&#125;
+
+void MyTime::mousePressEvent(QGraphicsSceneMouseEvent* event)
+&#123;
+	setFocus();
+	setCursor(Qt::ClosedHandCursor);
+&#125;
+
+void MyTime::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+&#123;
+	setCursor(Qt::OpenHandCursor);
+	setToolTip(&quot;I am a item&quot;);
+&#125;
+
+void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+&#123;
+	QMenu menu;
+	QAction* moveAction &#x3D; menu.addAction(&quot;move back&quot;);
+	QAction* selectedAction &#x3D; menu.exec(event-&gt;screenPos());
+	if (selectedAction &#x3D;&#x3D; moveAction)
+	&#123;
+		setPos(0, 0);
+	&#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="myview">MyView</h3>
+<ul>
+<li>MyView.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+
+#include &lt;QGraphicsView&gt;
+
+class MyView : public QGraphicsView
+&#123;
+
+public:
+	MyView();
+	~MyView();
+protected:
+	void keyPressEvent(QKeyEvent* event);
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyView.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
+#include &lt;QKeyEvent&gt;
+
+MyView::MyView()
+	
+&#123;
+&#125;
+
+MyView::~MyView()
+&#123;
+&#125;
+
+void MyView::keyPressEvent(QKeyEvent* event)
+&#123;
+	switch (event-&gt;key())
+	&#123;
+	case Qt::Key_Plus:
+		scale(1.2, 1.2);
+		break;
+	case Qt::Key_Minus:
+		scale(1 &#x2F; 1.2, 1 &#x2F; 1.2);
+		break;
+	case Qt::Key_Right:
+		rotate(30);
+	default:
+		break;
+	&#125;
+	QGraphicsView::keyPressEvent(event);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="main">main</h3>
+<ul>
+<li>main.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
+#include &lt;QTime&gt;
+#include &quot;MyTime.h&quot;
+#include &quot;MyView.h&quot;
+
+int main(int argc, char *argv[])
+&#123;
+    QApplication app(argc, argv);
+    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+    QGraphicsScene scene;
+    scene.setSceneRect(-200, -150, 400, 300);
+
+    for (int i &#x3D; 0; i &lt; 5; i++)
+    &#123;
+        MyTime* item &#x3D; new MyTime();
+        item-&gt;setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
+        item-&gt;setPos(i * 50 - 90, -50);
+        scene.addItem(item);
+    &#125;
+
+    MyView view;
+    view.setScene(&amp;scene);
+    view.setBackgroundBrush(QBrush(Qt::red));
+    view.show();
+    return app.exec();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt使用</tag>
       </tags>
   </entry>
   <entry>
@@ -2416,113 +2523,6 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>QHostAddress</title>
-    <url>/2022/03/14/QtAPI/2022-03-14-QHostAddress/</url>
-    <content><![CDATA[<p>QHostAddress类提供一个IP地址。</p>
-<p>这个类提供一种独立于平台和协议的方式来保存IPv4和IPv6地址。</p>
-<h1 id="bool-isloopback-const">bool isLoopback() const</h1>
-<p>如果地址是IPv6的环回地址，或任何IPv4的环回地址，则返回true。</p>
-<h1 id="bool-isnull-const">bool isNull() const</h1>
-<p>如果主机地址为空（INADDR_ANY 或 in6addr_any），返回true。默认的构造函数创建一个空的地址，这个地址对于任何主机或接口是无效的。</p>
-<h1 id="qabstractsocket-networklayerprotocol-protocol-const">QAbstractSocket::NetworkLayerProtocol protocol() const</h1>
-<p>返回主机地址的网络层协议。</p>
-<h1 id="qstring-scopeid-const">QString scopeId() const</h1>
-<p>返回IPv6地址的范围ID。对于IPv4地址，如果该地址不包含范围ID，则返回一个空字符串。</p>
-<p>IPv6的范围ID指定非全球IPv6地址范围的可达性，限制地址可以被使用的区域。所有IPv6地址与这种可达范围相关联。范围ID用于消除那些不能保证是全局唯一性的地址。</p>
-<h1 id="枚举-qhostaddress-specialaddress"><strong>枚举 QHostAddress::SpecialAddress</strong></h1>
-<table>
-<thead>
-<tr>
-<th>QHostAddress::Null</th>
-<th>0</th>
-<th>空地址对象，相当于QHostAddress()。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>QHostAddress::LocalHost</strong></td>
-<td><strong>2</strong></td>
-<td><strong>IPv4本地主机地址，相当于QHostAddress(127.0.0.1)。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::LocalHostIPv6</strong></td>
-<td><strong>3</strong></td>
-<td><strong>Pv6本地主机地址，相当于 QHostAddress(::1)。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::Broadcast</strong></td>
-<td><strong>1</strong></td>
-<td><strong>IPv4广播地址，相当于QHostAddress(255.255.255.255)。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::AnyIPv4</strong></td>
-<td><strong>6</strong></td>
-<td><strong>IPv4 any-address，相当于QHostAddress(0.0.0.0)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::AnyIPv6</strong></td>
-<td><strong>5</strong></td>
-<td><strong>IPv6 any-address，相当于QHostAddress(::)。与该地址绑定的socket将只监听IPv4接口。</strong></td>
-</tr>
-<tr>
-<td><strong>QHostAddress::Any</strong></td>
-<td><strong>4</strong></td>
-<td><strong>双any-address栈，与该地址绑定的socket将侦听IPv4和IPv6接口。</strong></td>
-</tr>
-</tbody>
-</table>
-<p><a href="https://blog.csdn.net/iamplane/article/details/70738406">参考地址</a></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QTcpServer</title>
-    <url>/2022/03/14/QtAPI/2022-03-14-QTcpServer/</url>
-    <content><![CDATA[<p><strong>该类用于服务器端建立网络监听，创建网络Socket连接</strong></p>
-<h1 id="public"><strong>public:</strong></h1>
-<h1 id="void-qtcpserver-close">void QTcpServer::close()</h1>
-<p>关闭服务器，停止网络监听</p>
-<h1 id="bool-qtcpserver-listen-const-qhostaddress-address-qhostaddress-any-quint16-port-0">bool QTcpServer::listen(const QHostAddress &amp;address = QHostAddress::Any, quint16 port = 0)</h1>
-<p>在给定IP地址和端口上开始监听，若成功就返回true</p>
-<h1 id="bool-qtcpserver-islistening-const">bool QTcpServer::isListening() const</h1>
-<p>返回true表示服务器处于监听状态</p>
-<h1 id="virtual-qtcpsocket-qtcpserver-nextpendingconnection">[virtual] QTcpSocket *QTcpServer::nextPendingConnection()</h1>
-<p>返回下一个等待接入的连接</p>
-<h1 id="qhostaddress-qtcpserver-serveraddress-const">QHostAddress QTcpServer::serverAddress() const</h1>
-<p>如果服务器处于监听状态，返回服务器地址</p>
-<h1 id="quint16-qtcpserver-serverport-const">quint16 QTcpServer::serverPort() const</h1>
-<p>如果服务器处于监听状态，返回监听端口</p>
-<h1 id="bool-qtcpserver-waitfornewconnection-int-msec-0-bool-timedout-nullptr">bool QTcpServer::waitForNewConnection(int msec = 0, bool *timedOut = nullptr)</h1>
-<p>以阻塞方式等待新的连接</p>
-<h1 id="signals"><strong>signals:</strong></h1>
-<h1 id="signal-void-qtcpserver-accepterror-qabstractsocket-socketerror-socketerror"><strong>[signal] void QTcpServer::acceptError(QAbstractSocket::SocketError socketError)</strong></h1>
-<p>当接受一个新的连接发生错误时发射此信号，参数socketError描述了错误信息</p>
-<h1 id="signal-void-qtcpserver-newconnection">[signal] void QTcpServer::newConnection()</h1>
-<p><strong>当有新的连接时发射此信号</strong></p>
-<h1 id="protected"><strong>protected:</strong></h1>
-<h1 id="virtual-protected-void-qtcpserver-incomingconnection-qintptr-socketdescriptor"><strong>[virtual protected] void QTcpServer::incomingConnection(qintptr socketDescriptor)</strong></h1>
-<p><strong>当有一个新的连接可用时，QTcpServer内部调用此函数，创建一个QTcpSocket对象，添加到内部可用新连接列表，然后发送newConnection()信号。用户若从QTcpServer继承定义类，可以重定义此函数，但必须调用</strong></p>
-<p><strong>addPendingConnection()</strong></p>
-<h1 id="protected-void-qtcpserver-addpendingconnection-qtcpsocket-socket">*<em>[protected] void QTcpServer::addPendingConnection(QTcpSocket <em>socket)</em></em></h1>
-<p><strong>由incomingConnection()调用，将创建的QTcpServer添加到内部新可用连接列表</strong></p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>双端栈</title>
     <url>/2022/03/13/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-13-%E5%8F%8C%E7%AB%AF%E6%A0%88/</url>
     <content><![CDATA[<h1 id="关于双端栈">关于双端栈</h1>
@@ -2818,6 +2818,129 @@ int main()
       </tags>
   </entry>
   <entry>
+    <title>循环队列</title>
+    <url>/2022/03/16/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-16-%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97/</url>
+    <content><![CDATA[<p>循环队列是队列的一种顺序表示与实现方法。</p>
+<p><img src="https://s2.loli.net/2022/06/05/LGIqkwfXtjp4RCM.png" alt="1.png"></p>
+<p><strong>入队</strong></p>
+<p><img src="https://s2.loli.net/2022/06/05/ECNe4YOfhZ2KI7G.png" alt="2.png"></p>
+<p><strong>出队</strong></p>
+<p><img src="https://s2.loli.net/2022/06/05/IB2YiTwLC38s5eQ.png" alt="3.png"></p>
+<p>我们可以看到<strong>rear指针总指向队里最后一个的下一个位置</strong></p>
+<p>此时当rear == front时，如果之前有元素出队，那么就会造成队满的假象。</p>
+<p>此时使用取模运算可以解决这个问题。</p>
+<p>因此队尾指针变化为</p>
+<pre class="line-numbers language-none"><code class="language-none">rear &#x3D; (rear + 1) % MAXSIZE;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>队首指针变化为</p>
+<pre class="line-numbers language-none"><code class="language-none">front &#x3D; (front + 1) % MAXSIZE;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>但是如果仅使用rear == front来判断队满还是队空，会发生歧义</p>
+<p>**队空 **</p>
+<p><img src="https://s2.loli.net/2022/06/05/4ia16PrTBEIf98u.png" alt="4.png"></p>
+<p><strong>队满</strong></p>
+<p><img src="https://s2.loli.net/2022/06/05/ndYtLgHcF4x2e9f.png" alt="5.png"></p>
+<p>解决方案是牺牲一个元素的空间，当队尾指针的下一个元素为队首元素时，则队满，停止入队</p>
+<p><strong>队满</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">rear &#x3D;&#x3D; front;
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>判满条件为</p>
+<pre class="line-numbers language-none"><code class="language-none">(rear + 1) % MAXSIZE &#x3D;&#x3D; front;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h1 id="实现">实现</h1>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+#define ElementType int
+#define MAXSIZE 50
+class CircularQueue
+&#123;
+    ElementType element[MAXSIZE];
+    int rear;
+    int front;
+    public:
+    void init();
+    bool enterQueue(ElementType x);
+    bool deleteQueue(ElementType* x);
+&#125;;
+void CircularQueue::init()
+&#123;
+    this-&gt;front &#x3D; this-&gt;rear &#x3D; 0;
+&#125;
+
+bool CircularQueue::enterQueue(ElementType x)
+&#123;
+    if ((this-&gt;rear + 1) % MAXSIZE &#x3D;&#x3D; this-&gt;front)
+    &#123;&#x2F;&#x2F;栈满
+        return false;
+    &#125;
+    this-&gt;element[this-&gt;rear] &#x3D; x;
+    this-&gt;rear &#x3D; (this-&gt;rear + 1) % MAXSIZE;
+    return true;
+&#125;
+
+bool CircularQueue::deleteQueue(ElementType* x)
+&#123;
+    if (this-&gt;front &#x3D;&#x3D; this-&gt;rear)
+    &#123;&#x2F;&#x2F;空队
+        return false;
+    &#125;
+    *x &#x3D; this-&gt;element[this-&gt;front];
+    this-&gt;front &#x3D; (this-&gt;front + 1) % MAXSIZE;
+    return true;
+&#125;
+
+
+int main()&#123;
+    CircularQueue Queue;
+    Queue.init();
+    int x;
+    Queue.deleteQueue(&amp;x);
+    Queue.enterQueue(1);
+    Queue.enterQueue(2);
+    Queue.enterQueue(3);
+    Queue.enterQueue(4);
+    Queue.enterQueue(5);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>数据结构</tag>
+        <tag>线性表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>【算法】深度优先搜索（DFS）</title>
+    <url>/2022/03/19/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-19-%E7%AE%97%E6%B3%95%E6%B7%B1%E5%BA%A6%E4%BC%98%E5%85%88%E6%90%9C%E7%B4%A2%EF%BC%88DFS%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言-吐槽">前言&amp;吐槽</h1>
+<p>我看网上都说深度优先搜索是一种遍历树和图的算法，但是我还没学数和图啊！老师就讲了。</p>
+<p>不过这种算法也确实挺好用的，下面我们就来介绍一下。</p>
+<h1 id="介绍">介绍</h1>
+<p>DFS形象点来说就是不撞南墙不回头，必须要一条路走到黑，之后再考虑其他路。</p>
+<p>因此DFS最重要的部分就是回溯了。</p>
+<p>而关于此算法的步骤，网上总结得已经很好了</p>
+<center>递归下去</center>
+<center>回溯上来</center>
+<p>下面我们画图来更好得理解一下这种算法。</p>
+<h1 id="图示">图示</h1>
+<p>首先，假设我们现在的任务是从A走向B</p>
+<p><img src="https://s2.loli.net/2022/06/07/7HAUDIqnyGcjCQ4.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/06/07/NOmKXRYxhztcopB.png" alt="2.png"></p>
+<p><img src="https://s2.loli.net/2022/06/07/sUK5pcdlVWemt1O.png" alt="3.png"></p>
+<p><img src="https://s2.loli.net/2022/06/07/DjH4gUK7onscOV9.png" alt="4.png"></p>
+<h1 id="实战">实战</h1>
+<p><a href="https://www.cnblogs.com/RickSchanze/articles/16026411.html">跳马问题</a></p>
+<p><a href="https://www.cnblogs.com/RickSchanze/articles/16026578.html">奇怪的电梯</a></p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>算法</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【算法】Prim算法</title>
     <url>/2022/05/30/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-05-29-Prim%E7%AE%97%E6%B3%95/</url>
     <content><![CDATA[<h2 id="前言">前言</h2>
@@ -3083,95 +3206,151 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>循环队列</title>
-    <url>/2022/03/16/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-03-16-%E5%BE%AA%E7%8E%AF%E9%98%9F%E5%88%97/</url>
-    <content><![CDATA[<p>循环队列是队列的一种顺序表示与实现方法。</p>
-<p><img src="https://s2.loli.net/2022/06/05/LGIqkwfXtjp4RCM.png" alt="1.png"></p>
-<p><strong>入队</strong></p>
-<p><img src="https://s2.loli.net/2022/06/05/ECNe4YOfhZ2KI7G.png" alt="2.png"></p>
-<p><strong>出队</strong></p>
-<p><img src="https://s2.loli.net/2022/06/05/IB2YiTwLC38s5eQ.png" alt="3.png"></p>
-<p>我们可以看到<strong>rear指针总指向队里最后一个的下一个位置</strong></p>
-<p>此时当rear == front时，如果之前有元素出队，那么就会造成队满的假象。</p>
-<p>此时使用取模运算可以解决这个问题。</p>
-<p>因此队尾指针变化为</p>
-<pre class="line-numbers language-none"><code class="language-none">rear &#x3D; (rear + 1) % MAXSIZE;
-<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>队首指针变化为</p>
-<pre class="line-numbers language-none"><code class="language-none">front &#x3D; (front + 1) % MAXSIZE;
-<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>但是如果仅使用rear == front来判断队满还是队空，会发生歧义</p>
-<p>**队空 **</p>
-<p><img src="https://s2.loli.net/2022/06/05/4ia16PrTBEIf98u.png" alt="4.png"></p>
-<p><strong>队满</strong></p>
-<p><img src="https://s2.loli.net/2022/06/05/ndYtLgHcF4x2e9f.png" alt="5.png"></p>
-<p>解决方案是牺牲一个元素的空间，当队尾指针的下一个元素为队首元素时，则队满，停止入队</p>
-<p><strong>队满</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">rear &#x3D;&#x3D; front;
-<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>判满条件为</p>
-<pre class="line-numbers language-none"><code class="language-none">(rear + 1) % MAXSIZE &#x3D;&#x3D; front;<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h1 id="实现">实现</h1>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
-#define ElementType int
-#define MAXSIZE 50
-class CircularQueue
+    <title>【算法】插入类排序</title>
+    <url>/2022/06/05/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-06-04-%E6%8F%92%E5%85%A5%E7%B1%BB%E6%8E%92%E5%BA%8F/</url>
+    <content><![CDATA[<h2 id="简介">简介</h2>
+<p>插入类排序的基本思想是<strong>在一个已排好序的记录子集基础上，每一步将下一个待排序的几步有序插入已排好的记录子集，直到将所有待排记录全部插入为止</strong>。</p>
+<h2 id="1：直接插入排序">1：直接插入排序</h2>
+<h3 id="例子">例子</h3>
+<p>对于序列<code>&#123;14, 62, 35, 77, 55, 14, 35, 95&#125;</code>而言，其顺序如下</p>
+<pre class="line-numbers language-none"><code class="language-none">&#123;48&#125; 62 35 77 55 14 *35* 98
+&#123;48 62&#125; 35 77 55 14 *35* 98
+&#123;35 48 62&#125; 77 55 14 *35* 98
+&#123;35 48 62 77&#125; 55 14 *35* 98
+&#123;35 48 55 62 77&#125; 14 *35* 98
+&#123;14 35 48 55 62 77&#125; *35* 98
+&#123;14 35 *35* 48 55 62 77&#125; 98
+&#123;14 35 *35* 48 55 62 77 98&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>为了提高效率，附设一个监视哨<em>data[0]</em>,使得*data[0]*始终存放待插入得记录。</p>
+<p>该监视哨作用有二：</p>
+<ol>
+<li>
+<p>备份待插入记录，以便前面关键字较大得记录后移</p>
+</li>
+<li>
+<p>防止越界</p>
+</li>
+</ol>
+<h3 id="算法实现">算法实现</h3>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void InsertSortion::directInsertionSort(TargetType *data, int length)
 &#123;
-    ElementType element[MAXSIZE];
-    int rear;
-    int front;
-    public:
-    void init();
-    bool enterQueue(ElementType x);
-    bool deleteQueue(ElementType* x);
-&#125;;
-void CircularQueue::init()
-&#123;
-    this-&gt;front &#x3D; this-&gt;rear &#x3D; 0;
-&#125;
-
-bool CircularQueue::enterQueue(ElementType x)
-&#123;
-    if ((this-&gt;rear + 1) % MAXSIZE &#x3D;&#x3D; this-&gt;front)
-    &#123;&#x2F;&#x2F;栈满
-        return false;
+    int j;
+    for (size_t i &#x3D; 2; i &lt;&#x3D; length; i++)
+    &#123;
+        data[0] &#x3D; data[i]; &#x2F;&#x2F; 将待插入数据记录到监视哨data[0]
+        j &#x3D; i - 1;
+        while (data[0] &lt; data[j]) &#x2F;&#x2F; 寻找插入位置,同时移动元素位置
+        &#123;
+            data[j + 1] &#x3D; data[j];
+            j--;
+        &#125;
+        data[j + 1] &#x3D; data[0]; &#x2F;&#x2F; 将待插入数据插入已排序的序列
     &#125;
-    this-&gt;element[this-&gt;rear] &#x3D; x;
-    this-&gt;rear &#x3D; (this-&gt;rear + 1) % MAXSIZE;
-    return true;
-&#125;
-
-bool CircularQueue::deleteQueue(ElementType* x)
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在插入排序中：</p>
+<ul>
+<li>
+<p>最坏情况为逆序，每一趟比较移动次数均为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.74285em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，此时总比较次数为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{(n+2)(n-1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.355em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">2</span><span class="mclose mtight">)</span><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>,即<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>n</mi></msubsup><mi>i</mi></mrow><annotation encoding="application/x-tex">\sum_{i=2}^{n}i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.104002em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.804292em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">2</span></span></span></span><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">i</span></span></span></span>,记录次数也达到最大，为</p>
+<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>4</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{(n+4)(n-1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.355em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">4</span><span class="mclose mtight">)</span><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>,即<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>n</mi></msubsup><mo stretchy="false">(</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sum_{i=2}^{n}(i+1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.104002em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.804292em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">2</span></span></span></span><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span> 。</p>
+</li>
+<li>
+<p>最好情况为顺序，此时需比较<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>次，记录移动<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">2(n-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>次。</p>
+</li>
+</ul>
+<p>由于排序记录大概率随机，出现各种排列概率相同，故取平均值。时间复杂度<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T(n)=O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
+<h2 id="2：折半插入排序">2：折半插入排序</h2>
+<p>折半插入排序主要是将查找过程利用二分查找进行优化，使其查找复杂度达到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><msub><mo><mi>log</mi><mo>⁡</mo></mo><mn>2</mn></msub><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n\log_{2}{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.20696799999999996em;"><span style="top:-2.4558600000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24414em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span>,但由于其移动元素的时间消耗不变，时间复杂度仍然是<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
+<h3 id="算法实现">算法实现</h3>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void InsertSortion::halfInsertionSort(TargetType *data, int length)
 &#123;
-    if (this-&gt;front &#x3D;&#x3D; this-&gt;rear)
-    &#123;&#x2F;&#x2F;空队
-        return false;
+    int temp, low, high, mid;
+    for (size_t i &#x3D; 2; i &lt;&#x3D; length; i++)
+    &#123;
+        temp &#x3D; data[i];
+        low &#x3D; 1;
+        high &#x3D; i - 1;
+        while (low &lt;&#x3D; high) &#x2F;&#x2F; 确定插入位置
+        &#123;
+            mid &#x3D; (low + high) &#x2F; 2;
+            if (temp &lt; mid)
+            &#123;
+                high &#x3D; mid - 1;
+            &#125;
+            else
+            &#123;
+                low &#x3D; mid + 1;
+            &#125;
+        &#125;
+        for (size_t j &#x3D; i - 1; j &gt;&#x3D; low; j++)   &#x2F;&#x2F; 开始移动
+        &#123;
+            data[j + 1] &#x3D; data[j];
+        &#125;
+        data[low] &#x3D; temp;
     &#125;
-    *x &#x3D; this-&gt;element[this-&gt;front];
-    this-&gt;front &#x3D; (this-&gt;front + 1) % MAXSIZE;
-    return true;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="3：希尔排序">3：希尔排序</h2>
+<p>希尔排序又称缩小增量排序，是一张基于插入思想的排序方法。</p>
+<h3 id="算法思想">算法思想</h3>
+<p>先将待排序记录序列分割为若干个较稀疏的子序列，分别进行插入排序。经过上述粗略调整后，再对全部记录进行一次直接插入排序。</p>
+<ol>
+<li>选定记录间的距离<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo stretchy="false">(</mo><mi>i</mi><mo>=</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d_i(i=1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，在整个待排序记录序列中，将所有间隔为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">d_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>的记录分为一组，进行组内直接插入排序</li>
+<li>取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i=i+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.74285em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，记录间的距离为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo stretchy="false">(</mo><msub><mi>d</mi><mi>i</mi></msub><mo>&lt;</mo><msub><mi>d</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d_i(d_i&lt;d_{i-1})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>，在整个待排序记录序列中，将所有间隔为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">d_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>的记录分为一组，进行组内直接插入排序。</li>
+</ol>
+<p>重复步骤2多次，直到<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d_i=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，此时只有一个子序列，对该序列进行直接插入排序即可。</p>
+<h3 id="例子">例子</h3>
+<p>初始关键字序列：<code>&#123;46, 55, 13, 42, 94, 17, 05, 70&#125;</code></p>
+<p>取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">d_i=4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span></span></span></span>，则分为4个间隔为4的子序列：</p>
+<center>{ <font color=red>46</font>  <font color=yellow>55</font>  <font color=blue>13</font>  <font color=green>42</font>  <font color=red>94</font>  <font color=yellow>17</font>  <font color=blue>05</font>     <font color=green>70</font> }</center>
+<p>对其每一个子序列进行插入排序，得:</p>
+<center>{ <font color=red>46</font>  <font color=yellow>17</font>  <font color=blue>05</font>  <font color=green>42</font>  <font color=red>94</font>  <font color=yellow>55</font>  <font color=blue>13</font>     <font color=green>70</font> }</center>
+<p>再取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">d_i=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">2</span></span></span></span>，分为两个间隔为2的子序列:</p>
+<center>{ <font color=red>46</font> <font color=blue>17</font> <font color=red>05</font>  <font color=blue>42</font> <font color=red>94</font>  <font color=blue>55</font> <font color=red>13</font> <font color=blue>70</font>}</center>
+<p>对其两个子序列进行插入排序:</p>
+<center>{ <font color=red>05</font> <font color=blue>17</font> <font color=red>13</font>  <font color=blue>42</font> <font color=red>46</font>  <font color=blue>55</font> <font color=red>94</font> <font color=blue>70</font>}</center>
+<p>取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d_i=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，对整体进行插入排序，得到结果:</p>
+<center>{ 05 13 17 42 46 55 70 94 }</center>
+<h3 id="算法实现">算法实现</h3>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void InsertSortion::shellInsert(TargetType *data, int length, int delta)
+&#123;
+    &#x2F;* 对记录数字data做一趟希尔排序*&#x2F;
+    for (int i &#x3D; 1 + delta; i &lt;&#x3D; length; i++)
+    &#123;
+        if (data[i] &lt; data[i - delta])
+        &#123;
+            data[0] &#x3D; data[i]; &#x2F;&#x2F; 备份data[i],不做监视哨
+            int j &#x3D; i - delta;
+            for (j &#x3D; i - delta; (j &gt; 0) &amp;&amp; (data[0] &lt; data[j]); j -&#x3D; delta)
+            &#123;
+                data[j + delta] &#x3D; data[j];
+            &#125;
+            data[j + delta] &#x3D; data[0];
+        &#125;
+    &#125;
 &#125;
-
-
-int main()&#123;
-    CircularQueue Queue;
-    Queue.init();
-    int x;
-    Queue.deleteQueue(&amp;x);
-    Queue.enterQueue(1);
-    Queue.enterQueue(2);
-    Queue.enterQueue(3);
-    Queue.enterQueue(4);
-    Queue.enterQueue(5);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+&#x2F;**
+ * @description: 希尔排序
+ * @param &#123;TargetType*&#125; 待记录数组
+ * @param &#123;int&#125; n  数组长度
+ * @param &#123;int&#125; *dalta   增量数组
+ * @param &#123;int&#125; m  增量数组长度
+ * @return &#123;*&#125;
+ *&#x2F;
+void InsertSortion::shellSort(TargetType *data, int n, int *dalta, int m)
+&#123;
+    for (int i &#x3D; 0; i &lt; m - 1; i++)
+    &#123;
+        shellInsert(data, n, dalta[i]);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>一般认为希尔排序的复杂度为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>1.5</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^{1.5})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">.</span><span class="mord mtight">5</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。且希尔排序不是稳定的排序算法。</p>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
       </categories>
       <tags>
         <tag>C++</tag>
-        <tag>数据结构</tag>
-        <tag>线性表</tag>
+        <tag>算法</tag>
+        <tag>排序算法</tag>
       </tags>
   </entry>
   <entry>
@@ -3447,154 +3626,6 @@ int main()
       <tags>
         <tag>C++</tag>
         <tag>细节问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>【算法】插入类排序</title>
-    <url>/2022/06/05/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-06-04-%E6%8F%92%E5%85%A5%E7%B1%BB%E6%8E%92%E5%BA%8F/</url>
-    <content><![CDATA[<h2 id="简介">简介</h2>
-<p>插入类排序的基本思想是<strong>在一个已排好序的记录子集基础上，每一步将下一个待排序的几步有序插入已排好的记录子集，直到将所有待排记录全部插入为止</strong>。</p>
-<h2 id="1：直接插入排序">1：直接插入排序</h2>
-<h3 id="例子">例子</h3>
-<p>对于序列<code>&#123;14, 62, 35, 77, 55, 14, 35, 95&#125;</code>而言，其顺序如下</p>
-<pre class="line-numbers language-none"><code class="language-none">&#123;48&#125; 62 35 77 55 14 *35* 98
-&#123;48 62&#125; 35 77 55 14 *35* 98
-&#123;35 48 62&#125; 77 55 14 *35* 98
-&#123;35 48 62 77&#125; 55 14 *35* 98
-&#123;35 48 55 62 77&#125; 14 *35* 98
-&#123;14 35 48 55 62 77&#125; *35* 98
-&#123;14 35 *35* 48 55 62 77&#125; 98
-&#123;14 35 *35* 48 55 62 77 98&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>为了提高效率，附设一个监视哨<em>data[0]</em>,使得*data[0]*始终存放待插入得记录。</p>
-<p>该监视哨作用有二：</p>
-<ol>
-<li>
-<p>备份待插入记录，以便前面关键字较大得记录后移</p>
-</li>
-<li>
-<p>防止越界</p>
-</li>
-</ol>
-<h3 id="算法实现">算法实现</h3>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void InsertSortion::directInsertionSort(TargetType *data, int length)
-&#123;
-    int j;
-    for (size_t i &#x3D; 2; i &lt;&#x3D; length; i++)
-    &#123;
-        data[0] &#x3D; data[i]; &#x2F;&#x2F; 将待插入数据记录到监视哨data[0]
-        j &#x3D; i - 1;
-        while (data[0] &lt; data[j]) &#x2F;&#x2F; 寻找插入位置,同时移动元素位置
-        &#123;
-            data[j + 1] &#x3D; data[j];
-            j--;
-        &#125;
-        data[j + 1] &#x3D; data[0]; &#x2F;&#x2F; 将待插入数据插入已排序的序列
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在插入排序中：</p>
-<ul>
-<li>
-<p>最坏情况为逆序，每一趟比较移动次数均为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.74285em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，此时总比较次数为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>2</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{(n+2)(n-1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.355em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">2</span><span class="mclose mtight">)</span><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>,即<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>n</mi></msubsup><mi>i</mi></mrow><annotation encoding="application/x-tex">\sum_{i=2}^{n}i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.104002em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.804292em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">2</span></span></span></span><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault">i</span></span></span></span>,记录次数也达到最大，为</p>
-<p><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mfrac><mrow><mo stretchy="false">(</mo><mi>n</mi><mo>+</mo><mn>4</mn><mo stretchy="false">)</mo><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><mn>2</mn></mfrac></mrow><annotation encoding="application/x-tex">\frac{(n+4)(n-1)}{2}</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.355em;vertical-align:-0.345em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.01em;"><span style="top:-2.6550000000000002em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.485em;"><span class="pstrut" style="height:3em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">+</span><span class="mord mtight">4</span><span class="mclose mtight">)</span><span class="mopen mtight">(</span><span class="mord mathdefault mtight">n</span><span class="mbin mtight">−</span><span class="mord mtight">1</span><span class="mclose mtight">)</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.345em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span></span></span></span>,即<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msubsup><mo>∑</mo><mrow><mi>i</mi><mo>=</mo><mn>2</mn></mrow><mi>n</mi></msubsup><mo stretchy="false">(</mo><mi>i</mi><mo>+</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">\sum_{i=2}^{n}(i+1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.104002em;vertical-align:-0.29971000000000003em;"></span><span class="mop"><span class="mop op-symbol small-op" style="position:relative;top:-0.0000050000000000050004em;">∑</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.804292em;"><span style="top:-2.40029em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mrel mtight">=</span><span class="mord mtight">2</span></span></span></span><span style="top:-3.2029em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.29971000000000003em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span> 。</p>
-</li>
-<li>
-<p>最好情况为顺序，此时需比较<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">n-1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.66666em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>次，记录移动<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>2</mn><mo stretchy="false">(</mo><mi>n</mi><mo>−</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">2(n-1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">−</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>次。</p>
-</li>
-</ul>
-<p>由于排序记录大概率随机，出现各种排列概率相同，故取平均值。时间复杂度<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>T</mi><mo stretchy="false">(</mo><mi>n</mi><mo stretchy="false">)</mo><mo>=</mo><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">T(n)=O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.13889em;">T</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
-<h2 id="2：折半插入排序">2：折半插入排序</h2>
-<p>折半插入排序主要是将查找过程利用二分查找进行优化，使其查找复杂度达到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><mi>n</mi><msub><mo><mi>log</mi><mo>⁡</mo></mo><mn>2</mn></msub><mi>n</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n\log_{2}{n})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord mathdefault">n</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mop"><span class="mop">lo<span style="margin-right:0.01389em;">g</span></span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.20696799999999996em;"><span style="top:-2.4558600000000004em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">2</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.24414em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord"><span class="mord mathdefault">n</span></span><span class="mclose">)</span></span></span></span>,但由于其移动元素的时间消耗不变，时间复杂度仍然是<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>2</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^2)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">2</span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span></p>
-<h3 id="算法实现">算法实现</h3>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void InsertSortion::halfInsertionSort(TargetType *data, int length)
-&#123;
-    int temp, low, high, mid;
-    for (size_t i &#x3D; 2; i &lt;&#x3D; length; i++)
-    &#123;
-        temp &#x3D; data[i];
-        low &#x3D; 1;
-        high &#x3D; i - 1;
-        while (low &lt;&#x3D; high) &#x2F;&#x2F; 确定插入位置
-        &#123;
-            mid &#x3D; (low + high) &#x2F; 2;
-            if (temp &lt; mid)
-            &#123;
-                high &#x3D; mid - 1;
-            &#125;
-            else
-            &#123;
-                low &#x3D; mid + 1;
-            &#125;
-        &#125;
-        for (size_t j &#x3D; i - 1; j &gt;&#x3D; low; j++)   &#x2F;&#x2F; 开始移动
-        &#123;
-            data[j + 1] &#x3D; data[j];
-        &#125;
-        data[low] &#x3D; temp;
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="3：希尔排序">3：希尔排序</h2>
-<p>希尔排序又称缩小增量排序，是一张基于插入思想的排序方法。</p>
-<h3 id="算法思想">算法思想</h3>
-<p>先将待排序记录序列分割为若干个较稀疏的子序列，分别进行插入排序。经过上述粗略调整后，再对全部记录进行一次直接插入排序。</p>
-<ol>
-<li>选定记录间的距离<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo stretchy="false">(</mo><mi>i</mi><mo>=</mo><mn>1</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d_i(i=1)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">1</span><span class="mclose">)</span></span></span></span>，在整个待排序记录序列中，将所有间隔为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mn>1</mn></msub></mrow><annotation encoding="application/x-tex">d_1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>的记录分为一组，进行组内直接插入排序</li>
-<li>取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi><mo>=</mo><mi>i</mi><mo>+</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">i=i+1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.74285em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">i</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，记录间的距离为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo stretchy="false">(</mo><msub><mi>d</mi><mi>i</mi></msub><mo>&lt;</mo><msub><mi>d</mi><mrow><mi>i</mi><mo>−</mo><mn>1</mn></mrow></msub><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">d_i(d_i&lt;d_{i-1})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&lt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.311664em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">i</span><span class="mbin mtight">−</span><span class="mord mtight">1</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.208331em;"><span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>，在整个待排序记录序列中，将所有间隔为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub></mrow><annotation encoding="application/x-tex">d_i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span>的记录分为一组，进行组内直接插入排序。</li>
-</ol>
-<p>重复步骤2多次，直到<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d_i=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，此时只有一个子序列，对该序列进行直接插入排序即可。</p>
-<h3 id="例子">例子</h3>
-<p>初始关键字序列：<code>&#123;46, 55, 13, 42, 94, 17, 05, 70&#125;</code></p>
-<p>取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>4</mn></mrow><annotation encoding="application/x-tex">d_i=4</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">4</span></span></span></span>，则分为4个间隔为4的子序列：</p>
-<center>{ <font color=red>46</font>  <font color=yellow>55</font>  <font color=blue>13</font>  <font color=green>42</font>  <font color=red>94</font>  <font color=yellow>17</font>  <font color=blue>05</font>     <font color=green>70</font> }</center>
-<p>对其每一个子序列进行插入排序，得:</p>
-<center>{ <font color=red>46</font>  <font color=yellow>17</font>  <font color=blue>05</font>  <font color=green>42</font>  <font color=red>94</font>  <font color=yellow>55</font>  <font color=blue>13</font>     <font color=green>70</font> }</center>
-<p>再取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">d_i=2</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">2</span></span></span></span>，分为两个间隔为2的子序列:</p>
-<center>{ <font color=red>46</font> <font color=blue>17</font> <font color=red>05</font>  <font color=blue>42</font> <font color=red>94</font>  <font color=blue>55</font> <font color=red>13</font> <font color=blue>70</font>}</center>
-<p>对其两个子序列进行插入排序:</p>
-<center>{ <font color=red>05</font> <font color=blue>17</font> <font color=red>13</font>  <font color=blue>42</font> <font color=red>46</font>  <font color=blue>55</font> <font color=red>94</font> <font color=blue>70</font>}</center>
-<p>取<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>d</mi><mi>i</mi></msub><mo>=</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">d_i=1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.84444em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault">d</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.31166399999999994em;"><span style="top:-2.5500000000000003em;margin-left:0em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mathdefault mtight">i</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>，对整体进行插入排序，得到结果:</p>
-<center>{ 05 13 17 42 46 55 70 94 }</center>
-<h3 id="算法实现">算法实现</h3>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void InsertSortion::shellInsert(TargetType *data, int length, int delta)
-&#123;
-    &#x2F;* 对记录数字data做一趟希尔排序*&#x2F;
-    for (int i &#x3D; 1 + delta; i &lt;&#x3D; length; i++)
-    &#123;
-        if (data[i] &lt; data[i - delta])
-        &#123;
-            data[0] &#x3D; data[i]; &#x2F;&#x2F; 备份data[i],不做监视哨
-            int j &#x3D; i - delta;
-            for (j &#x3D; i - delta; (j &gt; 0) &amp;&amp; (data[0] &lt; data[j]); j -&#x3D; delta)
-            &#123;
-                data[j + delta] &#x3D; data[j];
-            &#125;
-            data[j + delta] &#x3D; data[0];
-        &#125;
-    &#125;
-&#125;
-&#x2F;**
- * @description: 希尔排序
- * @param &#123;TargetType*&#125; 待记录数组
- * @param &#123;int&#125; n  数组长度
- * @param &#123;int&#125; *dalta   增量数组
- * @param &#123;int&#125; m  增量数组长度
- * @return &#123;*&#125;
- *&#x2F;
-void InsertSortion::shellSort(TargetType *data, int n, int *dalta, int m)
-&#123;
-    for (int i &#x3D; 0; i &lt; m - 1; i++)
-    &#123;
-        shellInsert(data, n, dalta[i]);
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>一般认为希尔排序的复杂度为<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>O</mi><mo stretchy="false">(</mo><msup><mi>n</mi><mn>1.5</mn></msup><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">O(n^{1.5})</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1.064108em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.02778em;">O</span><span class="mopen">(</span><span class="mord"><span class="mord mathdefault">n</span><span class="msupsub"><span class="vlist-t"><span class="vlist-r"><span class="vlist" style="height:0.8141079999999999em;"><span style="top:-3.063em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mtight">1</span><span class="mord mtight">.</span><span class="mord mtight">5</span></span></span></span></span></span></span></span></span><span class="mclose">)</span></span></span></span>。且希尔排序不是稳定的排序算法。</p>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>算法</tag>
-        <tag>排序算法</tag>
       </tags>
   </entry>
   <entry>
@@ -4132,6 +4163,562 @@ int main()
 <p>总之，这道题不怎么难，但是如果因为这道题能让您了解到STL，那也算值了！！！</p>
 <p>不过，<strong>如果您正在学习数据结构，那么不建议您过度依赖STL，以防止期末上机考试时STL被禁</strong>，但如果您在学习算法，那么STL将成为您的助力！！！</p>
 <p>**　　**</p>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>题解</tag>
+        <tag>NOJ</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>逆波兰式（NOJ第8题）</title>
+    <url>/2022/03/17/%E9%A2%98%E8%A7%A3/2022-03-17-%E9%80%86%E6%B3%A2%E5%85%B0%E5%BC%8F%EF%BC%88NOJ%E7%AC%AC8%E9%A2%98%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言">前言</h1>
+<p>对于NOJ，其实我最想吐槽的就是没有测试点输入输出的数据，这样我们只能拿前辈的代码来进行测试。</p>
+<p>就像这道题，我一开始全用的栈（因为课本上那道表达式的题用的就是栈），结果搁那耗了将近三个小时才想到合适的数据结构。</p>
+<p>而且我在解题的过程中，发现编程题好像就是在让我们钻研数学的本质。让我们在种种限制下起舞。</p>
+<p>还是太菜了啊。</p>
+<p><img src="https://s2.loli.net/2022/06/07/4dszr2I89GQwxcM.png" alt="1.png"></p>
+<h1 id="题目描述">题目描述</h1>
+<p><img src="https://s2.loli.net/2022/06/07/rOnCdzmWXJIVgZt.png" alt="2.png"></p>
+<p>我们先来看逆波兰式的例子吧</p>
+<p><strong>(a+b)(c+d)    ⟶    ab+cd+</strong></p>
+<p><strong>(a+(b+c))    ⟶    abc++</strong></p>
+<p><strong>(1+2)3/4(7+8)    ⟶    12+34/78+</strong></p>
+<p>基本就是以上的形式，愿君看清再做题。</p>
+<h1 id="算法设计">算法设计</h1>
+<p>在这道题中，我们会遇到六个符号</p>
+<center>( ) + - * /</center>
+<p>为了保证数字能按照顺序输出，我们使用队列来存储输入数据和其中的运算数</p>
+<p>为了能让操作符正确的输出（按照（）、【*、/】、【+、-】）来输出，我们使用栈来保存操作符</p>
+<p>而我们又考察到无论什么运算符，左边的都可以优先计算，所以我们从左边开始。</p>
+<ol>
+<li>
+<p>循环地从输入队列（SQ）中取出单个字符</p>
+</li>
+<li>
+<p>①如果是操作数，则入操作数队列（NQ）</p>
+</li>
+</ol>
+<p>②如果是操作符，则：</p>
+<p>（1）如果是’(’，则入操作符栈（OS)</p>
+<p>（2）如果是’)’,  则：</p>
+<p>Ⅰ.让NQ中所有数依次出队并输出</p>
+<p>Ⅱ.让OS中所有除’('外地操作符出栈并输出</p>
+<p>（3）如果是’*‘或’/’，则：**</p>
+<p>Ⅰ.如果下一操作符是’(’,则直接让下一操作符入栈</p>
+<p>​								 Ⅱ.如果不是，则先SQ出队并输出，然后OS出栈并输出</p>
+<p>(4)  如果是’+‘或’-’，则入OS栈</p>
+<p>（5）如果是操作数，则如NQ队列</p>
+<p>上述操作完成后，可以保证所有工作地正确地做完。</p>
+<h1 id="实现">实现</h1>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;逆波兰式
+#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+struct Queue
+&#123;
+    char queue[100];
+    int rear &#x3D; 0;
+    int front &#x3D; 0;
+    char pop()
+    &#123;
+        char rtn &#x3D; queue[front];
+        front++;
+        return rtn;
+    &#125;
+    char getTop()
+    &#123;
+        return queue[front];
+    &#125;
+    void push(char x)
+    &#123;
+        queue[rear] &#x3D; x;
+        rear++;
+    &#125;
+    bool isEmpty()
+    &#123;
+        return front &gt;&#x3D; rear;
+    &#125;
+&#125;;
+
+struct Stack
+&#123;
+    char stack[100];
+    int top &#x3D; -1;
+    char pop()
+    &#123;
+        char rtn &#x3D; stack[top];
+        top--;
+        return rtn;
+    &#125;
+    char getTop()
+    &#123;
+        return stack[top];
+    &#125;
+    void push(char x)
+    &#123;
+        top++;
+        stack[top] &#x3D; x;
+    &#125;
+    bool isEmpty()
+    &#123;
+        return top &#x3D;&#x3D; -1;
+    &#125;
+&#125;;
+
+bool isNormalOperator(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;+&#39; || x &#x3D;&#x3D; &#39;-&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+bool isGreaterOperator(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;*&#39; || x &#x3D;&#x3D; &#39;&#x2F;&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+bool isLeftBracket(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;(&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+bool isRightBracket(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;)&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+int main()
+&#123;
+    Queue SQ;
+    std::cin &gt;&gt; SQ.queue;
+    SQ.rear &#x3D; strlen(SQ.queue);
+    Stack OS;
+    Queue NQ;
+    while (!SQ.isEmpty())
+    &#123;
+        if (isLeftBracket(SQ.getTop()))
+        &#123;
+            OS.push(SQ.pop());
+        &#125;
+        else if (isRightBracket(SQ.getTop()))
+        &#123;
+            char x &#x3D; SQ.pop();
+            while (!NQ.isEmpty())
+            &#123;
+                std::cout &lt;&lt; NQ.pop();
+            &#125;
+            while (!OS.isEmpty())
+            &#123;
+                if (isLeftBracket(OS.getTop()) || isRightBracket(OS.getTop()))
+                &#123;
+                    OS.pop();
+                &#125;
+                else
+                &#123;
+                    std::cout &lt;&lt; OS.pop();
+                &#125;
+            &#125;
+        &#125;
+        else if (isGreaterOperator(SQ.getTop()))
+        &#123;
+            OS.push(SQ.pop());
+            char x &#x3D; SQ.getTop();
+            if (!isLeftBracket(x))
+            &#123;
+                std::cout &lt;&lt; SQ.pop();
+                std::cout &lt;&lt; OS.pop();
+            &#125;
+            else
+            &#123;
+                OS.push(SQ.pop());
+            &#125;
+        &#125;
+        else if (isNormalOperator(SQ.getTop()))
+        &#123;
+            OS.push(SQ.pop());
+        &#125;
+        else
+        &#123;
+            NQ.push(SQ.pop());
+        &#125;
+    &#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最前面的就是对栈和队列的实现，使用C函数可以很容易地实现那些类函数。</p>
+<p>我已经把完整的伪代码写在上面了，相信不用再写注释了。</p>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>题解</tag>
+        <tag>NOJ</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>奇怪的电梯（洛谷P1135）</title>
+    <url>/2022/03/19/%E9%A2%98%E8%A7%A3/2022-03-19-%E5%A5%87%E6%80%AA%E7%9A%84%E7%94%B5%E6%A2%AF%EF%BC%88%E6%B4%9B%E8%B0%B7P1135%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言-吐槽">前言&amp;吐槽</h1>
+<p>同样可以拿dfs，这道题怎么就难那么多呢？</p>
+<h1 id="题目描述">题目描述</h1>
+<p><a href="https://www.luogu.com.cn/problem/P1135">奇怪的电梯</a></p>
+<p><img src="https://s2.loli.net/2022/06/07/Alx2YXHSUzEJ53o.png" alt="1.png"></p>
+<h1 id="算法设计">算法设计</h1>
+<p>dfs的基本框架就是遍历一个结点的每一条路，所以我们的算法大概可以设计成这样</p>
+<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor()
+&#123;
+    if (当前楼层 &#x3D;&#x3D; 目标楼层)
+    &#123;
+        做一些操作...
+        retrun;
+    &#125;
+    
+    if (满足电梯向上走的条件)
+    &#123;
+        dfsInEveryFloor();
+    &#125;
+    if (满足电梯向下走的条件)
+    &#123;
+        dfsInEveryFloor();
+    &#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们假设step是所求的最小次数，sum为某一条路需要的次数，那么可以知道：</p>
+<ul>
+<li>在一个结点处，无论向上还是向下，sum都应该加1，但是sum本身不应该改变，因为那样sum得出来就不是一条路的次数了，而是多条路的总次数</li>
+<li>如果达到了目标，就可以置step了</li>
+<li>如果sum已经大于step，那么这个路就已经不是最小的了，直接return结束递归</li>
+</ul>
+<p>根据上述发现，我们将代码完善一下：</p>
+<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor(int now, int sum)
+&#123;
+    if (now &#x3D;&#x3D; targetFloor)
+    &#123;
+        step &#x3D; min(step, sum);  &#x2F;&#x2F;sum与step的最小值
+        return;
+    &#125;
+    
+    if (sum &gt; step)
+    &#123;
+        return;
+    &#125;
+    
+    if (now + floor[now] &lt;&#x3D; N)
+    &#123;
+        dfsInEveryFloor(now + floor[now], sum + 1); &#x2F;&#x2F;如果这里使用sum++，求的是两条路加起来的次数
+    &#125;
+    if (now - floor[now] &gt; 0)
+    &#123;
+        dfsInEveryFloor(now - floor[now], sum + 1);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>但是这并不能解这道题，因为如果楼层的按钮为0的话，会造成无限递归</p>
+<p>解决方案是，看看这条路的此结点有没有经过。</p>
+<p>我们使用</p>
+<pre class="line-numbers language-none"><code class="language-none">bool floorState[205];    &#x2F;&#x2F;因为楼层最多200
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>来保存状态</p>
+<p>那么代码可以更改为</p>
+<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor(int now, int sum)
+&#123;
+    if (now &#x3D;&#x3D; targetFloor)
+    &#123;
+        step &#x3D; min(step, sum); &#x2F;&#x2F; sum与step的最小值
+        return;
+    &#125;
+
+    if (sum &gt; step)
+    &#123;
+        return;
+    &#125;
+    floorState[now] &#x3D; 1;                                        &#x2F;&#x2F;已经过
+    if (now + floor[now] &lt;&#x3D; N &amp;&amp; !floorState[now + floor[now]]) &#x2F;&#x2F;下一个结点没经过
+    &#123;
+        dfsInEveryFloor(now + floor[now], sum + 1); &#x2F;&#x2F;如果这里使用sum++，求的是两条路加起来的次数
+    &#125;
+    if (now - floor[now] &gt; 0 &amp;&amp; !floorState[now - floor[now]])
+    &#123;
+        dfsInEveryFloor(now - floor[now], sum + 1);
+    &#125;
+
+    floorState[now] &#x3D; 0; &#x2F;&#x2F;接下来要回溯到上一个结点走另一条路，此时已经是不同的路了，因此需要重置状态
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>到此为止，算法已经设计完了。接下来就进行实现吧</p>
+<h1 id="代码实现">代码实现</h1>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+using namespace std;
+bool floorState[205] &#x3D; &#123;0&#125;;   &#x2F;&#x2F;记录楼层状态（这条有没有被搜索）
+int floorStep[205] &#x3D; &#123;0&#125;;
+int N, A, B;
+int step &#x3D; 0x7fffff;
+
+void dfs(int now, int sum)
+&#123;
+    if (now &#x3D;&#x3D; B)
+    &#123;
+        step &#x3D; min(step, sum);
+    &#125;
+    &#x2F;&#x2F;因为寻找的是最短路径
+    if (sum &gt; step)
+    &#123;
+        return;
+    &#125;
+    
+    floorState[now] &#x3D; 1;    &#x2F;&#x2F;该层被搜索
+    if (now + floorStep[now] &lt;&#x3D; N &amp;&amp; !floorState[now + floorStep[now]])
+    &#123;
+        dfs(now + floorStep[now], sum + 1);
+    &#125;
+    if (now - floorStep[now] &gt; 0 &amp;&amp; !floorState[now-floorStep[now]])
+    &#123;
+        dfs(now - floorStep[now], sum + 1);
+    &#125;
+    &#x2F;&#x2F;实际上上面那两个已经把当前楼层的情况搜完了
+    &#x2F;&#x2F;因此下面需要回溯到新的路径时，需要重置状态
+    floorState[now] &#x3D; 0;
+&#125;
+
+int main()
+&#123;
+    cin &gt;&gt; N &gt;&gt; A &gt;&gt; B;
+    for (int i &#x3D; 1; i &lt;&#x3D; N; i++)
+    &#123;
+        cin &gt;&gt; floorStep[i];
+    &#125;
+    dfs(A, 0);
+    if (step !&#x3D; 0x7fffff)
+    &#123;
+        cout &lt;&lt; step;
+    &#125;
+    else&#123;
+        cout &lt;&lt; -1;
+    &#125;
+    
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我也是才刚刚学DFS，若有不准确还请指出</p>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>题解</tag>
+        <tag>洛谷</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>跳马问题（洛谷P1644）</title>
+    <url>/2022/03/19/%E9%A2%98%E8%A7%A3/2022-03-19-%E8%B7%B3%E9%A9%AC%E9%97%AE%E9%A2%98%EF%BC%88%E6%B4%9B%E8%B0%B7P1644%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言-吐槽">前言&amp;吐槽</h1>
+<p>这道题用DFS很好做，唯一需要注意的是你正在下<strong>中国象棋</strong>，所以马是不能够向上向下走的，只能斜着走。</p>
+<h1 id="题目描述">题目描述</h1>
+<p><a href="https://www.luogu.com.cn/problem/P1644">跳马问题</a></p>
+<p><img src="https://s2.loli.net/2022/06/07/4JWeUQ5oAXZVFdI.png" alt="1.png"></p>
+<h1 id="算法设计">算法设计</h1>
+<p>使用DFS搜下去就行了</p>
+<pre class="line-numbers language-none"><code class="language-none">void DFS()&#123;
+    if(满足条件):
+        ...
+        return;
+    if(选择一种分支):
+       DFS()
+    if(另一种):
+       DFS()  
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h1 id="代码实现">代码实现</h1>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+using namespace std;
+int sum &#x3D; 0, n, m;
+
+void dfs(int row, int column)
+&#123;&#x2F;&#x2F;棋盘上的马已经限定了向右行走，所以只有四种情况
+    if (row &#x3D;&#x3D; m &amp;&amp; column &#x3D;&#x3D;n)
+    &#123;
+        sum++;
+    &#125;
+    if (row + 1 &lt;&#x3D; m &amp;&amp; column + 2 &lt;&#x3D; n)
+    &#123;
+        dfs(row + 1, column + 2);
+    &#125;
+    if (row + 1 &lt;&#x3D; m &amp;&amp; column - 2 &gt;&#x3D; 0)
+    &#123;
+        dfs(row + 1, column - 2);
+    &#125;
+    if (row + 2 &lt;&#x3D; m &amp;&amp; column + 1 &lt;&#x3D; n)
+    &#123;
+        dfs(row + 2, column + 1);
+    &#125;
+    if (row + 2 &lt;&#x3D; m &amp;&amp; column - 1 &gt;&#x3D; 0)
+    &#123;
+        dfs(row + 2, column - 1);
+    &#125;
+&#125;
+
+int main()
+&#123;
+    cin &gt;&gt; n &gt;&gt; m;
+    dfs(0, 0);
+    cout &lt;&lt; sum;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>题解</tag>
+        <tag>洛谷</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>K阶斐波那契数列（NOJ理论第10题）（非精解）</title>
+    <url>/2022/03/20/%E9%A2%98%E8%A7%A3/2022-03-20-K%E9%98%B6%E6%96%90%E6%B3%A2%E9%82%A3%E5%A5%91%E6%95%B0%E5%88%97%EF%BC%88NOJ%E7%90%86%E8%AE%BA%E7%AC%AC10%E9%A2%98%EF%BC%89%EF%BC%88%E9%9D%9E%E7%B2%BE%E8%A7%A3%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言">前言</h1>
+<p>这篇文章主要是为了诠释什么叫<strong>k阶斐波那契数列</strong>，以免各位做的时候意味题错了，同时还能水一篇文章。</p>
+<p>k阶斐波那契数列<strong>一开始前k-1项都是0，第k项为1，后面生成的每一项都是前数列之前k项的和</strong>。</p>
+<h1 id="答案">答案</h1>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+
+static int MAXSIZE;
+
+typedef struct CircularQueue
+&#123;
+    int series[500];
+    int rear;
+    int front;
+&#125; CircularQueue;
+
+void init(CircularQueue *aQueue)
+&#123;
+    aQueue-&gt;rear &#x3D; aQueue-&gt;front &#x3D; 0;
+    
+&#125;
+
+int isEmpty(CircularQueue *aQueue)
+&#123;
+    return aQueue-&gt;front &#x3D;&#x3D; aQueue-&gt;rear;
+&#125;
+
+int isFull(CircularQueue *aQueue)
+&#123;
+    return (aQueue-&gt;rear + 1) % MAXSIZE &#x3D;&#x3D; aQueue-&gt;front;
+&#125;
+
+int pop(CircularQueue *aQueue)
+&#123;
+    int rtn &#x3D; aQueue-&gt;series[aQueue-&gt;front];
+    aQueue-&gt;front &#x3D; (aQueue-&gt;front + 1) % MAXSIZE;
+    return rtn;
+&#125;
+
+void push(CircularQueue *aQueue, int element)
+&#123;
+    if (!isFull(aQueue))
+    &#123;
+        aQueue-&gt;series[aQueue-&gt;rear] &#x3D; element;
+        aQueue-&gt;rear &#x3D; (aQueue-&gt;rear + 1) % MAXSIZE;
+    &#125;
+    else
+    &#123;
+        pop(aQueue);
+        aQueue-&gt;series[aQueue-&gt;rear] &#x3D; element;
+        aQueue-&gt;rear &#x3D; (aQueue-&gt;rear + 1) % MAXSIZE;
+    &#125;
+&#125;
+
+void initF(int *F, int k)
+&#123;
+    for (int i &#x3D; 0; i &lt; k - 1; i++)
+    &#123;
+        F[i] &#x3D; 0;
+    &#125;
+    F[k - 1] &#x3D; 1;
+&#125;
+
+void pushF(CircularQueue* aQueue, int* F, int k)
+&#123;
+    for (int i &#x3D; 0; i &lt; k; i++)
+    &#123;
+        push(aQueue, F[i]);
+    &#125;
+&#125;
+
+void caculate(int* F, int k)
+&#123;
+    int newData &#x3D; 0;
+    for (int i &#x3D; 0; i &lt; k; i++)
+    &#123;
+        newData +&#x3D; F[i];
+    &#125;
+    for (int i &#x3D; 0; i &lt; k - 1; i++)
+    &#123;
+        F[i] &#x3D; F[i + 1];
+    &#125;
+    F[k - 1] &#x3D; newData;
+&#125;
+
+int main()
+&#123;
+    int k, max;
+    scanf(&quot;%d%d&quot;, &amp;max, &amp;k);
+    MAXSIZE &#x3D; k + 1;
+    CircularQueue *aQueue &#x3D; (CircularQueue *)malloc(sizeof(CircularQueue));
+    init(aQueue);
+    int Fibonacci[k];
+    initF(Fibonacci, k);
+    pushF(aQueue, Fibonacci, k);
+    while (1)
+    &#123;
+        caculate(Fibonacci, k);
+        if (Fibonacci[k - 1] &lt;&#x3D; max)
+        &#123;
+            push(aQueue, Fibonacci[k-1]);
+        &#125;
+        else
+        &#123;
+            break;
+        &#125;
+    &#125;
+    
+    if (k !&#x3D; 1)
+    &#123;
+        while (!isEmpty(aQueue))
+        &#123;
+            printf(&quot;%d &quot;, pop(aQueue));
+        &#125;
+    &#125;
+    else&#123;
+        printf(&quot;1&quot;);
+    &#125;
+    return 0;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>（还就那个淼）</p>
 ]]></content>
       <categories>
         <category>题解</category>
