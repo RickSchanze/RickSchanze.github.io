@@ -1,407 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Qt动画框架使用</title>
-    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
-　　本文算是一篇转载文章。<br>
-　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
-<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
-<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
-<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
-<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
-　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
-<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
-<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
-<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
-<table>
-<thead>
-<tr>
-<th>QAbstractAnimation</th>
-<th>所有动画类的基类</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QAnimationGroup</td>
-<td>动画容器类的抽象基类</td>
-</tr>
-<tr>
-<td>QEasingCurve</td>
-<td>动画控制的缓和曲线类</td>
-</tr>
-<tr>
-<td>QParallelAnimationGroup</td>
-<td>并行动画容器</td>
-</tr>
-<tr>
-<td>QPauseAnimation</td>
-<td>QSequentialAnimationGroup对象暂停延迟</td>
-</tr>
-<tr>
-<td>QPropertyAnimation</td>
-<td>Qt动画属性操作</td>
-</tr>
-<tr>
-<td>QSequentialAnimationGroup</td>
-<td>串行动画容器</td>
-</tr>
-<tr>
-<td>QTimeLine</td>
-<td>动画控制的时间片类</td>
-</tr>
-<tr>
-<td>QVariantAnimation</td>
-<td>动画类的抽象基类</td>
-</tr>
-</tbody>
-</table>
-<h2 id="qt动画属性">Qt动画属性</h2>
-<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
-　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
-　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
-<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
-　　也可以做到类似CSS中的@keyframe效果，例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
-　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
-　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
-&#123;
-    Q_OBJECT
-    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
-]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt使用</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Qt图形视图框架</title>
-    <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
-　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
-<h2 id="图形视图框架概述">图形视图框架概述</h2>
-<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
-<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
-<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
-<h2 id="场景">场景</h2>
-<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
-<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
-<ul>
-<li>
-<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
-</li>
-<li>
-<p>键盘输入焦点和键盘事件</p>
-</li>
-<li>
-<p>拖放事件</p>
-</li>
-<li>
-<p>碰撞检测</p>
-</li>
-</ul>
-<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
-<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
-　　纯虚函数实现示例：</p>
-<pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
-&#123;
-    qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
-    return QRectF(0 - penWidth &#x2F; 2, 0 - penWidth &#x2F; 2,
-                  20 + penWidth, 20 + penWidth);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
-&#123;
-    painter-&gt;setBrush(Qt::red);
-    painter-&gt;drawRect(0, 0, 20, 20);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>##图形视图框架的坐标系统<br>
-　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
-<h3 id="图形项坐标">图形项坐标</h3>
-<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
-<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
-<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
-<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
-<h3 id="场景坐标">场景坐标</h3>
-<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
-<h3 id="视图坐标">视图坐标</h3>
-<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
-<h3 id="坐标映射">坐标映射</h3>
-<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
-<p>####图形视图框架的映射函数</p>
-<table>
-<thead>
-<tr>
-<th>映射函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QGraphicsView::mapToScene( )</td>
-<td>从视图坐标系统映射到场景坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsView::mapFromScene( )</td>
-<td>从场景坐标系统映射到视图坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToScene( )</td>
-<td>从图形项的坐标系统映射到场景的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromScene( )</td>
-<td>从场景的坐标系统映射到图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToParent( )</td>
-<td>从本图形项的坐标系统映射到其父图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromParent( )</td>
-<td>从父图形项的坐标系统映射到本图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToItem( )</td>
-<td>从本图形项的坐标系统映射到另一个图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromItem( )</td>
-<td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
-</tr>
-</tbody>
-</table>
-<h2 id="事件处理与传播">事件处理与传播</h2>
-<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
-<h2 id="示例">示例</h2>
-<h3 id="myitem">MyItem</h3>
-<ul>
-<li>MyItem.h</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-
-#include &lt;QGraphicsItem&gt;
-
-class MyTime : public QGraphicsItem
-&#123;
-
-public:
-	MyTime();
-	~MyTime();
-	QRectF boundingRect() const override;
-	void paint(QPainter* painter,
-		const QStyleOptionGraphicsItem* option,
-		QWidget* widget) override;
-	void setColor(const QColor&amp; color);
-
-private:
-	QColor brushColor;
-
-protected:
-	void KeyPressEvent(QKeyEvent* event);
-	void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>MyItem.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
-
-#include &lt;QPainter&gt;
-#include &lt;QCursor&gt;
-#include &lt;QKeyEvent&gt;
-#include &lt;QGraphicsSceneHoverEvent&gt;
-#include &lt;QGraphicsSceneContextMenuEvent&gt;
-#include &lt;QMenu&gt;
-
-MyTime::MyTime()
-&#123;
-	brushColor &#x3D; Qt::red;
-
-	setFlag(QGraphicsItem::ItemIsFocusable);
-	setFlag(QGraphicsItem::ItemIsMovable);
-
-	setAcceptHoverEvents(true);
-&#125;
-
-MyTime::~MyTime()
-&#123;
-&#125;
-
-QRectF MyTime::boundingRect() const
-&#123;
-	qreal adjust &#x3D; 0.5;
-	return QRectF(
-		-10 - adjust,
-		-10 - adjust,
-		20 + adjust,
-		20 + adjust
-	);
-&#125;
-
-void MyTime::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-&#123;
-	if (hasFocus())
-	&#123;
-		painter-&gt;setPen(QPen(QColor(255, 255, 255, 200)));
-	&#125;
-	else
-	&#123;
-		painter-&gt;setPen(QPen(QColor(100, 100, 100, 100)));
-	&#125;
-	painter-&gt;setBrush(brushColor);
-	painter-&gt;drawRect(-10, -10, 20, 20);
-&#125;
-
-void MyTime::setColor(const QColor&amp; color)
-&#123;
-	brushColor &#x3D; color;
-&#125;
-
-void MyTime::KeyPressEvent(QKeyEvent* event)
-&#123;
-	if (event-&gt;key() &#x3D;&#x3D; Qt::Key_Down)
-	&#123;
-		moveBy(0, 10);
-	&#125;
-&#125;
-
-void MyTime::mousePressEvent(QGraphicsSceneMouseEvent* event)
-&#123;
-	setFocus();
-	setCursor(Qt::ClosedHandCursor);
-&#125;
-
-void MyTime::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-&#123;
-	setCursor(Qt::OpenHandCursor);
-	setToolTip(&quot;I am a item&quot;);
-&#125;
-
-void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-&#123;
-	QMenu menu;
-	QAction* moveAction &#x3D; menu.addAction(&quot;move back&quot;);
-	QAction* selectedAction &#x3D; menu.exec(event-&gt;screenPos());
-	if (selectedAction &#x3D;&#x3D; moveAction)
-	&#123;
-		setPos(0, 0);
-	&#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="myview">MyView</h3>
-<ul>
-<li>MyView.h</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-
-#include &lt;QGraphicsView&gt;
-
-class MyView : public QGraphicsView
-&#123;
-
-public:
-	MyView();
-	~MyView();
-protected:
-	void keyPressEvent(QKeyEvent* event);
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>MyView.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
-#include &lt;QKeyEvent&gt;
-
-MyView::MyView()
-	
-&#123;
-&#125;
-
-MyView::~MyView()
-&#123;
-&#125;
-
-void MyView::keyPressEvent(QKeyEvent* event)
-&#123;
-	switch (event-&gt;key())
-	&#123;
-	case Qt::Key_Plus:
-		scale(1.2, 1.2);
-		break;
-	case Qt::Key_Minus:
-		scale(1 &#x2F; 1.2, 1 &#x2F; 1.2);
-		break;
-	case Qt::Key_Right:
-		rotate(30);
-	default:
-		break;
-	&#125;
-	QGraphicsView::keyPressEvent(event);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="main">main</h3>
-<ul>
-<li>main.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
-#include &lt;QTime&gt;
-#include &quot;MyTime.h&quot;
-#include &quot;MyView.h&quot;
-
-int main(int argc, char *argv[])
-&#123;
-    QApplication app(argc, argv);
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-    QGraphicsScene scene;
-    scene.setSceneRect(-200, -150, 400, 300);
-
-    for (int i &#x3D; 0; i &lt; 5; i++)
-    &#123;
-        MyTime* item &#x3D; new MyTime();
-        item-&gt;setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
-        item-&gt;setPos(i * 50 - 90, -50);
-        scene.addItem(item);
-    &#125;
-
-    MyView view;
-    view.setScene(&amp;scene);
-    view.setBackgroundBrush(QBrush(Qt::red));
-    view.show();
-    return app.exec();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>Qt</tag>
-        <tag>C++</tag>
-        <tag>Qt使用</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>EffectiveC++(1)(1~4)</title>
     <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
     <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
@@ -1084,8 +683,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1099,8 +698,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1120,8 +719,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1137,8 +736,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1157,8 +756,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1208,8 +807,26 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QAbstractButton</title>
+    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
+    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
+<h2 id="ischeck">isCheck()</h2>
+<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
+<h2 id="text"><strong>text()</strong></h2>
+<p>获取这个按钮的文字</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1277,26 +894,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QAbstractButton</title>
-    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
-    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
-<h2 id="ischeck">isCheck()</h2>
-<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
-<h2 id="text"><strong>text()</strong></h2>
-<p>获取这个按钮的文字</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
         <tag>Qt</tag>
-        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1317,8 +916,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1362,8 +961,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1384,8 +983,25 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPolygon</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
+    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
+<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
+<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
+<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1417,25 +1033,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPolygon</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
-    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
-<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
-<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
-<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
         <tag>Qt</tag>
-        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1461,8 +1060,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1482,8 +1081,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1538,8 +1137,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1605,8 +1204,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1645,9 +1244,1094 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>Qt</tag>
         <tag>C++</tag>
+        <tag>Qt</tag>
         <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Qt动画框架使用</title>
+    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
+　　本文算是一篇转载文章。<br>
+　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
+<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
+<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
+<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
+<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
+　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
+<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
+<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
+<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
+<table>
+<thead>
+<tr>
+<th>QAbstractAnimation</th>
+<th>所有动画类的基类</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QAnimationGroup</td>
+<td>动画容器类的抽象基类</td>
+</tr>
+<tr>
+<td>QEasingCurve</td>
+<td>动画控制的缓和曲线类</td>
+</tr>
+<tr>
+<td>QParallelAnimationGroup</td>
+<td>并行动画容器</td>
+</tr>
+<tr>
+<td>QPauseAnimation</td>
+<td>QSequentialAnimationGroup对象暂停延迟</td>
+</tr>
+<tr>
+<td>QPropertyAnimation</td>
+<td>Qt动画属性操作</td>
+</tr>
+<tr>
+<td>QSequentialAnimationGroup</td>
+<td>串行动画容器</td>
+</tr>
+<tr>
+<td>QTimeLine</td>
+<td>动画控制的时间片类</td>
+</tr>
+<tr>
+<td>QVariantAnimation</td>
+<td>动画类的抽象基类</td>
+</tr>
+</tbody>
+</table>
+<h2 id="qt动画属性">Qt动画属性</h2>
+<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
+　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
+　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
+<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
+　　也可以做到类似CSS中的@keyframe效果，例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
+　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
+　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
+&#123;
+    Q_OBJECT
+    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
+]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>How to scan images, lookup tables and time measurement with OpenCV</title>
+    <url>/2022/06/25/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-25-Scan%20Image/</url>
+    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
+<h2 id="目标">目标</h2>
+<p>这篇文章将为您讲解:</p>
+<ul>
+<li>如何遍历图像的每一个像素?</li>
+<li>OpenCV中的矩阵如何存储?</li>
+<li>如何衡量我们使用算法的性能?</li>
+<li>什么是查找表?为什么我们要使用它?</li>
+</ul>
+<h2 id="测试用例">测试用例</h2>
+<p>​	考虑一个简单的减色方法,使用C和C++里的<code>unsigned char</code>类型来作为矩阵的数据类型.因此该矩阵中,每一像素通道都可能含有多达256种不同的数值.对于一个三通道图像,这会造成非常非常多组合(大概1600万).直接操作这些色彩可能会对我们算法的性能造成极大影响.然而,有时可能操作更少数量的色彩,却达到相同的结果.</p>
+<p>​	在这种情况下，我们通常会进行<em>色彩空间缩减</em>。这意味着我们将颜色空间当前值与新的输入值进行划分，最终得到更少的颜色。例如，介于 0 和 9 之间的每个值都采用新值 0，10 到 19 之间的每个值都取值 10，依此类推。</p>
+<p>​	当您将 <em>uchar</em>（无符号 char - 即值介于 0 和 255 之间）值与 <em>int</em> 值相除时，结果也将是 <em>char</em>。这些值只能是字符值。因此，任何分数都将向下舍入。利用这一事实，<em>uchar</em>域中的上部运算可以表示为：</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mrow><mi>n</mi><mi>e</mi><mi>w</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>I</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mn>10</mn></mfrac><mo>∗</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">I_{new}=\frac{I_{old}}{10}*10
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mord mathdefault mtight">e</span><span class="mord mathdefault mtight" style="margin-right:0.02691em;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.04633em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.36033em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mord">0</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">o</span><span class="mord mathdefault mtight" style="margin-right:0.01968em;">l</span><span class="mord mathdefault mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">0</span></span></span></span></span></p>
+<p>​	一个简单的色彩空间减少算法将仅传递图像矩阵的每个像素并应用此公式。值得注意的是，我们做了一个除法和乘法运算。对于系统来shu说，这些操作开销非常大。如果可能的话，值得通过使用开销更低的操作来避免它们，例如一些减法，加法在最好情况下就是简单赋值。此外，请注意，对于上述运算，我们只有有限数量的输入值。在使用<em>uchar</em>的情况下，该值为256.</p>
+<p>​	因此，对于较大的图像，明智的做法是事先计算所有可能的值，并且在分配期间只需使用查找表进行分配即可。查找表是简单的数组（具有一个或多个维度），对于给定的输入值变体，它保存最终的输出值。它的优势在于我们不需要进行计算，我们只需要读取结果即可。</p>
+<p>​	我们的测试用例程序（以及此处提供的示例）将执行以下操作：读取控制台行参数所提供的图像，并使用给定的控制台行参数整数值应用缩减。在OpenCV中，目前它们是逐个像素地浏览图像的三种主要方式。为了使事情变得更有趣，将使用所有这些方法扫描每个图像，并打印出花费的时间。</p>
+<p>​	最后一个参数是可选的。给定图像将以灰度格式加载，否则使用BGR颜色方式。第一件事是计算查找表。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">string input;
+cin &gt;&gt; input;
+stringstream s;
+s &lt;&lt; input;
+int divideWith;
+s &gt;&gt; divideWith;
+if (!s || !divideWith) &#123;
+    cout &lt;&lt; &quot;Invalid number entered for dividing&quot; &lt;&lt; endl;
+    return -1;
+&#125;
+uchar table[256];
+for (int i &#x3D; 0; i &lt; 256; i++) &#123;
+    table[i] &#x3D; (uchar)(divideWith * (i &#x2F; divideWith));
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	在这里，我们首先使用 C++ <em>stringstream</em> 类将输入字符串从文本转换为整数格式。然后，我们使用简单的外观和上面的公式来计算查找表。这里没有OpenCV特定的东西。</p>
+<p>​	另一个问题是我们如何测量时间？OpenCV提供了两个简单的函数来实现这个**getTickCount（）<strong>和</strong>getTickFrequency（）**第一个返回来自特定事件（例如，自您启动系统以来）的系统 CPU tick 。第二个返回 CPU 在一秒内发出tick的次数。因此，以秒为单位测量两次操作之间经过的时间数很容易.</p>
+ <pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">   double t &#x3D; (double)getTickCount();
+&#x2F;&#x2F; do somthing
+   t &#x3D; ((double)getTickCount() - t) &#x2F; getTickFrequency();
+   cout &lt;&lt; &quot;Times passed in seconds: &quot; &lt;&lt; t &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="图像矩阵如何保存在内存中">图像矩阵如何保存在内存中?</h2>
+<p>​	矩阵的大小取决于所使用的颜色系统。更准确地说，这取决于所使用的通道数量。对于灰度图像，我们有如下内容：</p>
+<p><img src="https://s2.loli.net/2022/06/26/gDXkM5xtEz6q3Bb.png" alt="1.png"></p>
+<p>​	对于多通道图像，列包含的子列数与通道数一样多。例如，在BGR颜色系统的情况下：</p>
+<p><img src="https://s2.loli.net/2022/06/26/ZJgoKe5Q12B4tYl.png" alt="2.png"></p>
+<p>​	因为在许多情况下，内存足够大，可以连续地存储行，因此行可能会一个接一个存储，从而创建一个长行。由于所有内容都是连续的，因此可以一个接一个地计算，这可能有助于加快扫描过程。我们可以使用 **isContinuous（）**函数来<em>确认</em>矩阵是否属于这种情况。</p>
+<h2 id="更高效的方式">更高效的方式</h2>
+<p>​	在性能方面，最快的便是经典的C样式运算符[]（指针）访问。因此，我们可以推荐的最高效的进行分配的方法是：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat&amp; ScanImageReduceC(Mat&amp; I, uchar* table) &#123;
+    &#x2F;&#x2F; accept only char type matrIces
+    CV_Assert(I.depth() &#x3D;&#x3D; CV_8U);
+
+    int channels &#x3D; I.channels();
+
+    int nRows &#x3D; I.rows;
+    int nCols &#x3D; I.cols;
+
+    if (I.isContinuous()) &#123;
+        nCols &#x3D; nRows * nCols * channels;
+        nRows &#x3D; 1;
+    &#125;
+    int i, j;
+    uchar* p;
+    for (i &#x3D; 0; i &lt; nRows; ++i) &#123;
+        p &#x3D; I.ptr&lt;uchar&gt;(i);
+        for (j &#x3D; 0; j &lt; nCols; ++j) &#123;
+            p[j] &#x3D; table[p[j]];
+        &#125;
+    &#125;
+    return I;
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	在这里，我们基本上只是获取一个指向每行开头的指针，并遍历它直到结束。在矩阵以连续方式存储的特殊情况下，我们只需要请求指针一次，然后一直走到最后。我们需要注意彩色图像：我们有三个通道，因此我们需要在每行中传递三倍以上的项。</p>
+<p>​	还有另一种方式。<em>Mat</em> 对象成员变量<em>data</em>返回指向第一行（第一列）的指针。如果此指针为 null，则该对象中没有有效的输入。这是检查图像加载是否成功的最简单方法。如果存储连续，我们可以使用它来遍历整个数据指针。如果是输入灰度图像，则可以按下面的进行操作：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">uchar* p &#x3D; I.data;
+
+for( unsigned int i &#x3D;0; i &lt; ncol*nrows; ++i)
+    *p++ &#x3D; table[*p];<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	你会得到同样的结果。但是，此代码以后更难阅读。如果你有一些更先进的技术，那就更难了。此外，在实践中，这会获得相同的性能结果（因为大多数现代编译器可能会自动为您进行这个小的优化）。</p>
+<h2 id="迭代器方式-安全方式">迭代器方式(安全方式)</h2>
+<p>​	如果您以指针以及[]方式进行遍历,那么正确处理可能出现的内存间隙就是您的责任.迭代器方法被认为是一种更安全的方式，因为它从用户那里接管这些任务。您需要做的就是询问图像矩阵的开始和结束，然后只需增加开始迭代器，直到到达终点。要获取迭代器<em>指向</em>的值，请使用 * 运算符。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat&amp; ScanImageAndReduceIterator(Mat&amp; I, uchar* table) &#123;
+    CV_Assert(I.depth() &#x3D;&#x3D; CV_8U);
+    const int channels &#x3D; I.channels();
+    switch (channels) &#123;
+        case 1: &#123;
+            MatIterator_&lt;uchar&gt; it, end;
+            for (it &#x3D; I.begin&lt;uchar&gt;(), end &#x3D; I.end&lt;uchar&gt;(); it !&#x3D; end; ++it) &#123;
+                *it &#x3D; table[*it];
+            &#125;
+            break;
+        &#125;
+        case 3: &#123;
+            MatIterator_&lt;Vec3b&gt; it, end;
+            for (it &#x3D; I.begin&lt;Vec3b&gt;(), end &#x3D; I.end&lt;Vec3b&gt;(); it !&#x3D; end; ++it) &#123;
+                (*it)[0] &#x3D; table[(*it)[0]];
+                (*it)[1] &#x3D; table[(*it)[1]];
+                (*it)[2] &#x3D; table[(*it)[2]];
+            &#125;
+        &#125;
+        default:
+            break;
+    &#125;
+    return I;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	对于彩色图像，每列有三个uchar子列。这可以被认为是uchar项目的简短向量，在OpenCV中以<em>Vec3b</em>命名。要访问第 n 个子列，我们使用简单的运算符 [] 访问。请务必记住，OpenCV 迭代器会遍历各列并自动跳到下一行。因此，对于彩色图像，如果您使用简单的<em>uchar</em>迭代器，您将只能访问蓝色通道值。</p>
+<h2 id="使用引用进行动态地址计算">使用引用进行动态地址计算</h2>
+<p>​	不建议使用此方法进行遍历。它是为了获取或修改图像中的随机元素而制作的。其基本用法是<strong>指定要访问的项目的行号和列号</strong>。在我们早期的遍历方法中，您已经可以通过我们查看图像的类型来观察到这一点很重要。此外,您需要手动指定在自动查找时使用的类型。对于以下源代码的灰度图像（一并演示了**at（）**函数的用法），您可以观察到这一点：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat&amp; ScanImageAndReduceRandomAccess(Mat&amp; I, uchar* table)
+&#123;
+    CV_Assert(I.depth() &#x3D;&#x3D; CV_8U);
+
+    const int channels &#x3D; I.channels();
+    switch (channels)
+    &#123;
+    case 1: &#123;
+        for (int i &#x3D; 0; i &lt; I.rows; ++i)
+        &#123;
+            for (int j &#x3D; 0; j &lt; I.cols; j++)
+            &#123;
+                I.at&lt;uchar&gt;(i, j) &#x3D; table[I.at&lt;uchar&gt;(i, j)];
+            &#125;
+        &#125;
+        break;
+    &#125;
+    case 3: &#123;
+        Mat_&lt;Vec3b&gt; _I &#x3D; I;
+        for (int i &#x3D; 0; i &lt; I.rows; i++)
+        &#123;
+            for (int j &#x3D; 0; j &lt; I.cols; j++) &#123;
+                _I(i, j)[0] &#x3D; table[_I(i, j)[0]];
+                _I(i, j)[1] &#x3D; table[_I(i, j)[1]];
+                _I(i, j)[2] &#x3D; table[_I(i, j)[2]];
+            &#125;
+        &#125;
+        I &#x3D; _I;
+        break;
+    &#125;
+    default:
+        break;
+    &#125;
+    return I;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	这些函数采用您指定输入类型和坐标，并动态计算查询项的地址。然后返回对此的引用。当您<em>获取</em>值时，这可能是一个常量，当您<em>设置</em>值时，这可能是一个非常量。在debug模式下，会有以安全检查措施:将对输入坐标是否有效且存在进行检查。如果不存在或者无效，您将在标准错误输出流上收到一个很好的输出消息。与release模式下的C风格[]方式相比，使用此方法的唯一区别是，对于图像的每个元素，您将获得一个新的行指针，用于我们使用C运算符[]来获取列元素的内容。</p>
+<p>​	如果需要使用此方法对图像进行多次查找，则为每个访问输入类型和 at 关键字可能会很麻烦且耗时。为了解决这个问题，OpenCV具有<strong>Mat_<strong>数据类型。它与Mat相同，在定义时，您需要通过查看数据矩阵的内容来指定数据类型，但是作为回报，您可以使用operator（）来快速访问项目。]同时，OpenCV也提供了很方便</strong>Mat</strong>与**Mat_<strong>的转化方式(如上示例)。尽管如此，重要的是要注意，相同的操作（具有相同的运行时速度）可以使用</strong>at()**函数完成。</p>
+<h2 id="主要函数">主要函数</h2>
+<p>​	这是在图像中实现查找表修改的额外方法。因为在图像处理中，将所有给定的图像值替换为其他值是很常见的，故OpenCV提供了一个函数，该函数无需您自己编写遍历方法便可以进行转变。我们使用核心模块的<a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html#lut">LUT（）</a>功能。首先，我们构建查找表的 Mat 类型：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat lookUpTable(1, 256, CV_8U);
+uchar* p &#x3D; lookUpTable.data;
+for (int i &#x3D; 0; i &lt; 256; i++)
+&#123;
+    p[i] &#x3D; table[i];
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最后调用函数（I 是我们的输入图像，J 是输出图像）：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">LUT(I, lookUpTable, I);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<h2 id="上述方法的性能差异">上述方法的性能差异</h2>
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>耗时</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>迭 代</td>
+<td>83.7201 毫秒</td>
+</tr>
+<tr>
+<td>实时 RA</td>
+<td>93.7878 毫秒</td>
+</tr>
+<tr>
+<td>LUT 函数</td>
+<td>32.5759 毫秒</td>
+</tr>
+<tr>
+<td>C风格[]</td>
+<td>79.4717 毫秒</td>
+</tr>
+</tbody>
+</table>
+<p>​	如果可能的话，使用OpenCV已经提供的函数（而不是重新造轮子）。最快的方法是LUT函数。这是因为 OpenCV 库是通过英特尔线程构建模块启用多线程的。但是，如果您需要编写简单的图像扫描，则首选指针方法。迭代器是一个更安全的方法，但速度相当慢。在调试模式下，使用动态引用访问方法进行全图像扫描是最慢的的。在发布模式下，它可能会快于迭代器方法，但肯定会为此牺牲迭代器的安全特性。</p>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Qt图形视图框架</title>
+    <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
+　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
+<h2 id="图形视图框架概述">图形视图框架概述</h2>
+<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
+<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
+<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
+<h2 id="场景">场景</h2>
+<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
+<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
+<ul>
+<li>
+<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
+</li>
+<li>
+<p>键盘输入焦点和键盘事件</p>
+</li>
+<li>
+<p>拖放事件</p>
+</li>
+<li>
+<p>碰撞检测</p>
+</li>
+</ul>
+<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
+<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
+　　纯虚函数实现示例：</p>
+<pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
+&#123;
+    qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
+    return QRectF(0 - penWidth &#x2F; 2, 0 - penWidth &#x2F; 2,
+                  20 + penWidth, 20 + penWidth);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+&#123;
+    painter-&gt;setBrush(Qt::red);
+    painter-&gt;drawRect(0, 0, 20, 20);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>##图形视图框架的坐标系统<br>
+　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
+<h3 id="图形项坐标">图形项坐标</h3>
+<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
+<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
+<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
+<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
+<h3 id="场景坐标">场景坐标</h3>
+<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
+<h3 id="视图坐标">视图坐标</h3>
+<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
+<h3 id="坐标映射">坐标映射</h3>
+<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
+<p>####图形视图框架的映射函数</p>
+<table>
+<thead>
+<tr>
+<th>映射函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QGraphicsView::mapToScene( )</td>
+<td>从视图坐标系统映射到场景坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsView::mapFromScene( )</td>
+<td>从场景坐标系统映射到视图坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToScene( )</td>
+<td>从图形项的坐标系统映射到场景的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromScene( )</td>
+<td>从场景的坐标系统映射到图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToParent( )</td>
+<td>从本图形项的坐标系统映射到其父图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromParent( )</td>
+<td>从父图形项的坐标系统映射到本图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToItem( )</td>
+<td>从本图形项的坐标系统映射到另一个图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromItem( )</td>
+<td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
+</tr>
+</tbody>
+</table>
+<h2 id="事件处理与传播">事件处理与传播</h2>
+<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
+<h2 id="示例">示例</h2>
+<h3 id="myitem">MyItem</h3>
+<ul>
+<li>MyItem.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+
+#include &lt;QGraphicsItem&gt;
+
+class MyTime : public QGraphicsItem
+&#123;
+
+public:
+	MyTime();
+	~MyTime();
+	QRectF boundingRect() const override;
+	void paint(QPainter* painter,
+		const QStyleOptionGraphicsItem* option,
+		QWidget* widget) override;
+	void setColor(const QColor&amp; color);
+
+private:
+	QColor brushColor;
+
+protected:
+	void KeyPressEvent(QKeyEvent* event);
+	void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyItem.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
+
+#include &lt;QPainter&gt;
+#include &lt;QCursor&gt;
+#include &lt;QKeyEvent&gt;
+#include &lt;QGraphicsSceneHoverEvent&gt;
+#include &lt;QGraphicsSceneContextMenuEvent&gt;
+#include &lt;QMenu&gt;
+
+MyTime::MyTime()
+&#123;
+	brushColor &#x3D; Qt::red;
+
+	setFlag(QGraphicsItem::ItemIsFocusable);
+	setFlag(QGraphicsItem::ItemIsMovable);
+
+	setAcceptHoverEvents(true);
+&#125;
+
+MyTime::~MyTime()
+&#123;
+&#125;
+
+QRectF MyTime::boundingRect() const
+&#123;
+	qreal adjust &#x3D; 0.5;
+	return QRectF(
+		-10 - adjust,
+		-10 - adjust,
+		20 + adjust,
+		20 + adjust
+	);
+&#125;
+
+void MyTime::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+&#123;
+	if (hasFocus())
+	&#123;
+		painter-&gt;setPen(QPen(QColor(255, 255, 255, 200)));
+	&#125;
+	else
+	&#123;
+		painter-&gt;setPen(QPen(QColor(100, 100, 100, 100)));
+	&#125;
+	painter-&gt;setBrush(brushColor);
+	painter-&gt;drawRect(-10, -10, 20, 20);
+&#125;
+
+void MyTime::setColor(const QColor&amp; color)
+&#123;
+	brushColor &#x3D; color;
+&#125;
+
+void MyTime::KeyPressEvent(QKeyEvent* event)
+&#123;
+	if (event-&gt;key() &#x3D;&#x3D; Qt::Key_Down)
+	&#123;
+		moveBy(0, 10);
+	&#125;
+&#125;
+
+void MyTime::mousePressEvent(QGraphicsSceneMouseEvent* event)
+&#123;
+	setFocus();
+	setCursor(Qt::ClosedHandCursor);
+&#125;
+
+void MyTime::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+&#123;
+	setCursor(Qt::OpenHandCursor);
+	setToolTip(&quot;I am a item&quot;);
+&#125;
+
+void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+&#123;
+	QMenu menu;
+	QAction* moveAction &#x3D; menu.addAction(&quot;move back&quot;);
+	QAction* selectedAction &#x3D; menu.exec(event-&gt;screenPos());
+	if (selectedAction &#x3D;&#x3D; moveAction)
+	&#123;
+		setPos(0, 0);
+	&#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="myview">MyView</h3>
+<ul>
+<li>MyView.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+
+#include &lt;QGraphicsView&gt;
+
+class MyView : public QGraphicsView
+&#123;
+
+public:
+	MyView();
+	~MyView();
+protected:
+	void keyPressEvent(QKeyEvent* event);
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyView.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
+#include &lt;QKeyEvent&gt;
+
+MyView::MyView()
+	
+&#123;
+&#125;
+
+MyView::~MyView()
+&#123;
+&#125;
+
+void MyView::keyPressEvent(QKeyEvent* event)
+&#123;
+	switch (event-&gt;key())
+	&#123;
+	case Qt::Key_Plus:
+		scale(1.2, 1.2);
+		break;
+	case Qt::Key_Minus:
+		scale(1 &#x2F; 1.2, 1 &#x2F; 1.2);
+		break;
+	case Qt::Key_Right:
+		rotate(30);
+	default:
+		break;
+	&#125;
+	QGraphicsView::keyPressEvent(event);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="main">main</h3>
+<ul>
+<li>main.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
+#include &lt;QTime&gt;
+#include &quot;MyTime.h&quot;
+#include &quot;MyView.h&quot;
+
+int main(int argc, char *argv[])
+&#123;
+    QApplication app(argc, argv);
+    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+    QGraphicsScene scene;
+    scene.setSceneRect(-200, -150, 400, 300);
+
+    for (int i &#x3D; 0; i &lt; 5; i++)
+    &#123;
+        MyTime* item &#x3D; new MyTime();
+        item-&gt;setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
+        item-&gt;setPos(i * 50 - 90, -50);
+        scene.addItem(item);
+    &#125;
+
+    MyView view;
+    view.setScene(&amp;scene);
+    view.setBackgroundBrush(QBrush(Qt::red));
+    view.show();
+    return app.exec();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mat - The Basic Image Container</title>
+    <url>/2022/06/02/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-02Mat/</url>
+    <content><![CDATA[<h2 id="mat">Mat</h2>
+<p>使用Mat对象无需再自己手动分配和释放内存</p>
+<p>Mat对象由两个数据部分组成：</p>
+<ol>
+<li>
+<p><strong>矩阵头</strong></p>
+<p>包含着一些信息，例如矩阵尺寸，用于记录矩阵存储位置的方法等等</p>
+</li>
+<li>
+<p><strong>矩阵指针</strong></p>
+<p>包含像素值(根据选择的存储方式决定维度)</p>
+</li>
+</ol>
+<p>其中，矩阵头大小恒定，但矩阵实际尺寸视情况而定。</p>
+<p>为了加快程序的运算速度，每一个Mat对象都有自己的头，而一个矩阵有可能通过共享矩阵指针的方式来被两个Mat对象使用。并且，拷贝运算符<strong>只会拷贝矩阵头与矩阵指针，而不会拷贝矩阵本身</strong>。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat A, C;                          &#x2F;&#x2F; creates just the header parts
+A &#x3D; imread(argv[1], IMREAD_COLOR); &#x2F;&#x2F; here we&#39;ll know the method used (allocate matrix)
+Mat B(A);                                 &#x2F;&#x2F; Use the copy constructor
+C &#x3D; A;                                    &#x2F;&#x2F; Assignment operator<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>上面例子中的<strong>所有Mat对象均指向同一矩阵，改变其中一个会影响到其他的</strong>。</p>
+<p>可以创建一个只含部分数据的矩阵头，例如，要在图像中创建感兴趣区域 （<em>ROI</em>），只需创建一个具有新边界的新标头:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat D (A, Rect(10, 10, 100, 100) ); &#x2F;&#x2F; using a rectangle
+Mat E &#x3D; A(Range::all(), Range(1,3)); &#x2F;&#x2F; using row and column boundaries<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>Mat对象使用引用计数来负责内存的释放。</p>
+<p>赋值矩阵本身时，可以使用<strong>cv::Mat::clone()<strong>或</strong>cv::Mat::copyTo()</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat F &#x3D; A.clone();
+Mat G;
+A.copyTo(G);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<hr>
+<h2 id="存储方法">存储方法</h2>
+<p><strong>色彩空间是</strong>指我们如何组合颜色分量以编码给定的颜色。最简单的一个是灰度，我们可以支配的颜色是黑色和白色。这些的组合使我们能够创建许多灰色阴影。</p>
+<p>最受欢迎的色彩空间是<strong>RGB</strong>,因为这也是我们眼睛建立颜色感受的方式，其基色为<strong>红，绿，蓝</strong>，有时候为了对颜色透明度进行区分，会加入第四个元素<strong>alpha</strong>。</p>
+<p>还有许多其他色彩空间，例如:</p>
+<ul>
+<li>RGB是最常见的，因为我们的眼睛使用类似的东西，但请记住，OpenCV标准显示系统使用BGR色彩空间组成颜色(而非RGB)</li>
+<li>HSV和HLS将颜色分解为它们的<strong>色调</strong>，<strong>饱和度</strong>和<strong>明度/亮度</strong>分量，这是我们描述颜色的更自然的方式。例如，您可能会忽略最后一个分量，从而使算法对输入图像的光照条件不那么敏感。</li>
+<li>YCrCb被流行的JPEG图像格式使用。</li>
+<li>CIE L<em>a</em>b* 是一个感知上均匀的色彩空间，如果您需要测量给定颜色到另一种颜色的<em>距离</em>，它会派上用场。</li>
+</ul>
+<p>每个色彩空间都有自己的有效域。这将决定我们使用的数据类型。我们如何存储颜色决定了我们对其有效域的控制。可能的最小数据类型是<strong>char</strong>，这意味着 1 个字节或 8 位。这可能是无符号（因此可以存储从 0 到 255 的值）或有符号（从 -127 到 +127 的值）。尽管在三个分量（如RGB）的情况下，这种宽度已经给出了1600万种可能的颜色来表示，但我们可以通过为每个分量使用浮点数（4字节= 32位）或双精度（8字节= 64位）数据类型来获得更精细的控制。但是，请记住，增加组件的大小也会增加内存中整个画面的大小。</p>
+<hr>
+<h2 id="显示创建mat对象">显示创建Mat对象</h2>
+<p>可以使用**&quot;&lt;&lt;&quot;**来查看矩阵具体的值，但该方式仅适用于二维矩阵。</p>
+<ul>
+<li>
+<p><strong>使用Mat构造函数进行创建</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat m(2, 2, CV_8UC3, Scalar(0, 0, 255));
+cout &lt;&lt; &quot;M &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; m &lt;&lt; endl&lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>对于二维和多通道图像，我们首先定义它们的大小：行数和列数。</p>
+<p>然后，我们需要指定用于存储元素的数据类型以及每个矩阵点的通道数。为此，我们根据以下约定构造了多个定义：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_[每个项目的位数][有符号或无符号][类型前缀]C[通道号]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>例如，<strong>CV_8UC3</strong>意味着我们使用长度为 8 位的无符号 char 类型，每个像素有三个<strong>uchar</strong>来形成三个通道。</p>
+</li>
+<li>
+<p><strong>使用 C/C++数组并通过构造函数进行初始化</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">int sz[3] &#x3D; &#123;2, 2, 2&#125;;
+Mat L(3, sz, CV_8UC1, Scalar::all(0));  &#x2F;&#x2F; 三维，sz数组决定了每个维度的而大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p><strong>使用cv::Mat::create函数</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat M;
+M.create(4, 4, CV_8UC(2));
+cout &lt;&lt; M;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p><strong>注意</strong>:这个创建方法不能为矩阵设初值，它只是在改变尺寸时重新为矩阵数据开辟内存。</p>
+</li>
+<li>
+<p><strong>使用Matlab风格的初始化函数：cv::Mat::zeros(), cv::Mat::ones(), cv::Mat::eye()</strong></p>
+<p>需要提供大小和数据类型来创建矩阵：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat E &#x3D; Mat::eye(4, 4, CV_64F);
+cout &lt;&lt; &quot;E &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;
+Mat O &#x3D; Mat::ones(2, 2, CV_32F);
+cout &lt;&lt; &quot;O &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; O &lt;&lt; endl &lt;&lt; endl;
+Mat Z &#x3D; Mat::zeros(3, 3, CV_8UC1);
+cout &lt;&lt; &quot;Z &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>对于小型矩阵，可以使用逗号分隔的初始值项或初始值列表：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">   Mat C &#x3D; (Mat_&lt;double&gt;(3, 3) &lt;&lt; 0, -1, 0, -1, 5, -1, 0, -1, 0);
+   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
+   C &#x3D; (Mat_&lt;double&gt;(&#123;0, -1, 0, -1, 5, -1, 0, -1, 0&#125;)).reshape(3);
+   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
+&#x2F;&#x2F; reshape(cn, rows):在不改变数据的情况下，将矩阵更改为
+&#x2F;&#x2F; 具有cn个通道，rows行的矩阵<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>为现有Mat对象创建新的头，并对齐使用<strong>cv::Mat::clone</strong>或<strong>cv::Mat::copyTo</strong></p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat RowClone &#x3D; C.row(1).clone();
+   cout &lt;&lt; &quot;RowClone &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; RowClone &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+</ul>
+<p><strong>注意</strong>：可以使用**cv::randu()**来随机填充一个矩阵，在使用时需要为随机值提供一个上下限</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat R &#x3D; Mat(3, 2, CV_8UC3);
+randu(R, Scalar::all(0), Scalar::all(255));<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<hr>
+<h2 id="格式化输出">格式化输出</h2>
+<p>有不同的格式，这里不再展示，可以使用的有</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; M为需要输出的矩阵
+cout &lt;&lt; R;								 &#x2F;&#x2F; 默认
+cout &lt;&lt; format(R, Formatter::FMT_PYTHON); 	&#x2F;&#x2F; python
+cout &lt;&lt; format(R, Formatter::FMT_CSV);	    &#x2F;&#x2F; Comma separated values (CSV)
+cout &lt;&lt; format(R, Formatter::FMT_NUMPY);	&#x2F;&#x2F; numpy
+cout &lt;&lt; format(R, Formatter::FMT_C);        &#x2F;&#x2F; C<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<hr>
+<h2 id="其他常用输出">其他常用输出</h2>
+<p>OpenCV也通过&lt;&lt;运算符支持其他常见OpenCV数据结构的输出：</p>
+<ul>
+<li>
+<p>2D Point</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point2f P(5, 1);
+cout &lt;&lt; &quot;Point(2d) &#x3D; &quot; &lt;&lt; P &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>3D Point</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point3f P3F(2, 6, 7);
+cout &lt;&lt; &quot;Point(3d) &#x3D; &quot; &lt;&lt; P3F &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>通过cv::Mat输出std::vector</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;float&gt; v;
+v.push_back((float)CV_PI);
+v.push_back(2);
+cout &lt;&lt; &quot;Vector of floats via Mat &#x3D; &quot; &lt;&lt; Mat(v) &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>由points组成的std::vector</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;Point2f&gt; vPoints(20);
+int j &#x3D; 0;
+for (auto i &#x3D; vPoints.begin(); i !&#x3D; vPoints.end(); ++i)
+&#123;
+    *i &#x3D; Point2f((float)(j * 5), float(j % 7));
+    j++;
+&#125;
+cout &lt;&lt; &quot;A vector of 2D Points &#x3D; &quot; &lt;&lt; vPoints &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ul>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Adding (blending) two images using OpenCV</title>
+    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Add%20image/</url>
+    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
+<h2 id="目标">目标</h2>
+<p>在这篇文章中中，您将学习：</p>
+<ul>
+<li>什么是<em>线性混合</em>以及为什么它是有用的;</li>
+<li>如何使用 <a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=addweighted#addweighted">addWeighted 混合</a>两个图像</li>
+</ul>
+<h2 id="相关理论">相关理论</h2>
+<blockquote>
+<p>注意:下面的解释属于Richard Szeliski的《<a href="http://szeliski.org/Book/">Computer Vision： Algorithms and Applications</a>》一书。</p>
+</blockquote>
+<p>从我们之前的教程中，我们已经知道了一些<em>Pixel运算符</em>。,其中<em>线性混合算子</em>是一个有趣的二元（双输入）算子:</p>
+<p><img src="https://s2.loli.net/2022/06/26/pY9LW2fyjiTEmzb.png" alt="1.png"></p>
+<p>通过赋予<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span></span></span></span>以<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>→</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\rightarrow1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>不同的值,该算子便可以用来在两个图片或视频中制作时间上的淡入淡出效果,因此可以被用于短视频,电影制作中.</p>
+<h2 id="代码部分">代码部分</h2>
+<p>像往常一样，在不那么冗长的解释之后，让我们看看代码：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;*
+ * @LastEditors: 帝皇の惊
+ * @Date: 2022-06-26 15:20:09
+ * @Description: 简单的线性图像混合
+ * @LastEditTime: 2022-06-26 15:30:35
+ *&#x2F;
+#include &lt;iostream&gt;
+#include &quot;opencv.hpp&quot;
+
+using namespace cv;
+
+int main(int argc, char** argv) &#123;
+    double alpha &#x3D; 0.5, beta, input;
+    Mat src1, src2, dst;
+
+    &#x2F;&#x2F; Ask the user enter alpha
+    std::cout &lt;&lt; &quot;Simple Linear Blender&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;---------------------&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;* Enter aplha [0-1]: &quot;;
+    std::cin &gt;&gt; input;
+
+    &#x2F;&#x2F; We use the alpha provided by the user if it is between 0 and 1
+    if (input &gt;&#x3D; 0.0 &amp;&amp; input &lt;&#x3D; 1.0) &#123;
+        alpha &#x3D; input;
+    &#125;
+
+    &#x2F;&#x2F; Read Image
+    src1 &#x3D; imread(&quot;LinuxLogo.jpg&quot;);
+    src2 &#x3D; imread(&quot;WindowsLogo.jpg&quot;);
+    if (!src1.data) &#123;
+        printf(&quot;Error loading src1 \n&quot;);
+        return -1;
+    &#125;
+    if (!src2.data) &#123;
+        printf(&quot;Error loading src2 \n&quot;);
+        return -1;
+    &#125;
+
+    &#x2F;&#x2F; Create Window
+    namedWindow(&quot;Linear Blend&quot;, WINDOW_AUTOSIZE);
+
+    beta &#x3D; (1.0 - alpha);
+    addWeighted(src1, alpha, src2, beta, 0.0, dst);
+    imshow(&quot;Linear Blend&quot;, dst);
+    waitKey(0);
+    return 0;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="解释">解释</h2>
+<p>由于我们的目标是执行</p>
+<p><img src="https://s2.loli.net/2022/06/26/pY9LW2fyjiTEmzb.png" alt="1.png"></p>
+<p>因此我们需要两个原图像(<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mn>0</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mtext>与</mtext><msub><mi>f</mi><mn>1</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f_0(x)与f_1(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mord cjk_fallback">与</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>).这里我们以imread形式加载它们:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">src1 &#x3D; imread(&quot;LinuxLogo.jpg&quot;);
+src2 &#x3D; imread(&quot;WindowsLogo.jpg&quot;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<blockquote>
+<p>注意:由于要对src1与src2进行融合,因此它们的大小和类型必须相同</p>
+</blockquote>
+<p>现在我们需要生成<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">g(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>图像,OpenCV提供的<a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=addweighted#addweighted">addWeighted</a> 非常方便</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">beta &#x3D; (1.0 - alpha);
+addWeighted(src1, alpha, src2, beta, 0.0, dst);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>而addWighted产生的图像为:</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>s</mi><mi>t</mi><mo>=</mo><mi>α</mi><mo>∗</mo><mi>s</mi><mi>r</mi><mi>c</mi><mn>1</mn><mo>+</mo><mi>β</mi><mo>∗</mo><mi>s</mi><mi>r</mi><mi>c</mi><mn>2</mn><mo>+</mo><mi>γ</mi></mrow><annotation encoding="application/x-tex">dst=\alpha*src1 + \beta*src2+\gamma
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05556em;">γ</span></span></span></span></span></p>
+<p>在本例中,<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05556em;">γ</span></span></span></span>为0</p>
+<p>接下来创建窗口显示图像.</p>
+<h2 id="结果">结果</h2>
+<p><img src="https://s2.loli.net/2022/06/26/BniMc2CEjzpSWlV.png" alt="2.png"></p>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Changing the contrast and brightness of an image!</title>
+    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-ChangingContrast/</url>
+    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
+<h2 id="目标">目标</h2>
+<p>在本教程中，您将学习如何：</p>
+<ul>
+<li>访问像素值</li>
+<li>使用零初始化矩阵</li>
+<li>了解<a href="http://docs.opencv.org/modules/core/doc/utility_and_system_functions_and_macros.html?highlight=saturate_cast#saturate-cast">saturate_cast</a>以及为什么它有用</li>
+<li>获取有关像素转换的一些很酷的信息</li>
+</ul>
+<h2 id="理论">理论</h2>
+<blockquote>
+<p>注意:下面的理论源自Richard Szeliski的《<a href="http://szeliski.org/Book/">Computer Vision： Algorithms and Applications</a>》一书。</p>
+</blockquote>
+<h3 id="图像处理">图像处理</h3>
+<ul>
+<li>通用图像处理运算符是输入一个或多个图像,并生成输出图像的函数</li>
+<li>图像转换可以视作:
+<ul>
+<li>Point operators (pixel transforms)   (像素级别的转换) (点运算符)</li>
+<li>Neighborhood (area-based) operators  (区域级别的转换)(邻域运算符)</li>
+</ul>
+</li>
+</ul>
+<h3 id="像素转换">像素转换</h3>
+<ul>
+<li>在这种图像处理变换中，每个输出像素的值仅取决于相应的输入像素值（加上一些可能全局收集的信息或参数）。</li>
+<li>此类运算符的包括<em>亮度和对比度调整</em>以及颜色校正和变换。</li>
+</ul>
+<h3 id="亮度和对比度调整">亮度和对比度调整</h3>
+<ul>
+<li>
+<p>两个常用的点过程(point process)为<em>乘法</em>和<em>常数加法</em></p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>α</mi><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">g(x)=\alpha f(x) + \beta
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span></span></span></span></span></p>
+</li>
+<li>
+<p>参数<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo>&gt;</mo><mn>0</mn></mrow><annotation encoding="application/x-tex">\alpha &gt;0</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.5782em;vertical-align:-0.0391em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">&gt;</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span></span></span></span>,并且<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>β</mi></mrow><annotation encoding="application/x-tex">\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span></span></span></span>经常被叫做<em>增益和偏置参数(gain and bias parameters)</em>;有时这些参数分别控制对比度和亮度</p>
+</li>
+<li>
+<p>您可以将<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>是做原图像像素而将<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">g(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>视作输出图像像素,然后我们便可以将表达式改写为:</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>i</mi><mo separator="true">,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mi>α</mi><mi>f</mi><mo stretchy="false">(</mo><mi>i</mi><mo separator="true">,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>+</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">g(i,j)=\alpha f(i,j)+\beta
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span></span></span></span></span></p>
+<p>其中<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>i</mi></mrow><annotation encoding="application/x-tex">i</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.65952em;vertical-align:0em;"></span><span class="mord mathdefault">i</span></span></span></span>和<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>j</mi></mrow><annotation encoding="application/x-tex">j</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.85396em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span></span></span></span>分别指出了像素的行与列.</p>
+</li>
+</ul>
+<h2 id="代码">代码</h2>
+<p>下面的代码进行了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>i</mi><mo separator="true">,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>=</mo><mi>α</mi><mi>f</mi><mo stretchy="false">(</mo><mi>i</mi><mo separator="true">,</mo><mi>j</mi><mo stretchy="false">)</mo><mo>+</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">g(i,j)=\alpha f(i,j)+\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">i</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05724em;">j</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span></span></span></span>操作:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;*
+ * @LastEditors: 帝皇の惊
+ * @Date: 2022-06-26 16:17:00
+ * @Description: Edit Here
+ * @LastEditTime: 2022-06-26 16:57:00
+ *&#x2F;
+#include &lt;iostream&gt;
+#include &quot;opencv.hpp&quot;
+
+using namespace cv;
+
+double alpha;  &#x2F;&#x2F;简易对比度控制
+int beta;      &#x2F;&#x2F;简易亮度控制
+
+int main(int argc, char** argv) &#123;
+    &#x2F;&#x2F; Read image
+    Mat image &#x3D; imread(&quot;E:\\Work\\Visual Studio Code\\fengmian.jpg&quot;);
+    Mat new_image &#x3D; Mat::zeros(image.size(), image.type());
+    &#x2F;&#x2F; &quot;initialize values&quot;
+    std::cout &lt;&lt; &quot;Basic Linear Transforms&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;-----------------------&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;* Enter the alpha value [1.0 - 3.0]: &quot;;
+    std::cin &gt;&gt; alpha;
+    std::cout &lt;&lt; &quot;* Enter the beta value [0 - 100]:&quot;;
+    std::cin &gt;&gt; beta;
+
+    &#x2F;&#x2F; 进行操作g(i,j)&#x3D;alpha*f(i,j)+beta
+    for (int y &#x3D; 0; y &lt; image.rows; y++) &#123;
+        for (int x &#x3D; 0; x &lt; image.cols; x++) &#123;
+            for (int c &#x3D; 0; c &lt; 3; c++) &#123;
+                new_image.at&lt;Vec3b&gt;(y, x)[c] &#x3D; saturate_cast&lt;uchar&gt;(
+                    alpha * (image.at&lt;Vec3b&gt;(y, x)[c]) + beta);
+            &#125;
+        &#125;
+    &#125;
+
+    &#x2F;&#x2F; Craete Window
+    namedWindow(&quot;Original Image&quot;, WINDOW_NORMAL);
+    namedWindow(&quot;New Image&quot;, WINDOW_NORMAL);
+
+    &#x2F;&#x2F; Show Stuff
+    imshow(&quot;Original Image&quot;, image);
+    imshow(&quot;New Image&quot;, new_image);
+    waitKey(0);
+    return 0;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="解释">解释</h2>
+<ol>
+<li>
+<p>我们首先创建并保存<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi><mo separator="true">,</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">\alpha,\beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span></span></span></span>,这两个都是用户输入的参数：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">double alpha;
+int beta;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+</li>
+<li>
+<p>我们使用 <a href="http://docs.opencv.org/modules/highgui/doc/reading_and_writing_images_and_video.html?highlight=imread#imread">imread</a> 加载图像并将其保存在 Mat 对象中：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat image &#x3D; imread(&quot;E:\\Work\\Visual Studio Code\\fengmian.jpg&quot;);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+</li>
+<li>
+<p>现在，由于我们将对此图像进行一些转换，因此我们需要一个新的 Mat 对象来存储它。此外，我们希望它具有以下特点：</p>
+<ul>
+<li>初始像素值等于零</li>
+<li>与原始图像相同的大小和类型</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">Mat new_image &#x3D; Mat::zeros( image.size(), image.type() );<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>我们观察到 <a href="http://docs.opencv.org/modules/core/doc/basic_structures.html?highlight=zeros#mat-zeros">Mat::zeros</a> 返回一个基于 <em>image.size（） 和 image.type（）</em> 的 Matlab 样式的零初始<em>值设定项。</em></p>
+</li>
+<li>
+<p>现在，要执行该操作<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>α</mi><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>+</mo><mi>β</mi></mrow><annotation encoding="application/x-tex">g(x)=\alpha f(x) + \beta</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span></span></span></span>,我们将访问图像中的每个像素。由于我们使用的是BGR图像，因此每个像素将有三个值（B，G和R），因此我们也将单独访问它们：</p>
+<pre class="line-numbers language-none"><code class="language-none">for( int y &#x3D; 0; y &lt; image.rows; y++ )
+   &#123; for( int x &#x3D; 0; x &lt; image.cols; x++ )
+        &#123; for( int c &#x3D; 0; c &lt; 3; c++ )
+             &#123; new_image.at&lt;Vec3b&gt;(y,x)[c] &#x3D;
+                         saturate_cast&lt;uchar&gt;( alpha*( image.at&lt;Vec3b&gt;(y,x)[c] ) + beta ); &#125;
+   &#125;
+   &#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>请注意以下几点：</p>
+<ul>
+<li>为了访问图像中的每个像素，我们使用以下语法：<em>image.at<Vec3b>（y，x）[c]</em>，其中<em>y</em>是行，<em>x</em>是列，<em>c</em>是R，G或B（0，1或2）。</li>
+<li>由于该操作的运算结果可能无效或超出范围，因此我们使用<a href="http://docs.opencv.org/modules/core/doc/utility_and_system_functions_and_macros.html?highlight=saturate_cast#saturate-cast">saturate_cast</a>来确保值有效。</li>
+</ul>
+</li>
+<li>
+<p>最后，我们创建窗口显示图像。</p>
+<pre class="line-numbers language-none"><code class="language-none">namedWindow(&quot;Original Image&quot;, 1);
+namedWindow(&quot;New Image&quot;, 1);
+
+imshow(&quot;Original Image&quot;, image);
+imshow(&quot;New Image&quot;, new_image);
+
+waitKey(0);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+</li>
+</ol>
+<blockquote>
+<p>注意：与其使用 <strong>for</strong> 循环来访问每个像素，不如简单地使用以下命令：</p>
+<pre class="line-numbers language-none"><code class="language-none">&gt;image.convertTo(new_image, -1, alpha, beta);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>其中 <a href="http://docs.opencv.org/modules/core/doc/basic_structures.html#mat-convertto">convertTo</a> 将有效地执行 <em>new_image = a*image + beta</em>。但是，我们想向您展示如何访问每个像素。无论如何，这两种方法都给出了相同的结果，但convertTo更加优化，并且工作速度更快。</p>
+</blockquote>
+<h2 id="结果">结果</h2>
+<p><img src="https://s2.loli.net/2022/06/26/MhGBOspXHqPrRLW.png" alt="1.png"></p>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Mask operations on matrices</title>
+    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Mask%20Mat/</url>
+    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
+<h2 id="矩阵上的掩膜操作">矩阵上的掩膜操作</h2>
+<p>​	矩阵上的掩码操作非常简单。基本做法是，我们根据掩膜矩阵（也称为内核）重新计算图像中的每个像素值。此内核包含的值将调整相邻像素（和当前像素）对新像素值的影响程度。从数学的角度来看，我们用我们指定的值进行了一个加权平均值计算。</p>
+<h2 id="测试用例">测试用例</h2>
+<p>​	让我们考虑一下如何增强图像对比度。基本上，我们会对图像的每个像素应用以下公式：</p>
+<p><img src="https://s2.loli.net/2022/06/26/8H5k7SRCzQ1qExG.png" alt="1.png"></p>
+<p>​	第一种表示法是使用公式，而第二种表示法是使用掩码的第一种表示法的压缩版本。使用掩码核时，请将掩码矩阵的中心放在要计算的像素上，并将像素值与相应位置的矩阵值相乘。在大型矩阵的情况下，后一种表示法更容易查看。</p>
+<p>​	现在让我们看看如何使用基本的像素访问方法或使用<a href="http://docs.opencv.org/modules/imgproc/doc/filtering.html#filter2d">filter2D</a>函数来实现这一点。</p>
+<h2 id="基本方法">基本方法</h2>
+<p>​	以下函数可以执行掩膜操作:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void Sharpen(const Mat&amp; myImage, Mat&amp; result) &#123;
+    CV_Assert(myImage.depth() &#x3D;&#x3D; CV_8U);
+
+    result.create(myImage.size(), myImage.type());
+    const int nChannels &#x3D; myImage.channels();
+
+    for (int j &#x3D; 1; j &lt; myImage.rows - 1; ++j) &#123;
+        const uchar* previous &#x3D; myImage.ptr&lt;uchar&gt;(j - 1);
+        const uchar* current &#x3D; myImage.ptr&lt;uchar&gt;(j);
+        const uchar* next &#x3D; myImage.ptr&lt;uchar&gt;(j + 1);
+
+        uchar* output &#x3D; result.ptr&lt;uchar&gt;(j);
+        for (int i &#x3D; nChannels; i &lt; nChannels * (myImage.cols - 1); ++i) &#123;
+            *output++ &#x3D; saturate_cast&lt;uchar&gt;(
+                5 * current[i] - current[i - nChannels] -
+                current[i + nChannels] - previous[i] - next[i]);
+        &#125;
+    &#125;
+
+    result.row(0).setTo(Scalar(0));
+    result.row(result.rows - 1).setTo(Scalar(0));
+    result.col(0).setTo(Scalar(0));
+    result.col(result.cols - 1).setTo(Scalar(0));
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	首先，我们确保输入图像数据采用<code>uchar</code>格式。为此，我们使用<a href="http://docs.opencv.org/modules/core/doc/utility_and_system_functions_and_macros.html#cv-assert">CV_Assert</a>函数，当其中的表达式为 false 时，该函数会引发错误。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_Assert(myImage.depth() &#x3D;&#x3D; CV_8U);  &#x2F;&#x2F; accept only uchar images<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>​	我们创建与输入具有相同大小和类型类型的输出图像。正如您在<a href="../how_to_scan_images/how_to_scan_images.html#how-image-stored-memory">“图像矩阵如何存储在内存中？”</a>部分中看到的那样，根据通道的数量，我们可能具有一个或多个子列。我们将通过指针循环访问它们.</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Result.create(myImage.size(), myImage.type());
+const int nChannels &#x3D; myImage.channels();<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>​	我们将使用普通的 C [] 运算符来访问像素。由于我们需要同时访问多行，因此我们将获取每个行的指针（上一行、当前行和下一行）。我们需要另一个指针，指向要保存计算结果的位置。然后，只需使用 [] 运算符访问正确的项目即可。为了将输出指针向前移动，我们只需在每次操作后增加此值（使用一个字节）：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">for(int j &#x3D; 1; j &lt; myImage.rows - 1; ++j)
+&#123;
+    const uchar* previous &#x3D; myImage.ptr&lt;uchar&gt;(j - 1);
+    const uchar* current  &#x3D; myImage.ptr&lt;uchar&gt;(j    );
+    const uchar* next     &#x3D; myImage.ptr&lt;uchar&gt;(j + 1);
+
+    uchar* output &#x3D; Result.ptr&lt;uchar&gt;(j);
+
+    for(int i &#x3D; nChannels; i &lt; nChannels * (myImage.cols - 1); ++i)
+    &#123;
+        *output++ &#x3D; saturate_cast&lt;uchar&gt;(5 * current[i]
+                     -current[i - nChannels] - current[i + nChannels] - previous[i] - next[i]);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	在图像的边界上，上一行不存在像素。因此,在这些点上，我们的公式是未定义的。一个简单的解决方案是不在这些点上应用掩码核，例如，将边界上的像素设置为零：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Result.row(0).setTo(Scalar(0));               &#x2F;&#x2F; The top row
+Result.row(Result.rows - 1).setTo(Scalar(0)); &#x2F;&#x2F; The bottom row
+Result.col(0).setTo(Scalar(0));               &#x2F;&#x2F; The left column
+Result.col(Result.cols - 1).setTo(Scalar(0)); &#x2F;&#x2F; The right column<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="filter2d-函数">filter2D 函数</h2>
+<p>​	应用这样的滤镜在图像处理中非常普遍，因此OpenCV提供一个函数来应用掩码（在某些地方也称为内核）。为此，您首先需要定义一个保存掩码核的 <em>Mat</em> 对象：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat kern &#x3D; (Mat_&lt;char&gt;(3,3) &lt;&lt;  0, -1,  0,
+                               -1,  5, -1,
+                                0, -1,  0);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>​	然后调用 <a href="http://docs.opencv.org/modules/imgproc/doc/filtering.html#filter2d">filter2D</a> 函数，指定要使用的输入、输出图像和内核：</p>
+<pre class="line-numbers language-none"><code class="language-none">filter2D(I, K, I.depth(), kern);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>​	该函数甚至有第五个可选参数来指定内核的中心，以及第六个用于确定在操作未定义的区域（边界）中要执行的操作的参数。使用此函数的优点是它更短，更不冗长，并且由于实现了一些优化技术，因此它通常比<em>手动编码的方法</em>更快。例如，在我的测试中，第二个只花了13毫秒，第一个花了大约31毫秒。有很大的不同。</p>
+<p>​	例如：</p>
+<p><img src="https://s2.loli.net/2022/06/26/U6TKPXgfdzFny9V.png" alt="2.png"></p>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
       </tags>
   </entry>
   <entry>
@@ -1873,530 +2557,6 @@ public:
       <tags>
         <tag>Linux</tag>
         <tag>Vim</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mat - The Basic Image Container</title>
-    <url>/2022/06/02/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-02Mat/</url>
-    <content><![CDATA[<h2 id="mat">Mat</h2>
-<p>使用Mat对象无需再自己手动分配和释放内存</p>
-<p>Mat对象由两个数据部分组成：</p>
-<ol>
-<li>
-<p><strong>矩阵头</strong></p>
-<p>包含着一些信息，例如矩阵尺寸，用于记录矩阵存储位置的方法等等</p>
-</li>
-<li>
-<p><strong>矩阵指针</strong></p>
-<p>包含像素值(根据选择的存储方式决定维度)</p>
-</li>
-</ol>
-<p>其中，矩阵头大小恒定，但矩阵实际尺寸视情况而定。</p>
-<p>为了加快程序的运算速度，每一个Mat对象都有自己的头，而一个矩阵有可能通过共享矩阵指针的方式来被两个Mat对象使用。并且，拷贝运算符<strong>只会拷贝矩阵头与矩阵指针，而不会拷贝矩阵本身</strong>。</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat A, C;                          &#x2F;&#x2F; creates just the header parts
-A &#x3D; imread(argv[1], IMREAD_COLOR); &#x2F;&#x2F; here we&#39;ll know the method used (allocate matrix)
-Mat B(A);                                 &#x2F;&#x2F; Use the copy constructor
-C &#x3D; A;                                    &#x2F;&#x2F; Assignment operator<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>上面例子中的<strong>所有Mat对象均指向同一矩阵，改变其中一个会影响到其他的</strong>。</p>
-<p>可以创建一个只含部分数据的矩阵头，例如，要在图像中创建感兴趣区域 （<em>ROI</em>），只需创建一个具有新边界的新标头:</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat D (A, Rect(10, 10, 100, 100) ); &#x2F;&#x2F; using a rectangle
-Mat E &#x3D; A(Range::all(), Range(1,3)); &#x2F;&#x2F; using row and column boundaries<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>Mat对象使用引用计数来负责内存的释放。</p>
-<p>赋值矩阵本身时，可以使用<strong>cv::Mat::clone()<strong>或</strong>cv::Mat::copyTo()</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat F &#x3D; A.clone();
-Mat G;
-A.copyTo(G);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<hr>
-<h2 id="存储方法">存储方法</h2>
-<p><strong>色彩空间是</strong>指我们如何组合颜色分量以编码给定的颜色。最简单的一个是灰度，我们可以支配的颜色是黑色和白色。这些的组合使我们能够创建许多灰色阴影。</p>
-<p>最受欢迎的色彩空间是<strong>RGB</strong>,因为这也是我们眼睛建立颜色感受的方式，其基色为<strong>红，绿，蓝</strong>，有时候为了对颜色透明度进行区分，会加入第四个元素<strong>alpha</strong>。</p>
-<p>还有许多其他色彩空间，例如:</p>
-<ul>
-<li>RGB是最常见的，因为我们的眼睛使用类似的东西，但请记住，OpenCV标准显示系统使用BGR色彩空间组成颜色(而非RGB)</li>
-<li>HSV和HLS将颜色分解为它们的<strong>色调</strong>，<strong>饱和度</strong>和<strong>明度/亮度</strong>分量，这是我们描述颜色的更自然的方式。例如，您可能会忽略最后一个分量，从而使算法对输入图像的光照条件不那么敏感。</li>
-<li>YCrCb被流行的JPEG图像格式使用。</li>
-<li>CIE L<em>a</em>b* 是一个感知上均匀的色彩空间，如果您需要测量给定颜色到另一种颜色的<em>距离</em>，它会派上用场。</li>
-</ul>
-<p>每个色彩空间都有自己的有效域。这将决定我们使用的数据类型。我们如何存储颜色决定了我们对其有效域的控制。可能的最小数据类型是<strong>char</strong>，这意味着 1 个字节或 8 位。这可能是无符号（因此可以存储从 0 到 255 的值）或有符号（从 -127 到 +127 的值）。尽管在三个分量（如RGB）的情况下，这种宽度已经给出了1600万种可能的颜色来表示，但我们可以通过为每个分量使用浮点数（4字节= 32位）或双精度（8字节= 64位）数据类型来获得更精细的控制。但是，请记住，增加组件的大小也会增加内存中整个画面的大小。</p>
-<hr>
-<h2 id="显示创建mat对象">显示创建Mat对象</h2>
-<p>可以使用**&quot;&lt;&lt;&quot;**来查看矩阵具体的值，但该方式仅适用于二维矩阵。</p>
-<ul>
-<li>
-<p><strong>使用Mat构造函数进行创建</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat m(2, 2, CV_8UC3, Scalar(0, 0, 255));
-cout &lt;&lt; &quot;M &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; m &lt;&lt; endl&lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>对于二维和多通道图像，我们首先定义它们的大小：行数和列数。</p>
-<p>然后，我们需要指定用于存储元素的数据类型以及每个矩阵点的通道数。为此，我们根据以下约定构造了多个定义：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_[每个项目的位数][有符号或无符号][类型前缀]C[通道号]<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>例如，<strong>CV_8UC3</strong>意味着我们使用长度为 8 位的无符号 char 类型，每个像素有三个<strong>uchar</strong>来形成三个通道。</p>
-</li>
-<li>
-<p><strong>使用 C/C++数组并通过构造函数进行初始化</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">int sz[3] &#x3D; &#123;2, 2, 2&#125;;
-Mat L(3, sz, CV_8UC1, Scalar::all(0));  &#x2F;&#x2F; 三维，sz数组决定了每个维度的而大小<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p><strong>使用cv::Mat::create函数</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat M;
-M.create(4, 4, CV_8UC(2));
-cout &lt;&lt; M;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p><strong>注意</strong>:这个创建方法不能为矩阵设初值，它只是在改变尺寸时重新为矩阵数据开辟内存。</p>
-</li>
-<li>
-<p><strong>使用Matlab风格的初始化函数：cv::Mat::zeros(), cv::Mat::ones(), cv::Mat::eye()</strong></p>
-<p>需要提供大小和数据类型来创建矩阵：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat E &#x3D; Mat::eye(4, 4, CV_64F);
-cout &lt;&lt; &quot;E &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;
-Mat O &#x3D; Mat::ones(2, 2, CV_32F);
-cout &lt;&lt; &quot;O &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; O &lt;&lt; endl &lt;&lt; endl;
-Mat Z &#x3D; Mat::zeros(3, 3, CV_8UC1);
-cout &lt;&lt; &quot;Z &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; E &lt;&lt; endl &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>对于小型矩阵，可以使用逗号分隔的初始值项或初始值列表：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">   Mat C &#x3D; (Mat_&lt;double&gt;(3, 3) &lt;&lt; 0, -1, 0, -1, 5, -1, 0, -1, 0);
-   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
-   C &#x3D; (Mat_&lt;double&gt;(&#123;0, -1, 0, -1, 5, -1, 0, -1, 0&#125;)).reshape(3);
-   cout &lt;&lt; &quot;C &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; C &lt;&lt; endl;
-&#x2F;&#x2F; reshape(cn, rows):在不改变数据的情况下，将矩阵更改为
-&#x2F;&#x2F; 具有cn个通道，rows行的矩阵<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>为现有Mat对象创建新的头，并对齐使用<strong>cv::Mat::clone</strong>或<strong>cv::Mat::copyTo</strong></p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat RowClone &#x3D; C.row(1).clone();
-   cout &lt;&lt; &quot;RowClone &#x3D; &quot; &lt;&lt; endl &lt;&lt; &quot; &quot; &lt;&lt; RowClone &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-</ul>
-<p><strong>注意</strong>：可以使用**cv::randu()**来随机填充一个矩阵，在使用时需要为随机值提供一个上下限</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat R &#x3D; Mat(3, 2, CV_8UC3);
-randu(R, Scalar::all(0), Scalar::all(255));<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<hr>
-<h2 id="格式化输出">格式化输出</h2>
-<p>有不同的格式，这里不再展示，可以使用的有</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;&#x2F; M为需要输出的矩阵
-cout &lt;&lt; R;								 &#x2F;&#x2F; 默认
-cout &lt;&lt; format(R, Formatter::FMT_PYTHON); 	&#x2F;&#x2F; python
-cout &lt;&lt; format(R, Formatter::FMT_CSV);	    &#x2F;&#x2F; Comma separated values (CSV)
-cout &lt;&lt; format(R, Formatter::FMT_NUMPY);	&#x2F;&#x2F; numpy
-cout &lt;&lt; format(R, Formatter::FMT_C);        &#x2F;&#x2F; C<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<hr>
-<h2 id="其他常用输出">其他常用输出</h2>
-<p>OpenCV也通过&lt;&lt;运算符支持其他常见OpenCV数据结构的输出：</p>
-<ul>
-<li>
-<p>2D Point</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point2f P(5, 1);
-cout &lt;&lt; &quot;Point(2d) &#x3D; &quot; &lt;&lt; P &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>3D Point</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Point3f P3F(2, 6, 7);
-cout &lt;&lt; &quot;Point(3d) &#x3D; &quot; &lt;&lt; P3F &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>通过cv::Mat输出std::vector</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;float&gt; v;
-v.push_back((float)CV_PI);
-v.push_back(2);
-cout &lt;&lt; &quot;Vector of floats via Mat &#x3D; &quot; &lt;&lt; Mat(v) &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-<li>
-<p>由points组成的std::vector</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">vector&lt;Point2f&gt; vPoints(20);
-int j &#x3D; 0;
-for (auto i &#x3D; vPoints.begin(); i !&#x3D; vPoints.end(); ++i)
-&#123;
-    *i &#x3D; Point2f((float)(j * 5), float(j % 7));
-    j++;
-&#125;
-cout &lt;&lt; &quot;A vector of 2D Points &#x3D; &quot; &lt;&lt; vPoints &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-</li>
-</ul>
-]]></content>
-      <categories>
-        <category>图像处理</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>图像处理</tag>
-        <tag>OpenCV</tag>
-        <tag>Core Module</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>How to scan images, lookup tables and time measurement with OpenCV</title>
-    <url>/2022/06/25/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-25-Scan%20Image/</url>
-    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
-<h2 id="目标">目标</h2>
-<p>这篇文章将为您讲解:</p>
-<ul>
-<li>如何遍历图像的每一个像素?</li>
-<li>OpenCV中的矩阵如何存储?</li>
-<li>如何衡量我们使用算法的性能?</li>
-<li>什么是查找表?为什么我们要使用它?</li>
-</ul>
-<h2 id="测试用例">测试用例</h2>
-<p>​	考虑一个简单的减色方法,使用C和C++里的<code>unsigned char</code>类型来作为矩阵的数据类型.因此该矩阵中,每一像素通道都可能含有多达256种不同的数值.对于一个三通道图像,这会造成非常非常多组合(大概1600万).直接操作这些色彩可能会对我们算法的性能造成极大影响.然而,有时可能操作更少数量的色彩,却达到相同的结果.</p>
-<p>​	在这种情况下，我们通常会进行<em>色彩空间缩减</em>。这意味着我们将颜色空间当前值与新的输入值进行划分，最终得到更少的颜色。例如，介于 0 和 9 之间的每个值都采用新值 0，10 到 19 之间的每个值都取值 10，依此类推。</p>
-<p>​	当您将 <em>uchar</em>（无符号 char - 即值介于 0 和 255 之间）值与 <em>int</em> 值相除时，结果也将是 <em>char</em>。这些值只能是字符值。因此，任何分数都将向下舍入。利用这一事实，<em>uchar</em>域中的上部运算可以表示为：</p>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>I</mi><mrow><mi>n</mi><mi>e</mi><mi>w</mi></mrow></msub><mo>=</mo><mfrac><msub><mi>I</mi><mrow><mi>o</mi><mi>l</mi><mi>d</mi></mrow></msub><mn>10</mn></mfrac><mo>∗</mo><mn>10</mn></mrow><annotation encoding="application/x-tex">I_{new}=\frac{I_{old}}{10}*10
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.83333em;vertical-align:-0.15em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.151392em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">n</span><span class="mord mathdefault mtight">e</span><span class="mord mathdefault mtight" style="margin-right:0.02691em;">w</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:2.04633em;vertical-align:-0.686em;"></span><span class="mord"><span class="mopen nulldelimiter"></span><span class="mfrac"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:1.36033em;"><span style="top:-2.314em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord">1</span><span class="mord">0</span></span></span><span style="top:-3.23em;"><span class="pstrut" style="height:3em;"></span><span class="frac-line" style="border-bottom-width:0.04em;"></span></span><span style="top:-3.677em;"><span class="pstrut" style="height:3em;"></span><span class="mord"><span class="mord"><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.33610799999999996em;"><span style="top:-2.5500000000000003em;margin-left:-0.07847em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight"><span class="mord mathdefault mtight">o</span><span class="mord mathdefault mtight" style="margin-right:0.01968em;">l</span><span class="mord mathdefault mtight">d</span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.686em;"><span></span></span></span></span></span><span class="mclose nulldelimiter"></span></span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span><span class="mord">0</span></span></span></span></span></p>
-<p>​	一个简单的色彩空间减少算法将仅传递图像矩阵的每个像素并应用此公式。值得注意的是，我们做了一个除法和乘法运算。对于系统来shu说，这些操作开销非常大。如果可能的话，值得通过使用开销更低的操作来避免它们，例如一些减法，加法在最好情况下就是简单赋值。此外，请注意，对于上述运算，我们只有有限数量的输入值。在使用<em>uchar</em>的情况下，该值为256.</p>
-<p>​	因此，对于较大的图像，明智的做法是事先计算所有可能的值，并且在分配期间只需使用查找表进行分配即可。查找表是简单的数组（具有一个或多个维度），对于给定的输入值变体，它保存最终的输出值。它的优势在于我们不需要进行计算，我们只需要读取结果即可。</p>
-<p>​	我们的测试用例程序（以及此处提供的示例）将执行以下操作：读取控制台行参数所提供的图像，并使用给定的控制台行参数整数值应用缩减。在OpenCV中，目前它们是逐个像素地浏览图像的三种主要方式。为了使事情变得更有趣，将使用所有这些方法扫描每个图像，并打印出花费的时间。</p>
-<p>​	最后一个参数是可选的。给定图像将以灰度格式加载，否则使用BGR颜色方式。第一件事是计算查找表。</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">string input;
-cin &gt;&gt; input;
-stringstream s;
-s &lt;&lt; input;
-int divideWith;
-s &gt;&gt; divideWith;
-if (!s || !divideWith) &#123;
-    cout &lt;&lt; &quot;Invalid number entered for dividing&quot; &lt;&lt; endl;
-    return -1;
-&#125;
-uchar table[256];
-for (int i &#x3D; 0; i &lt; 256; i++) &#123;
-    table[i] &#x3D; (uchar)(divideWith * (i &#x2F; divideWith));
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	在这里，我们首先使用 C++ <em>stringstream</em> 类将输入字符串从文本转换为整数格式。然后，我们使用简单的外观和上面的公式来计算查找表。这里没有OpenCV特定的东西。</p>
-<p>​	另一个问题是我们如何测量时间？OpenCV提供了两个简单的函数来实现这个**getTickCount（）<strong>和</strong>getTickFrequency（）**第一个返回来自特定事件（例如，自您启动系统以来）的系统 CPU tick 。第二个返回 CPU 在一秒内发出tick的次数。因此，以秒为单位测量两次操作之间经过的时间数很容易.</p>
- <pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">   double t &#x3D; (double)getTickCount();
-&#x2F;&#x2F; do somthing
-   t &#x3D; ((double)getTickCount() - t) &#x2F; getTickFrequency();
-   cout &lt;&lt; &quot;Times passed in seconds: &quot; &lt;&lt; t &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="图像矩阵如何保存在内存中">图像矩阵如何保存在内存中?</h2>
-<p>​	矩阵的大小取决于所使用的颜色系统。更准确地说，这取决于所使用的通道数量。对于灰度图像，我们有如下内容：</p>
-<p><img src="https://s2.loli.net/2022/06/26/gDXkM5xtEz6q3Bb.png" alt="1.png"></p>
-<p>​	对于多通道图像，列包含的子列数与通道数一样多。例如，在BGR颜色系统的情况下：</p>
-<p><img src="https://s2.loli.net/2022/06/26/ZJgoKe5Q12B4tYl.png" alt="2.png"></p>
-<p>​	因为在许多情况下，内存足够大，可以连续地存储行，因此行可能会一个接一个存储，从而创建一个长行。由于所有内容都是连续的，因此可以一个接一个地计算，这可能有助于加快扫描过程。我们可以使用 **isContinuous（）**函数来<em>确认</em>矩阵是否属于这种情况。</p>
-<h2 id="更高效的方式">更高效的方式</h2>
-<p>​	在性能方面，最快的便是经典的C样式运算符[]（指针）访问。因此，我们可以推荐的最高效的进行分配的方法是：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat&amp; ScanImageReduceC(Mat&amp; I, uchar* table) &#123;
-    &#x2F;&#x2F; accept only char type matrIces
-    CV_Assert(I.depth() &#x3D;&#x3D; CV_8U);
-
-    int channels &#x3D; I.channels();
-
-    int nRows &#x3D; I.rows;
-    int nCols &#x3D; I.cols;
-
-    if (I.isContinuous()) &#123;
-        nCols &#x3D; nRows * nCols * channels;
-        nRows &#x3D; 1;
-    &#125;
-    int i, j;
-    uchar* p;
-    for (i &#x3D; 0; i &lt; nRows; ++i) &#123;
-        p &#x3D; I.ptr&lt;uchar&gt;(i);
-        for (j &#x3D; 0; j &lt; nCols; ++j) &#123;
-            p[j] &#x3D; table[p[j]];
-        &#125;
-    &#125;
-    return I;
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	在这里，我们基本上只是获取一个指向每行开头的指针，并遍历它直到结束。在矩阵以连续方式存储的特殊情况下，我们只需要请求指针一次，然后一直走到最后。我们需要注意彩色图像：我们有三个通道，因此我们需要在每行中传递三倍以上的项。</p>
-<p>​	还有另一种方式。<em>Mat</em> 对象成员变量<em>data</em>返回指向第一行（第一列）的指针。如果此指针为 null，则该对象中没有有效的输入。这是检查图像加载是否成功的最简单方法。如果存储连续，我们可以使用它来遍历整个数据指针。如果是输入灰度图像，则可以按下面的进行操作：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">uchar* p &#x3D; I.data;
-
-for( unsigned int i &#x3D;0; i &lt; ncol*nrows; ++i)
-    *p++ &#x3D; table[*p];<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	你会得到同样的结果。但是，此代码以后更难阅读。如果你有一些更先进的技术，那就更难了。此外，在实践中，这会获得相同的性能结果（因为大多数现代编译器可能会自动为您进行这个小的优化）。</p>
-<h2 id="迭代器方式-安全方式">迭代器方式(安全方式)</h2>
-<p>​	如果您以指针以及[]方式进行遍历,那么正确处理可能出现的内存间隙就是您的责任.迭代器方法被认为是一种更安全的方式，因为它从用户那里接管这些任务。您需要做的就是询问图像矩阵的开始和结束，然后只需增加开始迭代器，直到到达终点。要获取迭代器<em>指向</em>的值，请使用 * 运算符。</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat&amp; ScanImageAndReduceIterator(Mat&amp; I, uchar* table) &#123;
-    CV_Assert(I.depth() &#x3D;&#x3D; CV_8U);
-    const int channels &#x3D; I.channels();
-    switch (channels) &#123;
-        case 1: &#123;
-            MatIterator_&lt;uchar&gt; it, end;
-            for (it &#x3D; I.begin&lt;uchar&gt;(), end &#x3D; I.end&lt;uchar&gt;(); it !&#x3D; end; ++it) &#123;
-                *it &#x3D; table[*it];
-            &#125;
-            break;
-        &#125;
-        case 3: &#123;
-            MatIterator_&lt;Vec3b&gt; it, end;
-            for (it &#x3D; I.begin&lt;Vec3b&gt;(), end &#x3D; I.end&lt;Vec3b&gt;(); it !&#x3D; end; ++it) &#123;
-                (*it)[0] &#x3D; table[(*it)[0]];
-                (*it)[1] &#x3D; table[(*it)[1]];
-                (*it)[2] &#x3D; table[(*it)[2]];
-            &#125;
-        &#125;
-        default:
-            break;
-    &#125;
-    return I;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	对于彩色图像，每列有三个uchar子列。这可以被认为是uchar项目的简短向量，在OpenCV中以<em>Vec3b</em>命名。要访问第 n 个子列，我们使用简单的运算符 [] 访问。请务必记住，OpenCV 迭代器会遍历各列并自动跳到下一行。因此，对于彩色图像，如果您使用简单的<em>uchar</em>迭代器，您将只能访问蓝色通道值。</p>
-<h2 id="使用引用进行动态地址计算">使用引用进行动态地址计算</h2>
-<p>​	不建议使用此方法进行遍历。它是为了获取或修改图像中的随机元素而制作的。其基本用法是<strong>指定要访问的项目的行号和列号</strong>。在我们早期的遍历方法中，您已经可以通过我们查看图像的类型来观察到这一点很重要。此外,您需要手动指定在自动查找时使用的类型。对于以下源代码的灰度图像（一并演示了**at（）**函数的用法），您可以观察到这一点：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat&amp; ScanImageAndReduceRandomAccess(Mat&amp; I, uchar* table)
-&#123;
-    CV_Assert(I.depth() &#x3D;&#x3D; CV_8U);
-
-    const int channels &#x3D; I.channels();
-    switch (channels)
-    &#123;
-    case 1: &#123;
-        for (int i &#x3D; 0; i &lt; I.rows; ++i)
-        &#123;
-            for (int j &#x3D; 0; j &lt; I.cols; j++)
-            &#123;
-                I.at&lt;uchar&gt;(i, j) &#x3D; table[I.at&lt;uchar&gt;(i, j)];
-            &#125;
-        &#125;
-        break;
-    &#125;
-    case 3: &#123;
-        Mat_&lt;Vec3b&gt; _I &#x3D; I;
-        for (int i &#x3D; 0; i &lt; I.rows; i++)
-        &#123;
-            for (int j &#x3D; 0; j &lt; I.cols; j++) &#123;
-                _I(i, j)[0] &#x3D; table[_I(i, j)[0]];
-                _I(i, j)[1] &#x3D; table[_I(i, j)[1]];
-                _I(i, j)[2] &#x3D; table[_I(i, j)[2]];
-            &#125;
-        &#125;
-        I &#x3D; _I;
-        break;
-    &#125;
-    default:
-        break;
-    &#125;
-    return I;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	这些函数采用您指定输入类型和坐标，并动态计算查询项的地址。然后返回对此的引用。当您<em>获取</em>值时，这可能是一个常量，当您<em>设置</em>值时，这可能是一个非常量。在debug模式下，会有以安全检查措施:将对输入坐标是否有效且存在进行检查。如果不存在或者无效，您将在标准错误输出流上收到一个很好的输出消息。与release模式下的C风格[]方式相比，使用此方法的唯一区别是，对于图像的每个元素，您将获得一个新的行指针，用于我们使用C运算符[]来获取列元素的内容。</p>
-<p>​	如果需要使用此方法对图像进行多次查找，则为每个访问输入类型和 at 关键字可能会很麻烦且耗时。为了解决这个问题，OpenCV具有<strong>Mat_<strong>数据类型。它与Mat相同，在定义时，您需要通过查看数据矩阵的内容来指定数据类型，但是作为回报，您可以使用operator（）来快速访问项目。]同时，OpenCV也提供了很方便</strong>Mat</strong>与**Mat_<strong>的转化方式(如上示例)。尽管如此，重要的是要注意，相同的操作（具有相同的运行时速度）可以使用</strong>at()**函数完成。</p>
-<h2 id="主要函数">主要函数</h2>
-<p>​	这是在图像中实现查找表修改的额外方法。因为在图像处理中，将所有给定的图像值替换为其他值是很常见的，故OpenCV提供了一个函数，该函数无需您自己编写遍历方法便可以进行转变。我们使用核心模块的<a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html#lut">LUT（）</a>功能。首先，我们构建查找表的 Mat 类型：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat lookUpTable(1, 256, CV_8U);
-uchar* p &#x3D; lookUpTable.data;
-for (int i &#x3D; 0; i &lt; 256; i++)
-&#123;
-    p[i] &#x3D; table[i];
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>最后调用函数（I 是我们的输入图像，J 是输出图像）：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">LUT(I, lookUpTable, I);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<h2 id="上述方法的性能差异">上述方法的性能差异</h2>
-<table>
-<thead>
-<tr>
-<th>方法</th>
-<th>耗时</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>迭 代</td>
-<td>83.7201 毫秒</td>
-</tr>
-<tr>
-<td>实时 RA</td>
-<td>93.7878 毫秒</td>
-</tr>
-<tr>
-<td>LUT 函数</td>
-<td>32.5759 毫秒</td>
-</tr>
-<tr>
-<td>C风格[]</td>
-<td>79.4717 毫秒</td>
-</tr>
-</tbody>
-</table>
-<p>​	如果可能的话，使用OpenCV已经提供的函数（而不是重新造轮子）。最快的方法是LUT函数。这是因为 OpenCV 库是通过英特尔线程构建模块启用多线程的。但是，如果您需要编写简单的图像扫描，则首选指针方法。迭代器是一个更安全的方法，但速度相当慢。在调试模式下，使用动态引用访问方法进行全图像扫描是最慢的的。在发布模式下，它可能会快于迭代器方法，但肯定会为此牺牲迭代器的安全特性。</p>
-]]></content>
-      <categories>
-        <category>图像处理</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>图像处理</tag>
-        <tag>OpenCV</tag>
-        <tag>Core Module</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Adding (blending) two images using OpenCV</title>
-    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Add%20image/</url>
-    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
-<h2 id="目标">目标</h2>
-<p>在这篇文章中中，您将学习：</p>
-<ul>
-<li>什么是<em>线性混合</em>以及为什么它是有用的;</li>
-<li>如何使用 <a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=addweighted#addweighted">addWeighted 混合</a>两个图像</li>
-</ul>
-<h2 id="相关理论">相关理论</h2>
-<blockquote>
-<p>注意:下面的解释属于Richard Szeliski的《<a href="http://szeliski.org/Book/">Computer Vision： Algorithms and Applications</a>》一书。</p>
-</blockquote>
-<p>从我们之前的教程中，我们已经知道了一些<em>Pixel运算符</em>。,其中<em>线性混合算子</em>是一个有趣的二元（双输入）算子:</p>
-<p><img src="https://s2.loli.net/2022/06/26/pY9LW2fyjiTEmzb.png" alt="1.png"></p>
-<p>通过赋予<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span></span></span></span>以<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>→</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\rightarrow1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>不同的值,该算子便可以用来在两个图片或视频中制作时间上的淡入淡出效果,因此可以被用于短视频,电影制作中.</p>
-<h2 id="代码部分">代码部分</h2>
-<p>像往常一样，在不那么冗长的解释之后，让我们看看代码：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;*
- * @LastEditors: 帝皇の惊
- * @Date: 2022-06-26 15:20:09
- * @Description: 简单的线性图像混合
- * @LastEditTime: 2022-06-26 15:30:35
- *&#x2F;
-#include &lt;iostream&gt;
-#include &quot;opencv.hpp&quot;
-
-using namespace cv;
-
-int main(int argc, char** argv) &#123;
-    double alpha &#x3D; 0.5, beta, input;
-    Mat src1, src2, dst;
-
-    &#x2F;&#x2F; Ask the user enter alpha
-    std::cout &lt;&lt; &quot;Simple Linear Blender&quot; &lt;&lt; std::endl;
-    std::cout &lt;&lt; &quot;---------------------&quot; &lt;&lt; std::endl;
-    std::cout &lt;&lt; &quot;* Enter aplha [0-1]: &quot;;
-    std::cin &gt;&gt; input;
-
-    &#x2F;&#x2F; We use the alpha provided by the user if it is between 0 and 1
-    if (input &gt;&#x3D; 0.0 &amp;&amp; input &lt;&#x3D; 1.0) &#123;
-        alpha &#x3D; input;
-    &#125;
-
-    &#x2F;&#x2F; Read Image
-    src1 &#x3D; imread(&quot;LinuxLogo.jpg&quot;);
-    src2 &#x3D; imread(&quot;WindowsLogo.jpg&quot;);
-    if (!src1.data) &#123;
-        printf(&quot;Error loading src1 \n&quot;);
-        return -1;
-    &#125;
-    if (!src2.data) &#123;
-        printf(&quot;Error loading src2 \n&quot;);
-        return -1;
-    &#125;
-
-    &#x2F;&#x2F; Create Window
-    namedWindow(&quot;Linear Blend&quot;, WINDOW_AUTOSIZE);
-
-    beta &#x3D; (1.0 - alpha);
-    addWeighted(src1, alpha, src2, beta, 0.0, dst);
-    imshow(&quot;Linear Blend&quot;, dst);
-    waitKey(0);
-    return 0;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="解释">解释</h2>
-<p>由于我们的目标是执行</p>
-<p><img src="https://s2.loli.net/2022/06/26/pY9LW2fyjiTEmzb.png" alt="1.png"></p>
-<p>因此我们需要两个原图像(<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mn>0</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mtext>与</mtext><msub><mi>f</mi><mn>1</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f_0(x)与f_1(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mord cjk_fallback">与</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>).这里我们以imread形式加载它们:</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">src1 &#x3D; imread(&quot;LinuxLogo.jpg&quot;);
-src2 &#x3D; imread(&quot;WindowsLogo.jpg&quot;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<blockquote>
-<p>注意:由于要对src1与src2进行融合,因此它们的大小和类型必须相同</p>
-</blockquote>
-<p>现在我们需要生成<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">g(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>图像,OpenCV提供的<a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=addweighted#addweighted">addWeighted</a> 非常方便</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">beta &#x3D; (1.0 - alpha);
-addWeighted(src1, alpha, src2, beta, 0.0, dst);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>而addWighted产生的图像为:</p>
-<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>s</mi><mi>t</mi><mo>=</mo><mi>α</mi><mo>∗</mo><mi>s</mi><mi>r</mi><mi>c</mi><mn>1</mn><mo>+</mo><mi>β</mi><mo>∗</mo><mi>s</mi><mi>r</mi><mi>c</mi><mn>2</mn><mo>+</mo><mi>γ</mi></mrow><annotation encoding="application/x-tex">dst=\alpha*src1 + \beta*src2+\gamma
-</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05556em;">γ</span></span></span></span></span></p>
-<p>在本例中,<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05556em;">γ</span></span></span></span>为0</p>
-<p>接下来创建窗口显示图像.</p>
-<h2 id="结果">结果</h2>
-<p><img src="https://s2.loli.net/2022/06/26/BniMc2CEjzpSWlV.png" alt="2.png"></p>
-]]></content>
-      <categories>
-        <category>图像处理</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>图像处理</tag>
-        <tag>OpenCV</tag>
-        <tag>Core Module</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mask operations on matrices</title>
-    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Mask%20Mat/</url>
-    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
-<h2 id="矩阵上的掩膜操作">矩阵上的掩膜操作</h2>
-<p>​	矩阵上的掩码操作非常简单。基本做法是，我们根据掩膜矩阵（也称为内核）重新计算图像中的每个像素值。此内核包含的值将调整相邻像素（和当前像素）对新像素值的影响程度。从数学的角度来看，我们用我们指定的值进行了一个加权平均值计算。</p>
-<h2 id="测试用例">测试用例</h2>
-<p>​	让我们考虑一下如何增强图像对比度。基本上，我们会对图像的每个像素应用以下公式：</p>
-<p><img src="https://s2.loli.net/2022/06/26/8H5k7SRCzQ1qExG.png" alt="1.png"></p>
-<p>​	第一种表示法是使用公式，而第二种表示法是使用掩码的第一种表示法的压缩版本。使用掩码核时，请将掩码矩阵的中心放在要计算的像素上，并将像素值与相应位置的矩阵值相乘。在大型矩阵的情况下，后一种表示法更容易查看。</p>
-<p>​	现在让我们看看如何使用基本的像素访问方法或使用<a href="http://docs.opencv.org/modules/imgproc/doc/filtering.html#filter2d">filter2D</a>函数来实现这一点。</p>
-<h2 id="基本方法">基本方法</h2>
-<p>​	以下函数可以执行掩膜操作:</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void Sharpen(const Mat&amp; myImage, Mat&amp; result) &#123;
-    CV_Assert(myImage.depth() &#x3D;&#x3D; CV_8U);
-
-    result.create(myImage.size(), myImage.type());
-    const int nChannels &#x3D; myImage.channels();
-
-    for (int j &#x3D; 1; j &lt; myImage.rows - 1; ++j) &#123;
-        const uchar* previous &#x3D; myImage.ptr&lt;uchar&gt;(j - 1);
-        const uchar* current &#x3D; myImage.ptr&lt;uchar&gt;(j);
-        const uchar* next &#x3D; myImage.ptr&lt;uchar&gt;(j + 1);
-
-        uchar* output &#x3D; result.ptr&lt;uchar&gt;(j);
-        for (int i &#x3D; nChannels; i &lt; nChannels * (myImage.cols - 1); ++i) &#123;
-            *output++ &#x3D; saturate_cast&lt;uchar&gt;(
-                5 * current[i] - current[i - nChannels] -
-                current[i + nChannels] - previous[i] - next[i]);
-        &#125;
-    &#125;
-
-    result.row(0).setTo(Scalar(0));
-    result.row(result.rows - 1).setTo(Scalar(0));
-    result.col(0).setTo(Scalar(0));
-    result.col(result.cols - 1).setTo(Scalar(0));
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	首先，我们确保输入图像数据采用<code>uchar</code>格式。为此，我们使用<a href="http://docs.opencv.org/modules/core/doc/utility_and_system_functions_and_macros.html#cv-assert">CV_Assert</a>函数，当其中的表达式为 false 时，该函数会引发错误。</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_Assert(myImage.depth() &#x3D;&#x3D; CV_8U);  &#x2F;&#x2F; accept only uchar images<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>​	我们创建与输入具有相同大小和类型类型的输出图像。正如您在<a href="../how_to_scan_images/how_to_scan_images.html#how-image-stored-memory">“图像矩阵如何存储在内存中？”</a>部分中看到的那样，根据通道的数量，我们可能具有一个或多个子列。我们将通过指针循环访问它们.</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Result.create(myImage.size(), myImage.type());
-const int nChannels &#x3D; myImage.channels();<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
-<p>​	我们将使用普通的 C [] 运算符来访问像素。由于我们需要同时访问多行，因此我们将获取每个行的指针（上一行、当前行和下一行）。我们需要另一个指针，指向要保存计算结果的位置。然后，只需使用 [] 运算符访问正确的项目即可。为了将输出指针向前移动，我们只需在每次操作后增加此值（使用一个字节）：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">for(int j &#x3D; 1; j &lt; myImage.rows - 1; ++j)
-&#123;
-    const uchar* previous &#x3D; myImage.ptr&lt;uchar&gt;(j - 1);
-    const uchar* current  &#x3D; myImage.ptr&lt;uchar&gt;(j    );
-    const uchar* next     &#x3D; myImage.ptr&lt;uchar&gt;(j + 1);
-
-    uchar* output &#x3D; Result.ptr&lt;uchar&gt;(j);
-
-    for(int i &#x3D; nChannels; i &lt; nChannels * (myImage.cols - 1); ++i)
-    &#123;
-        *output++ &#x3D; saturate_cast&lt;uchar&gt;(5 * current[i]
-                     -current[i - nChannels] - current[i + nChannels] - previous[i] - next[i]);
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>​	在图像的边界上，上一行不存在像素。因此,在这些点上，我们的公式是未定义的。一个简单的解决方案是不在这些点上应用掩码核，例如，将边界上的像素设置为零：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Result.row(0).setTo(Scalar(0));               &#x2F;&#x2F; The top row
-Result.row(Result.rows - 1).setTo(Scalar(0)); &#x2F;&#x2F; The bottom row
-Result.col(0).setTo(Scalar(0));               &#x2F;&#x2F; The left column
-Result.col(Result.cols - 1).setTo(Scalar(0)); &#x2F;&#x2F; The right column<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="filter2d-函数">filter2D 函数</h2>
-<p>​	应用这样的滤镜在图像处理中非常普遍，因此OpenCV提供一个函数来应用掩码（在某些地方也称为内核）。为此，您首先需要定义一个保存掩码核的 <em>Mat</em> 对象：</p>
-<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat kern &#x3D; (Mat_&lt;char&gt;(3,3) &lt;&lt;  0, -1,  0,
-                               -1,  5, -1,
-                                0, -1,  0);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
-<p>​	然后调用 <a href="http://docs.opencv.org/modules/imgproc/doc/filtering.html#filter2d">filter2D</a> 函数，指定要使用的输入、输出图像和内核：</p>
-<pre class="line-numbers language-none"><code class="language-none">filter2D(I, K, I.depth(), kern);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>​	该函数甚至有第五个可选参数来指定内核的中心，以及第六个用于确定在操作未定义的区域（边界）中要执行的操作的参数。使用此函数的优点是它更短，更不冗长，并且由于实现了一些优化技术，因此它通常比<em>手动编码的方法</em>更快。例如，在我的测试中，第二个只花了13毫秒，第一个花了大约31毫秒。有很大的不同。</p>
-<p>​	例如：</p>
-<p><img src="https://s2.loli.net/2022/06/26/U6TKPXgfdzFny9V.png" alt="2.png"></p>
-]]></content>
-      <categories>
-        <category>图像处理</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>图像处理</tag>
-        <tag>OpenCV</tag>
-        <tag>Core Module</tag>
       </tags>
   </entry>
   <entry>
@@ -3980,66 +4140,6 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>关于函数体内指针指向问题</title>
-    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
-<p>下面来诠释此问题。</p>
-<p></p>
-<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
-<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
-	int data;
-	test* next &#x3D; NULL;
-&#125;;
-
-test* createList()
-&#123;
-	test* list &#x3D; new test;
-	test* ret &#x3D; list;
-	for (int i &#x3D; 0; i &lt; 10; i++)
-	&#123;
-		test* newNode &#x3D; new test;
-		newNode-&gt;data &#x3D; i;
-		list-&gt;next &#x3D; newNode;
-		list &#x3D; list-&gt;next;
-	&#125;
-	return ret;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我们有一个测试函数来改变指针：</p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-
-int main()
-&#123;
-	test* testlist &#x3D; createList();
-	changePoint(testlist);
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
-<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
-<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
-<p>可见在函数体内部，指针是被改变了的。</p>
-<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
-<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
-<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>可以发现，指针被顺利改写。</p>
-<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
-<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
-<p></p>
-]]></content>
-      <tags>
-        <tag>C++</tag>
-        <tag>细节问题</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>【算法】插入类排序</title>
     <url>/2022/06/05/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-06-04-%E6%8F%92%E5%85%A5%E7%B1%BB%E6%8E%92%E5%BA%8F/</url>
     <content><![CDATA[<h2 id="简介">简介</h2>
@@ -4185,6 +4285,66 @@ void InsertSortion::shellSort(TargetType *data, int n, int *dalta, int m)
         <tag>C++</tag>
         <tag>算法</tag>
         <tag>排序算法</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>关于函数体内指针指向问题</title>
+    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
+<p>下面来诠释此问题。</p>
+<p></p>
+<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
+<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
+	int data;
+	test* next &#x3D; NULL;
+&#125;;
+
+test* createList()
+&#123;
+	test* list &#x3D; new test;
+	test* ret &#x3D; list;
+	for (int i &#x3D; 0; i &lt; 10; i++)
+	&#123;
+		test* newNode &#x3D; new test;
+		newNode-&gt;data &#x3D; i;
+		list-&gt;next &#x3D; newNode;
+		list &#x3D; list-&gt;next;
+	&#125;
+	return ret;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们有一个测试函数来改变指针：</p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+
+int main()
+&#123;
+	test* testlist &#x3D; createList();
+	changePoint(testlist);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
+<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
+<p>可见在函数体内部，指针是被改变了的。</p>
+<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
+<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
+<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以发现，指针被顺利改写。</p>
+<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
+<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
+<p></p>
+]]></content>
+      <tags>
+        <tag>C++</tag>
+        <tag>细节问题</tag>
       </tags>
   </entry>
   <entry>
@@ -4733,6 +4893,159 @@ int main()
       </tags>
   </entry>
   <entry>
+    <title>奇怪的电梯（洛谷P1135）</title>
+    <url>/2022/03/19/%E9%A2%98%E8%A7%A3/2022-03-19-%E5%A5%87%E6%80%AA%E7%9A%84%E7%94%B5%E6%A2%AF%EF%BC%88%E6%B4%9B%E8%B0%B7P1135%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言-吐槽">前言&amp;吐槽</h1>
+<p>同样可以拿dfs，这道题怎么就难那么多呢？</p>
+<h1 id="题目描述">题目描述</h1>
+<p><a href="https://www.luogu.com.cn/problem/P1135">奇怪的电梯</a></p>
+<p><img src="https://s2.loli.net/2022/06/07/Alx2YXHSUzEJ53o.png" alt="1.png"></p>
+<h1 id="算法设计">算法设计</h1>
+<p>dfs的基本框架就是遍历一个结点的每一条路，所以我们的算法大概可以设计成这样</p>
+<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor()
+&#123;
+    if (当前楼层 &#x3D;&#x3D; 目标楼层)
+    &#123;
+        做一些操作...
+        retrun;
+    &#125;
+    
+    if (满足电梯向上走的条件)
+    &#123;
+        dfsInEveryFloor();
+    &#125;
+    if (满足电梯向下走的条件)
+    &#123;
+        dfsInEveryFloor();
+    &#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们假设step是所求的最小次数，sum为某一条路需要的次数，那么可以知道：</p>
+<ul>
+<li>在一个结点处，无论向上还是向下，sum都应该加1，但是sum本身不应该改变，因为那样sum得出来就不是一条路的次数了，而是多条路的总次数</li>
+<li>如果达到了目标，就可以置step了</li>
+<li>如果sum已经大于step，那么这个路就已经不是最小的了，直接return结束递归</li>
+</ul>
+<p>根据上述发现，我们将代码完善一下：</p>
+<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor(int now, int sum)
+&#123;
+    if (now &#x3D;&#x3D; targetFloor)
+    &#123;
+        step &#x3D; min(step, sum);  &#x2F;&#x2F;sum与step的最小值
+        return;
+    &#125;
+    
+    if (sum &gt; step)
+    &#123;
+        return;
+    &#125;
+    
+    if (now + floor[now] &lt;&#x3D; N)
+    &#123;
+        dfsInEveryFloor(now + floor[now], sum + 1); &#x2F;&#x2F;如果这里使用sum++，求的是两条路加起来的次数
+    &#125;
+    if (now - floor[now] &gt; 0)
+    &#123;
+        dfsInEveryFloor(now - floor[now], sum + 1);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>但是这并不能解这道题，因为如果楼层的按钮为0的话，会造成无限递归</p>
+<p>解决方案是，看看这条路的此结点有没有经过。</p>
+<p>我们使用</p>
+<pre class="line-numbers language-none"><code class="language-none">bool floorState[205];    &#x2F;&#x2F;因为楼层最多200
+<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>来保存状态</p>
+<p>那么代码可以更改为</p>
+<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor(int now, int sum)
+&#123;
+    if (now &#x3D;&#x3D; targetFloor)
+    &#123;
+        step &#x3D; min(step, sum); &#x2F;&#x2F; sum与step的最小值
+        return;
+    &#125;
+
+    if (sum &gt; step)
+    &#123;
+        return;
+    &#125;
+    floorState[now] &#x3D; 1;                                        &#x2F;&#x2F;已经过
+    if (now + floor[now] &lt;&#x3D; N &amp;&amp; !floorState[now + floor[now]]) &#x2F;&#x2F;下一个结点没经过
+    &#123;
+        dfsInEveryFloor(now + floor[now], sum + 1); &#x2F;&#x2F;如果这里使用sum++，求的是两条路加起来的次数
+    &#125;
+    if (now - floor[now] &gt; 0 &amp;&amp; !floorState[now - floor[now]])
+    &#123;
+        dfsInEveryFloor(now - floor[now], sum + 1);
+    &#125;
+
+    floorState[now] &#x3D; 0; &#x2F;&#x2F;接下来要回溯到上一个结点走另一条路，此时已经是不同的路了，因此需要重置状态
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>到此为止，算法已经设计完了。接下来就进行实现吧</p>
+<h1 id="代码实现">代码实现</h1>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+using namespace std;
+bool floorState[205] &#x3D; &#123;0&#125;;   &#x2F;&#x2F;记录楼层状态（这条有没有被搜索）
+int floorStep[205] &#x3D; &#123;0&#125;;
+int N, A, B;
+int step &#x3D; 0x7fffff;
+
+void dfs(int now, int sum)
+&#123;
+    if (now &#x3D;&#x3D; B)
+    &#123;
+        step &#x3D; min(step, sum);
+    &#125;
+    &#x2F;&#x2F;因为寻找的是最短路径
+    if (sum &gt; step)
+    &#123;
+        return;
+    &#125;
+    
+    floorState[now] &#x3D; 1;    &#x2F;&#x2F;该层被搜索
+    if (now + floorStep[now] &lt;&#x3D; N &amp;&amp; !floorState[now + floorStep[now]])
+    &#123;
+        dfs(now + floorStep[now], sum + 1);
+    &#125;
+    if (now - floorStep[now] &gt; 0 &amp;&amp; !floorState[now-floorStep[now]])
+    &#123;
+        dfs(now - floorStep[now], sum + 1);
+    &#125;
+    &#x2F;&#x2F;实际上上面那两个已经把当前楼层的情况搜完了
+    &#x2F;&#x2F;因此下面需要回溯到新的路径时，需要重置状态
+    floorState[now] &#x3D; 0;
+&#125;
+
+int main()
+&#123;
+    cin &gt;&gt; N &gt;&gt; A &gt;&gt; B;
+    for (int i &#x3D; 1; i &lt;&#x3D; N; i++)
+    &#123;
+        cin &gt;&gt; floorStep[i];
+    &#125;
+    dfs(A, 0);
+    if (step !&#x3D; 0x7fffff)
+    &#123;
+        cout &lt;&lt; step;
+    &#125;
+    else&#123;
+        cout &lt;&lt; -1;
+    &#125;
+    
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我也是才刚刚学DFS，若有不准确还请指出</p>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>题解</tag>
+        <tag>洛谷</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>逆波兰式（NOJ第8题）</title>
     <url>/2022/03/17/%E9%A2%98%E8%A7%A3/2022-03-17-%E9%80%86%E6%B3%A2%E5%85%B0%E5%BC%8F%EF%BC%88NOJ%E7%AC%AC8%E9%A2%98%EF%BC%89/</url>
     <content><![CDATA[<h1 id="前言">前言</h1>
@@ -4933,159 +5246,6 @@ int main()
         <tag>C++</tag>
         <tag>题解</tag>
         <tag>NOJ</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>奇怪的电梯（洛谷P1135）</title>
-    <url>/2022/03/19/%E9%A2%98%E8%A7%A3/2022-03-19-%E5%A5%87%E6%80%AA%E7%9A%84%E7%94%B5%E6%A2%AF%EF%BC%88%E6%B4%9B%E8%B0%B7P1135%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="前言-吐槽">前言&amp;吐槽</h1>
-<p>同样可以拿dfs，这道题怎么就难那么多呢？</p>
-<h1 id="题目描述">题目描述</h1>
-<p><a href="https://www.luogu.com.cn/problem/P1135">奇怪的电梯</a></p>
-<p><img src="https://s2.loli.net/2022/06/07/Alx2YXHSUzEJ53o.png" alt="1.png"></p>
-<h1 id="算法设计">算法设计</h1>
-<p>dfs的基本框架就是遍历一个结点的每一条路，所以我们的算法大概可以设计成这样</p>
-<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor()
-&#123;
-    if (当前楼层 &#x3D;&#x3D; 目标楼层)
-    &#123;
-        做一些操作...
-        retrun;
-    &#125;
-    
-    if (满足电梯向上走的条件)
-    &#123;
-        dfsInEveryFloor();
-    &#125;
-    if (满足电梯向下走的条件)
-    &#123;
-        dfsInEveryFloor();
-    &#125;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我们假设step是所求的最小次数，sum为某一条路需要的次数，那么可以知道：</p>
-<ul>
-<li>在一个结点处，无论向上还是向下，sum都应该加1，但是sum本身不应该改变，因为那样sum得出来就不是一条路的次数了，而是多条路的总次数</li>
-<li>如果达到了目标，就可以置step了</li>
-<li>如果sum已经大于step，那么这个路就已经不是最小的了，直接return结束递归</li>
-</ul>
-<p>根据上述发现，我们将代码完善一下：</p>
-<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor(int now, int sum)
-&#123;
-    if (now &#x3D;&#x3D; targetFloor)
-    &#123;
-        step &#x3D; min(step, sum);  &#x2F;&#x2F;sum与step的最小值
-        return;
-    &#125;
-    
-    if (sum &gt; step)
-    &#123;
-        return;
-    &#125;
-    
-    if (now + floor[now] &lt;&#x3D; N)
-    &#123;
-        dfsInEveryFloor(now + floor[now], sum + 1); &#x2F;&#x2F;如果这里使用sum++，求的是两条路加起来的次数
-    &#125;
-    if (now - floor[now] &gt; 0)
-    &#123;
-        dfsInEveryFloor(now - floor[now], sum + 1);
-    &#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>但是这并不能解这道题，因为如果楼层的按钮为0的话，会造成无限递归</p>
-<p>解决方案是，看看这条路的此结点有没有经过。</p>
-<p>我们使用</p>
-<pre class="line-numbers language-none"><code class="language-none">bool floorState[205];    &#x2F;&#x2F;因为楼层最多200
-<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
-<p>来保存状态</p>
-<p>那么代码可以更改为</p>
-<pre class="line-numbers language-none"><code class="language-none">void dfsInEveryFloor(int now, int sum)
-&#123;
-    if (now &#x3D;&#x3D; targetFloor)
-    &#123;
-        step &#x3D; min(step, sum); &#x2F;&#x2F; sum与step的最小值
-        return;
-    &#125;
-
-    if (sum &gt; step)
-    &#123;
-        return;
-    &#125;
-    floorState[now] &#x3D; 1;                                        &#x2F;&#x2F;已经过
-    if (now + floor[now] &lt;&#x3D; N &amp;&amp; !floorState[now + floor[now]]) &#x2F;&#x2F;下一个结点没经过
-    &#123;
-        dfsInEveryFloor(now + floor[now], sum + 1); &#x2F;&#x2F;如果这里使用sum++，求的是两条路加起来的次数
-    &#125;
-    if (now - floor[now] &gt; 0 &amp;&amp; !floorState[now - floor[now]])
-    &#123;
-        dfsInEveryFloor(now - floor[now], sum + 1);
-    &#125;
-
-    floorState[now] &#x3D; 0; &#x2F;&#x2F;接下来要回溯到上一个结点走另一条路，此时已经是不同的路了，因此需要重置状态
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>到此为止，算法已经设计完了。接下来就进行实现吧</p>
-<h1 id="代码实现">代码实现</h1>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
-using namespace std;
-bool floorState[205] &#x3D; &#123;0&#125;;   &#x2F;&#x2F;记录楼层状态（这条有没有被搜索）
-int floorStep[205] &#x3D; &#123;0&#125;;
-int N, A, B;
-int step &#x3D; 0x7fffff;
-
-void dfs(int now, int sum)
-&#123;
-    if (now &#x3D;&#x3D; B)
-    &#123;
-        step &#x3D; min(step, sum);
-    &#125;
-    &#x2F;&#x2F;因为寻找的是最短路径
-    if (sum &gt; step)
-    &#123;
-        return;
-    &#125;
-    
-    floorState[now] &#x3D; 1;    &#x2F;&#x2F;该层被搜索
-    if (now + floorStep[now] &lt;&#x3D; N &amp;&amp; !floorState[now + floorStep[now]])
-    &#123;
-        dfs(now + floorStep[now], sum + 1);
-    &#125;
-    if (now - floorStep[now] &gt; 0 &amp;&amp; !floorState[now-floorStep[now]])
-    &#123;
-        dfs(now - floorStep[now], sum + 1);
-    &#125;
-    &#x2F;&#x2F;实际上上面那两个已经把当前楼层的情况搜完了
-    &#x2F;&#x2F;因此下面需要回溯到新的路径时，需要重置状态
-    floorState[now] &#x3D; 0;
-&#125;
-
-int main()
-&#123;
-    cin &gt;&gt; N &gt;&gt; A &gt;&gt; B;
-    for (int i &#x3D; 1; i &lt;&#x3D; N; i++)
-    &#123;
-        cin &gt;&gt; floorStep[i];
-    &#125;
-    dfs(A, 0);
-    if (step !&#x3D; 0x7fffff)
-    &#123;
-        cout &lt;&lt; step;
-    &#125;
-    else&#123;
-        cout &lt;&lt; -1;
-    &#125;
-    
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我也是才刚刚学DFS，若有不准确还请指出</p>
-]]></content>
-      <categories>
-        <category>题解</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>题解</tag>
-        <tag>洛谷</tag>
       </tags>
   </entry>
   <entry>
