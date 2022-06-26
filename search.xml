@@ -1,6 +1,407 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Qt动画框架使用</title>
+    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
+　　本文算是一篇转载文章。<br>
+　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
+<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
+<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
+<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
+<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
+　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
+<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
+<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
+<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
+<table>
+<thead>
+<tr>
+<th>QAbstractAnimation</th>
+<th>所有动画类的基类</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QAnimationGroup</td>
+<td>动画容器类的抽象基类</td>
+</tr>
+<tr>
+<td>QEasingCurve</td>
+<td>动画控制的缓和曲线类</td>
+</tr>
+<tr>
+<td>QParallelAnimationGroup</td>
+<td>并行动画容器</td>
+</tr>
+<tr>
+<td>QPauseAnimation</td>
+<td>QSequentialAnimationGroup对象暂停延迟</td>
+</tr>
+<tr>
+<td>QPropertyAnimation</td>
+<td>Qt动画属性操作</td>
+</tr>
+<tr>
+<td>QSequentialAnimationGroup</td>
+<td>串行动画容器</td>
+</tr>
+<tr>
+<td>QTimeLine</td>
+<td>动画控制的时间片类</td>
+</tr>
+<tr>
+<td>QVariantAnimation</td>
+<td>动画类的抽象基类</td>
+</tr>
+</tbody>
+</table>
+<h2 id="qt动画属性">Qt动画属性</h2>
+<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
+　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
+　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
+<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
+　　也可以做到类似CSS中的@keyframe效果，例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
+&#123;
+　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
+　　animation-&gt;setDuration(10000);
+　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
+　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
+　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
+　　animation-&gt;start();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
+<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
+&#123;
+    Q_OBJECT
+    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
+]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+        <tag>C++</tag>
+        <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Qt图形视图框架</title>
+    <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
+    <content><![CDATA[<h2 id="前言">前言</h2>
+<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
+　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
+<h2 id="图形视图框架概述">图形视图框架概述</h2>
+<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
+<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
+<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
+<h2 id="场景">场景</h2>
+<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
+<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
+<ul>
+<li>
+<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
+</li>
+<li>
+<p>键盘输入焦点和键盘事件</p>
+</li>
+<li>
+<p>拖放事件</p>
+</li>
+<li>
+<p>碰撞检测</p>
+</li>
+</ul>
+<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
+<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
+　　纯虚函数实现示例：</p>
+<pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
+&#123;
+    qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
+    return QRectF(0 - penWidth &#x2F; 2, 0 - penWidth &#x2F; 2,
+                  20 + penWidth, 20 + penWidth);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<pre class="line-numbers language-none"><code class="language-none">void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
+&#123;
+    painter-&gt;setBrush(Qt::red);
+    painter-&gt;drawRect(0, 0, 20, 20);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>##图形视图框架的坐标系统<br>
+　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
+<h3 id="图形项坐标">图形项坐标</h3>
+<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
+<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
+<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
+<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
+<h3 id="场景坐标">场景坐标</h3>
+<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
+<h3 id="视图坐标">视图坐标</h3>
+<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
+<h3 id="坐标映射">坐标映射</h3>
+<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
+<p>####图形视图框架的映射函数</p>
+<table>
+<thead>
+<tr>
+<th>映射函数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QGraphicsView::mapToScene( )</td>
+<td>从视图坐标系统映射到场景坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsView::mapFromScene( )</td>
+<td>从场景坐标系统映射到视图坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToScene( )</td>
+<td>从图形项的坐标系统映射到场景的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromScene( )</td>
+<td>从场景的坐标系统映射到图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToParent( )</td>
+<td>从本图形项的坐标系统映射到其父图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromParent( )</td>
+<td>从父图形项的坐标系统映射到本图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapToItem( )</td>
+<td>从本图形项的坐标系统映射到另一个图形项的坐标系统</td>
+</tr>
+<tr>
+<td>QGraphicsItem::mapFromItem( )</td>
+<td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
+</tr>
+</tbody>
+</table>
+<h2 id="事件处理与传播">事件处理与传播</h2>
+<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
+<h2 id="示例">示例</h2>
+<h3 id="myitem">MyItem</h3>
+<ul>
+<li>MyItem.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+
+#include &lt;QGraphicsItem&gt;
+
+class MyTime : public QGraphicsItem
+&#123;
+
+public:
+	MyTime();
+	~MyTime();
+	QRectF boundingRect() const override;
+	void paint(QPainter* painter,
+		const QStyleOptionGraphicsItem* option,
+		QWidget* widget) override;
+	void setColor(const QColor&amp; color);
+
+private:
+	QColor brushColor;
+
+protected:
+	void KeyPressEvent(QKeyEvent* event);
+	void mousePressEvent(QGraphicsSceneMouseEvent* event);
+	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
+	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyItem.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
+
+#include &lt;QPainter&gt;
+#include &lt;QCursor&gt;
+#include &lt;QKeyEvent&gt;
+#include &lt;QGraphicsSceneHoverEvent&gt;
+#include &lt;QGraphicsSceneContextMenuEvent&gt;
+#include &lt;QMenu&gt;
+
+MyTime::MyTime()
+&#123;
+	brushColor &#x3D; Qt::red;
+
+	setFlag(QGraphicsItem::ItemIsFocusable);
+	setFlag(QGraphicsItem::ItemIsMovable);
+
+	setAcceptHoverEvents(true);
+&#125;
+
+MyTime::~MyTime()
+&#123;
+&#125;
+
+QRectF MyTime::boundingRect() const
+&#123;
+	qreal adjust &#x3D; 0.5;
+	return QRectF(
+		-10 - adjust,
+		-10 - adjust,
+		20 + adjust,
+		20 + adjust
+	);
+&#125;
+
+void MyTime::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+&#123;
+	if (hasFocus())
+	&#123;
+		painter-&gt;setPen(QPen(QColor(255, 255, 255, 200)));
+	&#125;
+	else
+	&#123;
+		painter-&gt;setPen(QPen(QColor(100, 100, 100, 100)));
+	&#125;
+	painter-&gt;setBrush(brushColor);
+	painter-&gt;drawRect(-10, -10, 20, 20);
+&#125;
+
+void MyTime::setColor(const QColor&amp; color)
+&#123;
+	brushColor &#x3D; color;
+&#125;
+
+void MyTime::KeyPressEvent(QKeyEvent* event)
+&#123;
+	if (event-&gt;key() &#x3D;&#x3D; Qt::Key_Down)
+	&#123;
+		moveBy(0, 10);
+	&#125;
+&#125;
+
+void MyTime::mousePressEvent(QGraphicsSceneMouseEvent* event)
+&#123;
+	setFocus();
+	setCursor(Qt::ClosedHandCursor);
+&#125;
+
+void MyTime::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
+&#123;
+	setCursor(Qt::OpenHandCursor);
+	setToolTip(&quot;I am a item&quot;);
+&#125;
+
+void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
+&#123;
+	QMenu menu;
+	QAction* moveAction &#x3D; menu.addAction(&quot;move back&quot;);
+	QAction* selectedAction &#x3D; menu.exec(event-&gt;screenPos());
+	if (selectedAction &#x3D;&#x3D; moveAction)
+	&#123;
+		setPos(0, 0);
+	&#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="myview">MyView</h3>
+<ul>
+<li>MyView.h</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+
+#include &lt;QGraphicsView&gt;
+
+class MyView : public QGraphicsView
+&#123;
+
+public:
+	MyView();
+	~MyView();
+protected:
+	void keyPressEvent(QKeyEvent* event);
+&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<ul>
+<li>MyView.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
+#include &lt;QKeyEvent&gt;
+
+MyView::MyView()
+	
+&#123;
+&#125;
+
+MyView::~MyView()
+&#123;
+&#125;
+
+void MyView::keyPressEvent(QKeyEvent* event)
+&#123;
+	switch (event-&gt;key())
+	&#123;
+	case Qt::Key_Plus:
+		scale(1.2, 1.2);
+		break;
+	case Qt::Key_Minus:
+		scale(1 &#x2F; 1.2, 1 &#x2F; 1.2);
+		break;
+	case Qt::Key_Right:
+		rotate(30);
+	default:
+		break;
+	&#125;
+	QGraphicsView::keyPressEvent(event);
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h3 id="main">main</h3>
+<ul>
+<li>main.cpp</li>
+</ul>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
+#include &lt;QTime&gt;
+#include &quot;MyTime.h&quot;
+#include &quot;MyView.h&quot;
+
+int main(int argc, char *argv[])
+&#123;
+    QApplication app(argc, argv);
+    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+    QGraphicsScene scene;
+    scene.setSceneRect(-200, -150, 400, 300);
+
+    for (int i &#x3D; 0; i &lt; 5; i++)
+    &#123;
+        MyTime* item &#x3D; new MyTime();
+        item-&gt;setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
+        item-&gt;setPos(i * 50 - 90, -50);
+        scene.addItem(item);
+    &#125;
+
+    MyView view;
+    view.setScene(&amp;scene);
+    view.setBackgroundBrush(QBrush(Qt::red));
+    view.show();
+    return app.exec();
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
+      <categories>
+        <category>Qt具体使用</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+        <tag>C++</tag>
+        <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>EffectiveC++(1)(1~4)</title>
     <url>/2022/03/04/Effective%20C++/2022-03-04-EffectiveC++(1)(1~4)/</url>
     <content><![CDATA[<h2 id="01-视c-为一个语言联邦"><strong>01:视C++为一个语言联邦</strong></h2>
@@ -674,21 +1075,6 @@ public:
       </tags>
   </entry>
   <entry>
-    <title>QScreen</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
-    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
-<p>获取应用程序可用区域</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>QGuiApplication</title>
     <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
     <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
@@ -698,8 +1084,23 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QScreen</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QScreen/</url>
+    <content><![CDATA[<h1 id="availablegeometry">availableGeometry()</h1>
+<p>获取应用程序可用区域</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -719,8 +1120,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -736,8 +1137,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -756,8 +1157,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -807,48 +1208,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QList</title>
-    <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
-    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
-<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
-<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
-<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
-<p>此函数要求值类型具有operator==()的实现。</p>
-<p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
-<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
-<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
-<p>这个函数非常快(常数时间)。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
         <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QAbstractButton</title>
-    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
-    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
-<h2 id="ischeck">isCheck()</h2>
-<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
-<h2 id="text"><strong>text()</strong></h2>
-<p>获取这个按钮的文字</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -916,8 +1277,48 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QAbstractButton</title>
+    <url>/2022/03/05/QtAPI/2022-03-05-QAbstractButton/</url>
+    <content><![CDATA[<h1 id="此章用于所有与button有关的控件"><strong>此章用于所有与button有关的控件</strong></h1>
+<h2 id="ischeck">isCheck()</h2>
+<p>如果这个按钮被选中，则返回true。只有checkable的button才有这个，默认为false</p>
+<h2 id="text"><strong>text()</strong></h2>
+<p>获取这个按钮的文字</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+        <tag>C++</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QList</title>
+    <url>/2022/03/04/QtAPI/2022-03-04-QList/</url>
+    <content><![CDATA[<h2 id="removelast"><strong><strong>removeLast()</strong></strong></h2>
+<p>从一个QList中拿走最后一个，自动调整大小，但是，<strong>如果存储的是指针，则不会不delete它</strong></p>
+<h2 id="int-qlist-indexof-const-t-value-int-from-const"><strong><strong>int QList::indexOf(const T &amp;value, int from = …) const</strong></strong></h2>
+<p>返回列表中第一个值出现的索引位置，从索引位置from向后搜索。如果没有匹配项，则返回-1。</p>
+<p>此函数要求值类型具有operator==()的实现。</p>
+<p><strong>请注意，QList使用基于0的索引，就像c++数组一样。除上面提到的值外，不支持负索引</strong></p>
+<h2 id="const-t-qlist-at-int-i-const"><strong><strong>const T &amp;QList::at(int i) const</strong></strong></h2>
+<p>返回列表中索引位置i处的项。我必须是一个有效的索引位置在列表(即，0 &lt;= i &lt; size())。</p>
+<p>这个函数非常快(常数时间)。</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -961,8 +1362,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -983,25 +1384,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>QPolygon</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
-    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
-<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
-<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
-<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
         <tag>C++</tag>
-        <tag>Qt</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1033,8 +1417,25 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QPolygon</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QPolygon/</url>
+    <content><![CDATA[<h2 id="void-qpolygon-setpoints-int-npoints-const-int-points">void QPolygon::setPoints(int nPoints, const int *points)</h2>
+<p>根据数组设置多边形的点。参数1是设置点的个数。有函数重载</p>
+<h2 id="void-putpoints-int-index-int-npoints-int-firstx-int-firsty"><strong>void putPoints(int index, int nPoints, int firstx, int firsty, …)</strong></h2>
+<p>将变量参数列表中的点从给定索引添加到当前多边形中。参数1是添加起始的索引，参数2是添加的点的个数，参数3、4是添加的第1个点的x、y…</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1060,8 +1461,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1081,8 +1482,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1137,8 +1538,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1204,8 +1605,8 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
       </tags>
   </entry>
@@ -1244,106 +1645,9 @@ public:
         <category>Qt API</category>
       </categories>
       <tags>
-        <tag>C++</tag>
         <tag>Qt</tag>
+        <tag>C++</tag>
         <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Qt动画框架使用</title>
-    <url>/2022/05/26/Qt%E4%BD%BF%E7%94%A8/2022-05-26-Qt%E5%8A%A8%E7%94%BB%E6%A1%86%E6%9E%B6%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>最近在考虑上位机的问题，在使用纯Qt + C++ + OpenCV和使用OpenCV + C# 中徘徊，但最后考虑到我不太会C#，就选择了Qt,因此怎么也该来学习学习了。<br>
-　　本文算是一篇转载文章。<br>
-　　原文<a href="https://blog.csdn.net/qinhoupingss/article/details/47961507">点这里</a>。<br>
-<img src="https://s2.loli.net/2022/05/28/g5xc4f3GWOvohUD.gif" alt="1.gif"></p>
-<h2 id="qt-animation-framework继承体系">Qt Animation Framework继承体系</h2>
-<p>Qt有一套专门的动画框架，其继承体系如下图。<br>
-<img src="https://s2.loli.net/2022/05/28/FXdBOjHKyvqEMC8.jpg" alt="2.jpg"><br>
-　　Qt动画框架基石由<strong>QAbstractAnimation</strong>以及它的两个子类<strong>QVariantAnimation</strong>和<strong>QAnimationGroup</strong>组成。<strong>QAbstractAnimation</strong>类是所有动画类的祖先。它包含了一些在框架中被普遍使用的基本功能；尤其是启动、停止和暂停动画功能。它也接收定时触发通知。</p>
-<p>Qt动画框架更是提供了<strong>QPropertyAnimation</strong>类，该类继承于<strong>QVariantAnimation</strong>类，用于对Qt属性的动画操作(Qt属性系统是Qt元对象系统的一部分)。<strong>QPropertyAnimation</strong>类使用缓和曲线算法对属性进行插值演化操作。因此当你想动画改变一个值时，你就声明该值为一个属性值并且使该类为成为一个<strong>QObject</strong>对象。这给我们提供了很大的方便性去动画操作现有的部件和其他的<strong>QObject</strong>对象。</p>
-<p>复杂动画可以通过构建Q<strong>AbstractAnimation</strong>树形结构来构造。该树主要使用<strong>QAnimationGroup</strong>，<strong>QAnimationGroup</strong>类是一个包含其他动画类的容器类；同时<strong>QAnimationGroup</strong>类也是<strong>QAbstractAnimation</strong>类的子类，因此一个容器可以包含其他容器。</p>
-<p>Qt动画框架既是独立的一部分，也是Qt状态机框架的一部分。Qt状态机框架提供一个状态用来行使动画。当<strong>QState</strong>进入或者退出时可以改变属性，当这个动画状态提供了一个<strong>QPropertyAnimatio</strong>时，则动画状态即在这些值之间进行插值衍化操作。</p>
-<table>
-<thead>
-<tr>
-<th>QAbstractAnimation</th>
-<th>所有动画类的基类</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QAnimationGroup</td>
-<td>动画容器类的抽象基类</td>
-</tr>
-<tr>
-<td>QEasingCurve</td>
-<td>动画控制的缓和曲线类</td>
-</tr>
-<tr>
-<td>QParallelAnimationGroup</td>
-<td>并行动画容器</td>
-</tr>
-<tr>
-<td>QPauseAnimation</td>
-<td>QSequentialAnimationGroup对象暂停延迟</td>
-</tr>
-<tr>
-<td>QPropertyAnimation</td>
-<td>Qt动画属性操作</td>
-</tr>
-<tr>
-<td>QSequentialAnimationGroup</td>
-<td>串行动画容器</td>
-</tr>
-<tr>
-<td>QTimeLine</td>
-<td>动画控制的时间片类</td>
-</tr>
-<tr>
-<td>QVariantAnimation</td>
-<td>动画类的抽象基类</td>
-</tr>
-</tbody>
-</table>
-<h2 id="qt动画属性">Qt动画属性</h2>
-<p>正如上述所提到的，QPropertyAnimation类能够修改Qt属性值。正是该类用于改变动画属性值；事实上，它的基类QVariantAnimation是一个抽象类，所以QVariantAnimation不能被直接使用。<br>
-　　我们选用Qt动画属性的一个主要原因是由于它给了我们很大的自由性去动画操作已经存在的类，尤其是拥有bounds、colors等属性的QWidget类(QWidget能被嵌入到QGraphicsView类)。我们看看一个小例子：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new 　　QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setStartValue(QRect(0, 0, 200, 200));
-　　animation-&gt;setEndValue(QRect(500, 500, 　　this-&gt;width(), this-&gt;height()));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这段代码使按钮被按下后，<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>l</mi><mi>a</mi><mi>b</mi><mi>e</mi><mi>l</mi></mrow><annotation encoding="application/x-tex">label</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">a</span><span class="mord mathdefault">b</span><span class="mord mathdefault">e</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span></span></span></span>从<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>0</mn><mo separator="true">,</mo><mn>0</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(0,0)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">0</span><span class="mclose">)</span></span></span></span>在10秒内移动到了<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mo stretchy="false">(</mo><mn>500</mn><mo separator="true">,</mo><mn>500</mn><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">(500,500)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mopen">(</span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mpunct">,</span><span class="mspace" style="margin-right:0.16666666666666666em;"></span><span class="mord">5</span><span class="mord">0</span><span class="mord">0</span><span class="mclose">)</span></span></span></span><br>
-<strong>注意：在我测试的过程中，发现只有指针形式的调用才能实现次效果</strong><br>
-　　也可以做到类似CSS中的@keyframe效果，例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">void QtWidgetsApplication1::on_btn_clicked()
-&#123;
-　　QPropertyAnimation* animation &#x3D; new QPropertyAnimation(ui.label, &quot;geometry&quot;);
-　　animation-&gt;setDuration(10000);
-　　animation-&gt;setKeyValueAt(0, QRect(0, 0, 500, 500));
-　　animation-&gt;setKeyValueAt(0.5, QRect(250, 250, 500, 500));
-　　animation-&gt;setKeyValueAt(1.0, QRect(0, 0, 500, 500));
-　　animation-&gt;start();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>而在自定义动画属性时，<strong>必须使用宏Q_PROPERTY设置访问与设置的函数</strong>，这样才能正确使用。例如：</p>
-<pre class="line-numbers language-none"><code class="language-none">class MyGraphicsRectItem : public QObject, public QGraphicsRectItem
-&#123;
-    Q_OBJECT
-    Q_PROPERTY(QRectF geometry READ geometry WRITE setGeometry)
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h2 id="动画和图形视图框架">动画和图形视图框架</h2>
-]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt使用</tag>
       </tags>
   </entry>
   <entry>
@@ -1386,310 +1690,6 @@ public:
       </categories>
       <tags>
         <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Qt图形视图框架</title>
-    <url>/2022/05/28/Qt%E4%BD%BF%E7%94%A8/2022-05-28-Qt%E5%9B%BE%E5%BD%A2%E8%A7%86%E5%9B%BE%E6%A1%86%E6%9E%B6/</url>
-    <content><![CDATA[<h2 id="前言">前言</h2>
-<p>为了应付大作业<s>更好的整活</s>，我需要学习以下Qt的图形视图框架。<br>
-　　本文内容主要来自<a href="https://blog.csdn.net/qq_25800311/article/details/81002822">这里</a></p>
-<h2 id="图形视图框架概述">图形视图框架概述</h2>
-<p>如果要绘制成千上万的图形，并且对它们进行控制，比如拖动这些图形、检测它们的位置以及判断它们是否碰撞等，可以使用Qt提供的图形视图框架来进行设计。</p>
-<p>图形视图框架提供了一个基于图形项的模型视图编程方法，主要由场景、视图和图形项三部分组成，这三部分分别由<strong>QGraphicsScene</strong>、<strong>QGraphicsView</strong>和<strong>QGraphicsItem</strong>这三个类来表示。多个视图可以查看一个场景，场景中包含各种各样几何形状的图形项。</p>
-<p>图形视图框架可以管理数量庞大的自定义2D图形项，并且可以与它们进行交互。使用视图部件可以使这些图形项可视化，视图还支持缩放与旋转。框架中包含了一个事件传播架构，提供了和场景中的图形项进行精确的双精度交互的能力。图形视图框架使用一个<strong>BSP(Binary Space Partitioning)树</strong>来快速发现图形项。可通过<strong>Graphics View Framework</strong>关键字查看相关帮助。</p>
-<h2 id="场景">场景</h2>
-<p><strong>QGraphicsItem</strong>是场景中图形项的基类。典型的形状的标准图形项有矩形(<strong>QGraphicsRectItem</strong>)、椭圆(<strong>QGraphicsEllipseItem</strong>)和文本项(<strong>QGraphicsTextItem</strong>)等。但只有编写自定义的图形项才能发挥<strong>QGraphicsItem</strong>的强大功能。</p>
-<p><strong>QGraphicsItem</strong>主要支持如下功能：</p>
-<ul>
-<li>
-<p>鼠标按下、移动、释放、双击、悬停、滚轮和右键菜单事件</p>
-</li>
-<li>
-<p>键盘输入焦点和键盘事件</p>
-</li>
-<li>
-<p>拖放事件</p>
-</li>
-<li>
-<p>碰撞检测</p>
-</li>
-</ul>
-<p>除此之外，图形项还可以存储自定义的数据，可以使用<strong>setData</strong>()进行数据存储，然后使用<strong>data</strong>()获取其中的数据。</p>
-<p>要实现自定义的图形项，那么首先要创建一个<strong>QGraphicsItem</strong>的子类，然后重新实现它的两个纯虚公共函数:<strong>boundingRect</strong>()和<strong>paint</strong>()，前者用来返回要绘制图形项的矩形区域，后者用来执行实际的绘图操作。其中<strong>boundingRect</strong>()函数将图形项的外部边界定义为一个矩形，所有的绘图操作都必须限制在图形项的边界矩形中。这个矩形对于剔除不可见图形项、确定绘制交叉项目时哪些区域需要重新构建、碰撞检测机制都很重要。一定要保证所有绘图都在<strong>boundingRect</strong>()的边界之中，特别是当<strong>QPainter</strong>使用了指定的QPen来渲染图形的边界轮廓时，绘制的图形的边界线的一般会在外面，一半会在里面（例如使用了宽度为两个单位的画笔，就必须在<strong>boundingRect</strong>()里绘制一个单位的边界线），这也是在<strong>boundingRect</strong>()中要包含半个画笔宽度的原因。<br>
-　　纯虚函数实现示例：</p>
-<pre class="line-numbers language-none"><code class="language-none">QRectF MyItem::boundingRect() const
-&#123;
-    qreal penWidth &#x3D; 1; &#x2F;&#x2F;画笔宽度
-    return QRectF(0 - penWidth &#x2F; 2, 0 - penWidth &#x2F; 2,
-                  20 + penWidth, 20 + penWidth);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<pre class="line-numbers language-none"><code class="language-none">void MyItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *, QWidget *)
-&#123;
-    painter-&gt;setBrush(Qt::red);
-    painter-&gt;drawRect(0, 0, 20, 20);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>##图形视图框架的坐标系统<br>
-　　图形视图框架基于笛卡尔坐标系统。图形视图框架中有3个有效的坐标系统：<strong>图形项坐标</strong>、<strong>场景坐标</strong>和<strong>视图坐标</strong>。进行绘图时，场景坐标对应QPainter的逻辑坐标，视图坐标对应设备坐标。</p>
-<h3 id="图形项坐标">图形项坐标</h3>
-<p>图形项使用自己的本地坐标系统，<strong>坐标通常是以（0,0）为原点</strong>，而这也是所有变换的中心。当要创建一个自定义图形项时，只需要考虑图形项的坐标系统，而且一个图形项的边界矩形和图形形状都是在图形项坐标系统中的。</p>
-<p>图形项的位置是指<strong>图形项的原点在其父图形项或者场景中的位置</strong>。可以使用<strong>setPos</strong>（）函数来指定图形项的位置，如果没有指定，默认出现在父图形项或者场景的原点处。</p>
-<p>子图形项的位置和坐标是相对于父图形项的，虽然父图形项的坐标变换会隐含地变换子图形项，但<strong>子图形项的坐标不会受到父图形项的变换的影响</strong>。例如，在没有坐标变换时，子图形项就在父图形项的（10,0）点，那么子图形项中的（0,10）点就对应了父图形项的（10,10）点。现在即使父图形项进行了旋转或者缩放，子图形项的（0,10）点仍对应着父图形项的（10,10）点。但是相对于场景，子图形项就会跟随父图形项的变换，例如，父图形项放大为（2x，2x），那么子图形项在场景中的位置就会变成（20,0），它的（10,0）点就会对应着场景中的（40,0）点。</p>
-<p>所有的图形项都会使用确定的顺序来进行绘制，这个顺序也决定了单击场景时哪个图形项会先获得鼠标输入。一个子图形项会堆叠在父图形项的上面，而兄弟图形项会以插入顺序进行堆叠。<strong>所有图形项都包含一个Z值来设置它们的层叠顺序</strong>，一个图形项的Z值默认为0，可以使用<strong>QGraphicsItem::setZValue</strong>()来改变一个图形项的Z值，从而使它堆叠到其兄弟图形项的上面（使用较大的Z值）或者下面（使用较小的Z值）。</p>
-<h3 id="场景坐标">场景坐标</h3>
-<p>场景坐标是所有图形项的基础坐标系统。场景坐标的原点在场景的中心，x和y坐标分别向右和向下增大。</p>
-<h3 id="视图坐标">视图坐标</h3>
-<p>视图坐标的每一个单位对应一个像素，原点（0,0）总在<strong>QGraphicsView</strong>视口的左上角，而右下角是（宽，高）。所有的鼠标事件和拖放事件最初都是使用视图坐标接收的。</p>
-<h3 id="坐标映射">坐标映射</h3>
-<p>不仅可以在视图、场景和图形项之间使用坐标映射，还可以在子图形项、父图形项或者图形项、图形项之间进行坐标映射。所有的映射函数都可以映射点、矩形、多边形和路径。例如要获取在视图中的一个椭圆形中包含的图形项，则可以先传递一个<strong>QPainterPath</strong>对象作为参数给<strong>mapToScene</strong>（）函数，然后传递映射后的路径给<strong>QGraphicsScene::items</strong>（）函数。</p>
-<p>####图形视图框架的映射函数</p>
-<table>
-<thead>
-<tr>
-<th>映射函数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QGraphicsView::mapToScene( )</td>
-<td>从视图坐标系统映射到场景坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsView::mapFromScene( )</td>
-<td>从场景坐标系统映射到视图坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToScene( )</td>
-<td>从图形项的坐标系统映射到场景的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromScene( )</td>
-<td>从场景的坐标系统映射到图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToParent( )</td>
-<td>从本图形项的坐标系统映射到其父图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromParent( )</td>
-<td>从父图形项的坐标系统映射到本图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapToItem( )</td>
-<td>从本图形项的坐标系统映射到另一个图形项的坐标系统</td>
-</tr>
-<tr>
-<td>QGraphicsItem::mapFromItem( )</td>
-<td>从另一个图形项的坐标系统映射到本图形项的坐标系统</td>
-</tr>
-</tbody>
-</table>
-<h2 id="事件处理与传播">事件处理与传播</h2>
-<p>图形视图框架中的事件都是<strong>先由视图进行接收，然后传递给场景，再由场景传递给相应的图形项</strong>。而对于键盘事件，它会传递给获得焦点的图形项，可以使用<strong>QGraphicsScene</strong>类的<strong>setFocusItem</strong>（）函数或者图形项自身调用<strong>setFocus</strong>（）函数来设置焦点图形项。默认的，如果场景没有获得焦点，那么所有的键盘事件都会被丢弃。场景中的图形项获得了焦点，场景也会自动获得焦点。</p>
-<h2 id="示例">示例</h2>
-<h3 id="myitem">MyItem</h3>
-<ul>
-<li>MyItem.h</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-
-#include &lt;QGraphicsItem&gt;
-
-class MyTime : public QGraphicsItem
-&#123;
-
-public:
-	MyTime();
-	~MyTime();
-	QRectF boundingRect() const override;
-	void paint(QPainter* painter,
-		const QStyleOptionGraphicsItem* option,
-		QWidget* widget) override;
-	void setColor(const QColor&amp; color);
-
-private:
-	QColor brushColor;
-
-protected:
-	void KeyPressEvent(QKeyEvent* event);
-	void mousePressEvent(QGraphicsSceneMouseEvent* event);
-	void hoverEnterEvent(QGraphicsSceneHoverEvent* event);
-	void contextMenuEvent(QGraphicsSceneContextMenuEvent* event);
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>MyItem.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyTime.h&quot;
-
-#include &lt;QPainter&gt;
-#include &lt;QCursor&gt;
-#include &lt;QKeyEvent&gt;
-#include &lt;QGraphicsSceneHoverEvent&gt;
-#include &lt;QGraphicsSceneContextMenuEvent&gt;
-#include &lt;QMenu&gt;
-
-MyTime::MyTime()
-&#123;
-	brushColor &#x3D; Qt::red;
-
-	setFlag(QGraphicsItem::ItemIsFocusable);
-	setFlag(QGraphicsItem::ItemIsMovable);
-
-	setAcceptHoverEvents(true);
-&#125;
-
-MyTime::~MyTime()
-&#123;
-&#125;
-
-QRectF MyTime::boundingRect() const
-&#123;
-	qreal adjust &#x3D; 0.5;
-	return QRectF(
-		-10 - adjust,
-		-10 - adjust,
-		20 + adjust,
-		20 + adjust
-	);
-&#125;
-
-void MyTime::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
-&#123;
-	if (hasFocus())
-	&#123;
-		painter-&gt;setPen(QPen(QColor(255, 255, 255, 200)));
-	&#125;
-	else
-	&#123;
-		painter-&gt;setPen(QPen(QColor(100, 100, 100, 100)));
-	&#125;
-	painter-&gt;setBrush(brushColor);
-	painter-&gt;drawRect(-10, -10, 20, 20);
-&#125;
-
-void MyTime::setColor(const QColor&amp; color)
-&#123;
-	brushColor &#x3D; color;
-&#125;
-
-void MyTime::KeyPressEvent(QKeyEvent* event)
-&#123;
-	if (event-&gt;key() &#x3D;&#x3D; Qt::Key_Down)
-	&#123;
-		moveBy(0, 10);
-	&#125;
-&#125;
-
-void MyTime::mousePressEvent(QGraphicsSceneMouseEvent* event)
-&#123;
-	setFocus();
-	setCursor(Qt::ClosedHandCursor);
-&#125;
-
-void MyTime::hoverEnterEvent(QGraphicsSceneHoverEvent* event)
-&#123;
-	setCursor(Qt::OpenHandCursor);
-	setToolTip(&quot;I am a item&quot;);
-&#125;
-
-void MyTime::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
-&#123;
-	QMenu menu;
-	QAction* moveAction &#x3D; menu.addAction(&quot;move back&quot;);
-	QAction* selectedAction &#x3D; menu.exec(event-&gt;screenPos());
-	if (selectedAction &#x3D;&#x3D; moveAction)
-	&#123;
-		setPos(0, 0);
-	&#125;
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="myview">MyView</h3>
-<ul>
-<li>MyView.h</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-
-#include &lt;QGraphicsView&gt;
-
-class MyView : public QGraphicsView
-&#123;
-
-public:
-	MyView();
-	~MyView();
-protected:
-	void keyPressEvent(QKeyEvent* event);
-&#125;;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<ul>
-<li>MyView.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;MyView.h&quot;
-#include &lt;QKeyEvent&gt;
-
-MyView::MyView()
-	
-&#123;
-&#125;
-
-MyView::~MyView()
-&#123;
-&#125;
-
-void MyView::keyPressEvent(QKeyEvent* event)
-&#123;
-	switch (event-&gt;key())
-	&#123;
-	case Qt::Key_Plus:
-		scale(1.2, 1.2);
-		break;
-	case Qt::Key_Minus:
-		scale(1 &#x2F; 1.2, 1 &#x2F; 1.2);
-		break;
-	case Qt::Key_Right:
-		rotate(30);
-	default:
-		break;
-	&#125;
-	QGraphicsView::keyPressEvent(event);
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<h3 id="main">main</h3>
-<ul>
-<li>main.cpp</li>
-</ul>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;QtWidgets&#x2F;QApplication&gt;
-#include &lt;QTime&gt;
-#include &quot;MyTime.h&quot;
-#include &quot;MyView.h&quot;
-
-int main(int argc, char *argv[])
-&#123;
-    QApplication app(argc, argv);
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-    QGraphicsScene scene;
-    scene.setSceneRect(-200, -150, 400, 300);
-
-    for (int i &#x3D; 0; i &lt; 5; i++)
-    &#123;
-        MyTime* item &#x3D; new MyTime();
-        item-&gt;setColor(QColor(qrand() % 256, qrand() % 256, qrand() % 256));
-        item-&gt;setPos(i * 50 - 90, -50);
-        scene.addItem(item);
-    &#125;
-
-    MyView view;
-    view.setScene(&amp;scene);
-    view.setBackgroundBrush(QBrush(Qt::red));
-    view.show();
-    return app.exec();
-&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>]]></content>
-      <categories>
-        <category>Qt具体使用</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt使用</tag>
       </tags>
   </entry>
   <entry>
@@ -2208,6 +2208,103 @@ for (int i &#x3D; 0; i &lt; 256; i++)
 </tbody>
 </table>
 <p>​	如果可能的话，使用OpenCV已经提供的函数（而不是重新造轮子）。最快的方法是LUT函数。这是因为 OpenCV 库是通过英特尔线程构建模块启用多线程的。但是，如果您需要编写简单的图像扫描，则首选指针方法。迭代器是一个更安全的方法，但速度相当慢。在调试模式下，使用动态引用访问方法进行全图像扫描是最慢的的。在发布模式下，它可能会快于迭代器方法，但肯定会为此牺牲迭代器的安全特性。</p>
+]]></content>
+      <categories>
+        <category>图像处理</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Adding (blending) two images using OpenCV</title>
+    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Add%20image/</url>
+    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
+<h2 id="目标">目标</h2>
+<p>在这篇文章中中，您将学习：</p>
+<ul>
+<li>什么是<em>线性混合</em>以及为什么它是有用的;</li>
+<li>如何使用 <a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=addweighted#addweighted">addWeighted 混合</a>两个图像</li>
+</ul>
+<h2 id="相关理论">相关理论</h2>
+<blockquote>
+<p>注意:下面的解释属于Richard Szeliski的《<a href="http://szeliski.org/Book/">Computer Vision： Algorithms and Applications</a>》一书。</p>
+</blockquote>
+<p>从我们之前的教程中，我们已经知道了一些<em>Pixel运算符</em>。,其中<em>线性混合算子</em>是一个有趣的二元（双输入）算子:</p>
+<p><img src="https://s2.loli.net/2022/06/26/pY9LW2fyjiTEmzb.png" alt="1.png"></p>
+<p>通过赋予<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>α</mi></mrow><annotation encoding="application/x-tex">\alpha</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.43056em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span></span></span></span>以<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mn>0</mn><mo>→</mo><mn>1</mn></mrow><annotation encoding="application/x-tex">0\rightarrow1</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">0</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">→</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.64444em;vertical-align:0em;"></span><span class="mord">1</span></span></span></span>不同的值,该算子便可以用来在两个图片或视频中制作时间上的淡入淡出效果,因此可以被用于短视频,电影制作中.</p>
+<h2 id="代码部分">代码部分</h2>
+<p>像往常一样，在不那么冗长的解释之后，让我们看看代码：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">&#x2F;*
+ * @LastEditors: 帝皇の惊
+ * @Date: 2022-06-26 15:20:09
+ * @Description: 简单的线性图像混合
+ * @LastEditTime: 2022-06-26 15:30:35
+ *&#x2F;
+#include &lt;iostream&gt;
+#include &quot;opencv.hpp&quot;
+
+using namespace cv;
+
+int main(int argc, char** argv) &#123;
+    double alpha &#x3D; 0.5, beta, input;
+    Mat src1, src2, dst;
+
+    &#x2F;&#x2F; Ask the user enter alpha
+    std::cout &lt;&lt; &quot;Simple Linear Blender&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;---------------------&quot; &lt;&lt; std::endl;
+    std::cout &lt;&lt; &quot;* Enter aplha [0-1]: &quot;;
+    std::cin &gt;&gt; input;
+
+    &#x2F;&#x2F; We use the alpha provided by the user if it is between 0 and 1
+    if (input &gt;&#x3D; 0.0 &amp;&amp; input &lt;&#x3D; 1.0) &#123;
+        alpha &#x3D; input;
+    &#125;
+
+    &#x2F;&#x2F; Read Image
+    src1 &#x3D; imread(&quot;LinuxLogo.jpg&quot;);
+    src2 &#x3D; imread(&quot;WindowsLogo.jpg&quot;);
+    if (!src1.data) &#123;
+        printf(&quot;Error loading src1 \n&quot;);
+        return -1;
+    &#125;
+    if (!src2.data) &#123;
+        printf(&quot;Error loading src2 \n&quot;);
+        return -1;
+    &#125;
+
+    &#x2F;&#x2F; Create Window
+    namedWindow(&quot;Linear Blend&quot;, WINDOW_AUTOSIZE);
+
+    beta &#x3D; (1.0 - alpha);
+    addWeighted(src1, alpha, src2, beta, 0.0, dst);
+    imshow(&quot;Linear Blend&quot;, dst);
+    waitKey(0);
+    return 0;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="解释">解释</h2>
+<p>由于我们的目标是执行</p>
+<p><img src="https://s2.loli.net/2022/06/26/pY9LW2fyjiTEmzb.png" alt="1.png"></p>
+<p>因此我们需要两个原图像(<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><msub><mi>f</mi><mn>0</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mtext>与</mtext><msub><mi>f</mi><mn>1</mn></msub><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">f_0(x)与f_1(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">0</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span><span class="mord cjk_fallback">与</span><span class="mord"><span class="mord mathdefault" style="margin-right:0.10764em;">f</span><span class="msupsub"><span class="vlist-t vlist-t2"><span class="vlist-r"><span class="vlist" style="height:0.30110799999999993em;"><span style="top:-2.5500000000000003em;margin-left:-0.10764em;margin-right:0.05em;"><span class="pstrut" style="height:2.7em;"></span><span class="sizing reset-size6 size3 mtight"><span class="mord mtight">1</span></span></span></span><span class="vlist-s">​</span></span><span class="vlist-r"><span class="vlist" style="height:0.15em;"><span></span></span></span></span></span></span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>).这里我们以imread形式加载它们:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">src1 &#x3D; imread(&quot;LinuxLogo.jpg&quot;);
+src2 &#x3D; imread(&quot;WindowsLogo.jpg&quot;);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<blockquote>
+<p>注意:由于要对src1与src2进行融合,因此它们的大小和类型必须相同</p>
+</blockquote>
+<p>现在我们需要生成<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>g</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">g(x)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.03588em;">g</span><span class="mopen">(</span><span class="mord mathdefault">x</span><span class="mclose">)</span></span></span></span>图像,OpenCV提供的<a href="http://docs.opencv.org/modules/core/doc/operations_on_arrays.html?highlight=addweighted#addweighted">addWeighted</a> 非常方便</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">beta &#x3D; (1.0 - alpha);
+addWeighted(src1, alpha, src2, beta, 0.0, dst);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>而addWighted产生的图像为:</p>
+<p class='katex-block'><span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>s</mi><mi>t</mi><mo>=</mo><mi>α</mi><mo>∗</mo><mi>s</mi><mi>r</mi><mi>c</mi><mn>1</mn><mo>+</mo><mi>β</mi><mo>∗</mo><mi>s</mi><mi>r</mi><mi>c</mi><mn>2</mn><mo>+</mo><mi>γ</mi></mrow><annotation encoding="application/x-tex">dst=\alpha*src1 + \beta*src2+\gamma
+</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.69444em;vertical-align:0em;"></span><span class="mord mathdefault">d</span><span class="mord mathdefault">s</span><span class="mord mathdefault">t</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:0.46528em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.0037em;">α</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord">1</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.8888799999999999em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05278em;">β</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">∗</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.72777em;vertical-align:-0.08333em;"></span><span class="mord mathdefault">s</span><span class="mord mathdefault" style="margin-right:0.02778em;">r</span><span class="mord mathdefault">c</span><span class="mord">2</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">+</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05556em;">γ</span></span></span></span></span></p>
+<p>在本例中,<span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>γ</mi></mrow><annotation encoding="application/x-tex">\gamma</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.625em;vertical-align:-0.19444em;"></span><span class="mord mathdefault" style="margin-right:0.05556em;">γ</span></span></span></span>为0</p>
+<p>接下来创建窗口显示图像.</p>
+<h2 id="结果">结果</h2>
+<p><img src="https://s2.loli.net/2022/06/26/BniMc2CEjzpSWlV.png" alt="2.png"></p>
 ]]></content>
       <categories>
         <category>图像处理</category>
@@ -3883,6 +3980,66 @@ int main()
       </tags>
   </entry>
   <entry>
+    <title>关于函数体内指针指向问题</title>
+    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
+    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
+<p>下面来诠释此问题。</p>
+<p></p>
+<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
+<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
+	int data;
+	test* next &#x3D; NULL;
+&#125;;
+
+test* createList()
+&#123;
+	test* list &#x3D; new test;
+	test* ret &#x3D; list;
+	for (int i &#x3D; 0; i &lt; 10; i++)
+	&#123;
+		test* newNode &#x3D; new test;
+		newNode-&gt;data &#x3D; i;
+		list-&gt;next &#x3D; newNode;
+		list &#x3D; list-&gt;next;
+	&#125;
+	return ret;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>我们有一个测试函数来改变指针：</p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+
+int main()
+&#123;
+	test* testlist &#x3D; createList();
+	changePoint(testlist);
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
+<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
+<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
+<p>可见在函数体内部，指针是被改变了的。</p>
+<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
+<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
+<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
+&#123;
+	list &#x3D; list-&gt;next;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<p>可以发现，指针被顺利改写。</p>
+<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
+<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
+<p></p>
+]]></content>
+      <tags>
+        <tag>C++</tag>
+        <tag>细节问题</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>【算法】插入类排序</title>
     <url>/2022/06/05/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-06-04-%E6%8F%92%E5%85%A5%E7%B1%BB%E6%8E%92%E5%BA%8F/</url>
     <content><![CDATA[<h2 id="简介">简介</h2>
@@ -4078,66 +4235,6 @@ int test::get()
       <categories>
         <category>细节问题</category>
       </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>细节问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>关于函数体内指针指向问题</title>
-    <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
-    <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
-<p>下面来诠释此问题。</p>
-<p></p>
-<p>首先，我们用一段代码创建了一个具有10个节点的链表（不算头结点）：</p>
-<pre class="line-numbers language-none"><code class="language-none">struct test &#123;
-	int data;
-	test* next &#x3D; NULL;
-&#125;;
-
-test* createList()
-&#123;
-	test* list &#x3D; new test;
-	test* ret &#x3D; list;
-	for (int i &#x3D; 0; i &lt; 10; i++)
-	&#123;
-		test* newNode &#x3D; new test;
-		newNode-&gt;data &#x3D; i;
-		list-&gt;next &#x3D; newNode;
-		list &#x3D; list-&gt;next;
-	&#125;
-	return ret;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>我们有一个测试函数来改变指针：</p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-
-int main()
-&#123;
-	test* testlist &#x3D; createList();
-	changePoint(testlist);
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>下面开始调试，将断点设置在函数changePoint中，得到如下结果：</p>
-<p><img src="https://s2.loli.net/2022/05/26/YQ4jAtaXq9swDVN.png" alt="1.png"></p>
-<p><img src="https://s2.loli.net/2022/05/26/xCjGmJqbHD4QSVA.png" alt="2.png"></p>
-<p>可见在函数体内部，指针是被改变了的。</p>
-<p>但在函数执行完毕后，指针又变成了原来未被改变的：</p>
-<p><img src="https://s2.loli.net/2022/05/26/PvFCebwK7R2ziWI.png" alt="3.png"></p>
-<p>如果想要同时更改函数体内和函数体外的指针的值，可以使用<strong>指针的引用.</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">void changePoint(test* &amp;list)
-&#123;
-	list &#x3D; list-&gt;next;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
-<p>可以发现，指针被顺利改写。</p>
-<p><strong><img src="https://s2.loli.net/2022/05/26/YsUfb5eViRh8P3u.png" alt="4.png"></strong></p>
-<p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
-<p></p>
-]]></content>
       <tags>
         <tag>C++</tag>
         <tag>细节问题</tag>
