@@ -389,21 +389,6 @@ Derived&amp; Derived::operator&#x3D;(const Derived&amp; rhs)
       </tags>
   </entry>
   <entry>
-    <title>QGuiApplication</title>
-    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
-    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
-<p>获取应用主屏幕</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>EffectiveC++(3)(13~17)</title>
     <url>/2022/06/02/Effective%20C++/2022-03-07-EffectiveC++(3)(13~17)/</url>
     <content><![CDATA[<h2 id="13-以对象管理资源">13:以对象管理资源</h2>
@@ -704,6 +689,21 @@ public:
       </tags>
   </entry>
   <entry>
+    <title>QGuiApplication</title>
+    <url>/2022/03/01/QtAPI/2022-03-01-QGuiApplication/</url>
+    <content><![CDATA[<h1 id="primaryscreen">primaryScreen()</h1>
+<p>获取应用主屏幕</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>QSystemTrayIcon</title>
     <url>/2022/03/01/QtAPI/2022-03-01-QSystemTrayIcon/</url>
     <content><![CDATA[<p>此类用于在系统托盘中添加应用图标</p>
@@ -853,51 +853,6 @@ public:
       </tags>
   </entry>
   <entry>
-    <title>QFont</title>
-    <url>/2022/03/06/QtAPI/2022-03-06-QFont/</url>
-    <content><![CDATA[<h2 id="void-qfont-sethintingpreference-qfont-hintingpreference-hintingpreference"><strong>void QFont::setHintingPreference(QFont::HintingPreference hintingPreference)</strong></h2>
-<p><strong>将符号的提示级别的首选项设置为hintingPreference。这是对底层字体渲染系统使用某种程度的提示的提示，并且跨平台有不同的支持。</strong></p>
-<p><strong>QFont::HintingPreference</strong></p>
-<table>
-<thead>
-<tr>
-<th>QFont::PreferDefaultHinting</th>
-<th>0</th>
-<th>使用目标平台的默认提示级别。</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>QFont::PreferNoHinting</td>
-<td>1</td>
-<td>如果可能的话,在渲染文本时不要提示字形的轮廓。文本布局将是排版准确和可扩展的,使用与打印时相同的指标。</td>
-</tr>
-<tr>
-<td>QFont::PreferVerticalHinting</td>
-<td>2</td>
-<td>如果可能的话,渲染文本时不要有水平提示,但在垂直方向上将字形与像素网格对齐。在密度过低而无法准确渲染字形的显示器上,文字会显得更清晰。但由于字形的水平度量是没有提示的,所以文本的布局将可以扩展到更高密度的设备上(如打印机),而不会影响换行符等细节。</td>
-</tr>
-<tr>
-<td>QFont::PreferFullHinting</td>
-<td>3</td>
-<td>如果可能的话,在水平和垂直方向上渲染带有提示的文本。文本将被改变,以优化目标设备上的可读性,但由于指标将取决于文本的目标尺寸,字形、换行符和其他排版细节的位置将不按比例排列,这意味着文本布局在不同像素密度的设备上可能会有不同的外观。</td>
-</tr>
-</tbody>
-</table>
-<p><strong>翻译不够精准还请看官方文档</strong></p>
-<h2 id="void-qfont-setpixelsize-int-pixelsize">void QFont::setPixelSize(int pixelSize)</h2>
-<p>将字体大小设置为pixelSize像素。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>QPixmap</title>
     <url>/2022/03/05/QtAPI/2022-03-05-QPixmap/</url>
     <content><![CDATA[<h2 id="bool-qpixmap-load-const-qstring-filename-const-char-format-nullptr-qt-imageconversionflags-flags-qt-autocolor">*<em>bool QPixmap::load(const QString &amp;fileName, const char <em>format = nullptr, Qt::ImageConversionFlags flags = Qt::AutoColor)</em></em></h2>
@@ -956,6 +911,51 @@ public:
 <h2 id="void-qpixmap-fill-const-qcolor-color-qt-white">void QPixmap::fill(const QColor &amp;color = Qt::white)</h2>
 <p>用给定的颜色填充像素图。</p>
 <p>当pixmap已经被绘制在设备上时，此函数的行为是未定义的</p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QFont</title>
+    <url>/2022/03/06/QtAPI/2022-03-06-QFont/</url>
+    <content><![CDATA[<h2 id="void-qfont-sethintingpreference-qfont-hintingpreference-hintingpreference"><strong>void QFont::setHintingPreference(QFont::HintingPreference hintingPreference)</strong></h2>
+<p><strong>将符号的提示级别的首选项设置为hintingPreference。这是对底层字体渲染系统使用某种程度的提示的提示，并且跨平台有不同的支持。</strong></p>
+<p><strong>QFont::HintingPreference</strong></p>
+<table>
+<thead>
+<tr>
+<th>QFont::PreferDefaultHinting</th>
+<th>0</th>
+<th>使用目标平台的默认提示级别。</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>QFont::PreferNoHinting</td>
+<td>1</td>
+<td>如果可能的话,在渲染文本时不要提示字形的轮廓。文本布局将是排版准确和可扩展的,使用与打印时相同的指标。</td>
+</tr>
+<tr>
+<td>QFont::PreferVerticalHinting</td>
+<td>2</td>
+<td>如果可能的话,渲染文本时不要有水平提示,但在垂直方向上将字形与像素网格对齐。在密度过低而无法准确渲染字形的显示器上,文字会显得更清晰。但由于字形的水平度量是没有提示的,所以文本的布局将可以扩展到更高密度的设备上(如打印机),而不会影响换行符等细节。</td>
+</tr>
+<tr>
+<td>QFont::PreferFullHinting</td>
+<td>3</td>
+<td>如果可能的话,在水平和垂直方向上渲染带有提示的文本。文本将被改变,以优化目标设备上的可读性,但由于指标将取决于文本的目标尺寸,字形、换行符和其他排版细节的位置将不按比例排列,这意味着文本布局在不同像素密度的设备上可能会有不同的外观。</td>
+</tr>
+</tbody>
+</table>
+<p><strong>翻译不够精准还请看官方文档</strong></p>
+<h2 id="void-qfont-setpixelsize-int-pixelsize">void QFont::setPixelSize(int pixelSize)</h2>
+<p>将字体大小设置为pixelSize像素。</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -1039,27 +1039,6 @@ public:
       </tags>
   </entry>
   <entry>
-    <title>QNetworkAddressEntry</title>
-    <url>/2022/03/13/QtAPI/2022-03-13-QNetworkAddressEntry/</url>
-    <content><![CDATA[<h1 id="qhostaddress-qnetworkaddressentry-ip-const"><strong>QHostAddress QNetworkAddressEntry::ip() const</strong></h1>
-<p><strong>这个函数返回一个在网络接口中找到的IPv4或IPv6地址。</strong></p>
-<h1 id="qhostaddress-qnetworkaddressentry-netmask-const"><strong>QHostAddress QNetworkAddressEntry::netmask() const</strong></h1>
-<p>**返回与IP地址关联的子网掩码。子网掩码采用IP地址形式，**如255.255.0.0。</p>
-<p>对于IPv6地址，前缀长度转换为地址中位数为1的地址与前缀长度相等。如果前缀长度为64位(最常用的值)，netmask将被表示为QHostAddress，其中包含地址FFFF:FFFF:FFFF:FFFF::</p>
-<h1 id="qhostaddress-qnetworkaddressentry-broadcast-const"><strong>QHostAddress QNetworkAddressEntry::broadcast() const</strong></h1>
-<p>**返回与IPv4地址和子网掩码相关联的广播地址。**它通常可以通过将子网掩码包含0的IP地址位设置为1来派生。(换句话说，通过按位或者用网络掩码的逆来计算IP地址)</p>
-<p>这个成员对于IPv6地址来说总是空的，因为广播的概念在这个系统中已经被放弃了，取而代之的是组播。特别是，全节点专用组播组(地址FF02::1)可以到达本地网络中所有节点对应的主机组。</p>
-]]></content>
-      <categories>
-        <category>Qt API</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>Qt</tag>
-        <tag>Qt API</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>QNetworkInterface</title>
     <url>/2022/03/10/QtAPI/2022-03-10-QNetworkInterface/</url>
     <content><![CDATA[<h1 id="qlist-qnetworkaddressentry-addressentries">QList<QNetworkAddressEntry> addressEntries()</h1>
@@ -1076,6 +1055,27 @@ public:
 <p>返回主机上所有IP地址的列表</p>
 <h1 id="qlist-qnetworkinterface-allinterface">QList<QNetworkInterface> allInterface()</h1>
 <p><strong><strong>返回主机上所有接口的列表</strong></strong></p>
+]]></content>
+      <categories>
+        <category>Qt API</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>Qt</tag>
+        <tag>Qt API</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>QNetworkAddressEntry</title>
+    <url>/2022/03/13/QtAPI/2022-03-13-QNetworkAddressEntry/</url>
+    <content><![CDATA[<h1 id="qhostaddress-qnetworkaddressentry-ip-const"><strong>QHostAddress QNetworkAddressEntry::ip() const</strong></h1>
+<p><strong>这个函数返回一个在网络接口中找到的IPv4或IPv6地址。</strong></p>
+<h1 id="qhostaddress-qnetworkaddressentry-netmask-const"><strong>QHostAddress QNetworkAddressEntry::netmask() const</strong></h1>
+<p>**返回与IP地址关联的子网掩码。子网掩码采用IP地址形式，**如255.255.0.0。</p>
+<p>对于IPv6地址，前缀长度转换为地址中位数为1的地址与前缀长度相等。如果前缀长度为64位(最常用的值)，netmask将被表示为QHostAddress，其中包含地址FFFF:FFFF:FFFF:FFFF::</p>
+<h1 id="qhostaddress-qnetworkaddressentry-broadcast-const"><strong>QHostAddress QNetworkAddressEntry::broadcast() const</strong></h1>
+<p>**返回与IPv4地址和子网掩码相关联的广播地址。**它通常可以通过将子网掩码包含0的IP地址位设置为1来派生。(换句话说，通过按位或者用网络掩码的逆来计算IP地址)</p>
+<p>这个成员对于IPv6地址来说总是空的，因为广播的概念在这个系统中已经被放弃了，取而代之的是组播。特别是，全节点专用组播组(地址FF02::1)可以到达本地网络中所有节点对应的主机组。</p>
 ]]></content>
       <categories>
         <category>Qt API</category>
@@ -1344,6 +1344,48 @@ public:
         <tag>C++</tag>
         <tag>Qt</tag>
         <tag>Qt使用</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>基本命令与热键</title>
+    <url>/2022/03/06/linux/2022-03-06-%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E4%B8%8E%E7%83%AD%E9%94%AE/</url>
+    <content><![CDATA[<h1 id="命令">命令</h1>
+<h1 id="cal-month-year">cal [month] [year]</h1>
+<p>显示某年某月的日历</p>
+<h1 id="date">**date **</h1>
+<p>显示时间日期</p>
+<h1 id="bc"><strong>bc</strong></h1>
+<p>命令行下的计算器，默认仅输出整数，如果要输出小数点下位数可以使用</p>
+<p><strong>scale=number</strong></p>
+<p>使用<strong>quit</strong>退出</p>
+<h1 id="可选参数-help"><strong>可选参数–help</strong></h1>
+<p>大多数命令都有这个参数，用于查询命令所具有的选项和参数</p>
+<h1 id="man-命令"><strong>man 命令</strong></h1>
+<p>用于查看命令的详细说明，按下【空格键】翻页，按下【q】离开</p>
+<p>命令后可能有数字，如date(1)，最重要的三个为</p>
+<ul>
+<li>1：用户在shell环境中可以操作的命令和可执行文件</li>
+<li>5：配置文件或是某些文件的格式</li>
+<li>8：系统管理员可用的管理命令</li>
+</ul>
+<p>其余自行查阅</p>
+<p>在man页面，使用 **/word **来向下查找所有word所在地，用？word来向上查找</p>
+<p><strong>热键</strong></p>
+<h1 id="tab">[tab]</h1>
+<p>如果跟在一串命令的第一个字段后，则会显示所有以输入数据开头的命令</p>
+<p>如果跟在一串命令的第二个字段后，则为【文件补齐】</p>
+<h1 id="ctrl-c"><strong>[ctrl]+c</strong></h1>
+<p>中断目前程序</p>
+<h1 id="ctrl-d"><strong>[ctrl]+d</strong></h1>
+<p>键盘输入结束，可以离开命令行模式</p>
+<h1 id="shift-page-up-page-down"><strong>[shift]+{[Page Up]|[Page Down]}</strong></h1>
+<p>前后翻页</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
       </tags>
   </entry>
   <entry>
@@ -1651,6 +1693,189 @@ int main(int argc, char *argv[])
       </tags>
   </entry>
   <entry>
+    <title>Vim的使用</title>
+    <url>/2022/06/25/linux/2022-06-22-Vim%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
+    <content><![CDATA[<p>​	Vim是linux环境下常用的编辑器,这篇文章目的在于帮助我自己记忆Vim的相关语法命令.</p>
+<hr>
+<p><code>i</code>或<code>Insert</code>进入编辑模式</p>
+<p><code>:</code>或<code>/</code>进入命令模式</p>
+<p><code>vim [文件名]</code>使用vim进入文件</p>
+<p><code>vim [文件名] [文件名] ...</code>使用vim进入多个文件</p>
+<p><code>:ls</code>(命令)列出当前打开的所有文件,例如<code>:ls</code></p>
+<p><code>:bn</code>(命令)打开第n个文件例如:<code>:b1</code>,<code>:b2</code></p>
+<p><code>vim -On [files]</code>打开多个文件并左右分屏</p>
+<p><code>vim -on [flies]</code>打开多个文件并上下分屏</p>
+<p><code>:sp file</code>打开一个新的文件file,并上下分割当前文件与新打开的文件</p>
+<p><code>:vsp file</code>打开一个文件file并与当前文件左右分割</p>
+<p><code>Ctrl +  W</code>键为组合功能键,与其他键配合使用.</p>
+<ul>
+<li><code>s</code>上下分割当前打开的文件</li>
+<li><code>v</code>左右分割当前打开的文件</li>
+<li><code>h</code>将光标定在左边屏幕</li>
+<li><code>l</code>将光标定在右边屏幕</li>
+<li><code>H</code>将当前分屏移动到左边</li>
+<li><code>L</code>将当前分屏移动到右边</li>
+<li><code>j</code>将光标移到下面分屏</li>
+<li><code>k</code>将光标移到上面分屏</li>
+<li><code>J</code>将当前分屏移到下面</li>
+<li><code>K</code>将当前分屏移到上面</li>
+<li><code>c</code>关闭当前分屏</li>
+<li><code>q</code>关闭当前分屏,如果是最后一个分屏则退出vim</li>
+</ul>
+<p><code>:w</code>保存文件但不退出</p>
+<p><code>:w!</code>强制保存但不退出</p>
+<p><code>:w file</code>保存当前文件修改到file中</p>
+<p><code>:q!</code>强制退出文件,但不保存</p>
+<p><code>:qa!</code>强制退出所有文件,任何修改都不保存</p>
+<p><code>:wq</code>退出文件,保存修改</p>
+<p><code>:x</code>退出文件保存修改</p>
+<p><code>:e</code>打开另一个文件</p>
+<p><code>:e!</code>放弃对文件的所以修改,恢复文件到上次保存的位置</p>
+<p><code>:saveas file</code>另存为file</p>
+<p><code>快捷键ZZ(大写ZZ)</code>保存退出</p>
+<hr>
+<p><code>I</code>进入插入模式,把光标移至<strong>行首</strong></p>
+<p><code>i</code>进入插入模式,在光标所在字符之前插入</p>
+<p><code>a</code>在光标后插入</p>
+<p><code>A</code>在行尾插入</p>
+<p><code>o</code>光标下一行行首插入</p>
+<p><code>O</code>光标上一行行首插入</p>
+<p><code>s</code>删除光标所在处字符进行插入</p>
+<p><code>S</code>删除光标所在行在行首插入</p>
+<p><code>cw</code>删除光标处到单词结束的字符并进行插入</p>
+<p><code>:set nu</code>显示行号</p>
+<p><code>:set nonu</code>取消显示行号</p>
+<p><code>:n</code>定位至第n行</p>
+<hr>
+<p><code>/&#123;目标字符串&#125;</code>查找目标字符串</p>
+<p>查找成功后<code>n</code>寻找下一个匹配,<code>N</code>寻找下一个匹配</p>
+<p><code>:set ic</code>查找时不区分大小写</p>
+<p><code>:set noic</code>查找时区分大小写</p>
+<p><code>:n1, n2d</code>删除n1到n2行</p>
+<hr>
+<p><code>:&#123;作用范围&#125;s/&#123;目标&#125;/&#123;替换&#125;/&#123;替换标志&#125;</code>文本替换</p>
+<p>例如:</p>
+<ul>
+<li><code>:s/test/TEST/g</code>将当前行的test换为TEST</li>
+<li><code>:%s/test/TEST/g</code>换全文</li>
+<li><code>:n1,n2s/test/TEST/g</code>换n1到n2行</li>
+<li>选区,在可视模式下选区后输入<code>:</code>会自动添加<code>:'&lt;,'&gt;</code>,比如<code>:'&lt;,'&gt;s/test/TEST/g</code></li>
+</ul>
+<p><strong>替换标志</strong></p>
+<p><code>g</code>替换所有出现</p>
+<p><code>%s</code>替换所有行第一次出现,例如<code>%s/TEST/test</code></p>
+<p><code>(空)</code>替换当前光标开始的第一次出现</p>
+<p><code>i</code>大小写不敏感</p>
+<p><code>I</code>大小写敏感</p>
+<p><code>c</code>需要确认</p>
+<p><strong>执行linux命令</strong></p>
+<p><code>:![command]</code>command即为欲执行的命令,例如:</p>
+<ul>
+<li><code>:!date</code></li>
+</ul>
+<p><code>:r ![command]</code>将命令执行结果加至操作文本光标处</p>
+<p><strong>定义快捷键</strong></p>
+<p><code>:map [key] [value]</code></p>
+<hr>
+<p><strong>正常模式下</strong></p>
+<ol>
+<li>
+<p>在当前行上移动光标</p>
+<ul>
+<li><code>0</code>移动至行头</li>
+<li><code>^</code>移动到本行第一个不是空白字符的地方</li>
+<li><code>$</code>移动至行尾</li>
+<li><code>g_</code>移动到本行最后一个不是空白字符的地方</li>
+<li><code>w</code>移动到下一个单词开头</li>
+<li><code>e</code>移动到下一个单词结尾</li>
+<li><code>f[a]</code>移动到下一个为a的字符处,例如<code>fa</code>移动到下一个a,<code>fb</code>移动到下一个b</li>
+<li><code>nf[a]</code>移动到第n个字符为a的地方</li>
+<li><code>F[a]与nF[a]</code>查找方向与上两个相反</li>
+<li><code>t[a]</code>移动至a前一个字符</li>
+<li><code>nt[a]</code>移动到第n个</li>
+<li><code>;与,</code>;下一个字符,前一个字符</li>
+</ul>
+</li>
+<li>
+<p>跨行移动光标</p>
+<ul>
+<li><code>nG</code>到第n行行首</li>
+<li><code>gg</code>到第一行行首</li>
+<li><code>G</code>最后一行行首</li>
+<li><code>H</code>当前屏幕第一行行首</li>
+<li><code>M</code>当前屏幕中间</li>
+<li><code>L</code>当前屏幕尾部</li>
+<li><code>zt</code>当前屏幕最上方</li>
+<li><code>zz</code>当前屏幕中间</li>
+<li><code>zb</code>当前屏幕尾部</li>
+<li><code>%</code>匹配括号移动</li>
+<li><code>*与#</code>匹配光标当前单词,移动光标至下一个或上一个匹配的单词,<code>*</code>为下一个,<code>#</code>为上一个</li>
+</ul>
+</li>
+<li>
+<p>翻页操作</p>
+<ul>
+<li><code>ctrl+f</code>下一页</li>
+<li><code>ctrl+b</code>上一页</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><strong>复制粘贴删除</strong></p>
+<p><code>d</code>删除,<code>y</code>复制,<code>p</code>粘贴</p>
+<ol>
+<li>
+<p>关于<code>d</code>删除,它通常搭配不同字母使用</p>
+<ul>
+<li><code>dw</code>删除一个单词</li>
+<li><code>dnw</code>删除n个单词</li>
+<li><code>dfa</code>删除光标到下一个a处的字符</li>
+<li><code>dnfa</code>删除光标到第n个a处的字符</li>
+<li><code>dd</code>删除一整行</li>
+<li><code>ndd</code>删除光标开始的n行</li>
+<li><code>d$</code>删除光标至本行结尾</li>
+<li><code>dH</code>删除屏幕显示第一行文本到光标所在行</li>
+<li><code>dG</code>删除光标所在行到文本的结束</li>
+</ul>
+</li>
+<li>
+<p><code>y</code>复制,操作和上面<code>d</code>的基本一样</p>
+</li>
+<li>
+<p><code>p</code>粘贴</p>
+<ul>
+<li><code>p</code>光标和粘贴</li>
+<li><code>P</code>光标前粘贴</li>
+</ul>
+</li>
+</ol>
+<hr>
+<p><code>u</code>撤销</p>
+<p><code>ctrl+u</code>恢复撤销</p>
+<hr>
+<p><code>x</code>删除光标所在字符</p>
+<p><code>r</code>替换光标所在处的字符</p>
+<p><code>R</code>替换光标开始后的所有字符</p>
+<hr>
+<p><code>~</code>将光标处字母带小写改变</p>
+<p><code>n~</code>改变n个大小写</p>
+<p><code>g~~</code>改变当前行</p>
+<p><code>gUU</code>当前行全改成大写</p>
+<p><code>guu</code>小写</p>
+<p><code>3gUU</code>光标开始三行全改为大写</p>
+<p><code>gUw</code>光标处单词改为大写</p>
+<p><code>guw</code>小写</p>
+<p><code>n[command]</code>执行n次命令</p>
+]]></content>
+      <categories>
+        <category>Linux</category>
+      </categories>
+      <tags>
+        <tag>Linux</tag>
+        <tag>Vim</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Mat - The Basic Image Container</title>
     <url>/2022/06/02/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-02Mat/</url>
     <content><![CDATA[<h2 id="mat">Mat</h2>
@@ -1788,21 +2013,6 @@ for (auto i &#x3D; vPoints.begin(); i !&#x3D; vPoints.end(); ++i)
 cout &lt;&lt; &quot;A vector of 2D Points &#x3D; &quot; &lt;&lt; vPoints &lt;&lt; endl;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
 </li>
 </ul>
-]]></content>
-      <categories>
-        <category>图像处理</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>图像处理</tag>
-        <tag>OpenCV</tag>
-        <tag>Core Module</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Mask operations on matrices</title>
-    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Mask%20Mat/</url>
-    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
 ]]></content>
       <categories>
         <category>图像处理</category>
@@ -2010,415 +2220,86 @@ for (int i &#x3D; 0; i &lt; 256; i++)
       </tags>
   </entry>
   <entry>
-    <title>基本命令与热键</title>
-    <url>/2022/03/06/linux/2022-03-06-%E5%9F%BA%E6%9C%AC%E5%91%BD%E4%BB%A4%E4%B8%8E%E7%83%AD%E9%94%AE/</url>
-    <content><![CDATA[<h1 id="命令">命令</h1>
-<h1 id="cal-month-year">cal [month] [year]</h1>
-<p>显示某年某月的日历</p>
-<h1 id="date">**date **</h1>
-<p>显示时间日期</p>
-<h1 id="bc"><strong>bc</strong></h1>
-<p>命令行下的计算器，默认仅输出整数，如果要输出小数点下位数可以使用</p>
-<p><strong>scale=number</strong></p>
-<p>使用<strong>quit</strong>退出</p>
-<h1 id="可选参数-help"><strong>可选参数–help</strong></h1>
-<p>大多数命令都有这个参数，用于查询命令所具有的选项和参数</p>
-<h1 id="man-命令"><strong>man 命令</strong></h1>
-<p>用于查看命令的详细说明，按下【空格键】翻页，按下【q】离开</p>
-<p>命令后可能有数字，如date(1)，最重要的三个为</p>
-<ul>
-<li>1：用户在shell环境中可以操作的命令和可执行文件</li>
-<li>5：配置文件或是某些文件的格式</li>
-<li>8：系统管理员可用的管理命令</li>
-</ul>
-<p>其余自行查阅</p>
-<p>在man页面，使用 **/word **来向下查找所有word所在地，用？word来向上查找</p>
-<p><strong>热键</strong></p>
-<h1 id="tab">[tab]</h1>
-<p>如果跟在一串命令的第一个字段后，则会显示所有以输入数据开头的命令</p>
-<p>如果跟在一串命令的第二个字段后，则为【文件补齐】</p>
-<h1 id="ctrl-c"><strong>[ctrl]+c</strong></h1>
-<p>中断目前程序</p>
-<h1 id="ctrl-d"><strong>[ctrl]+d</strong></h1>
-<p>键盘输入结束，可以离开命令行模式</p>
-<h1 id="shift-page-up-page-down"><strong>[shift]+{[Page Up]|[Page Down]}</strong></h1>
-<p>前后翻页</p>
+    <title>Mask operations on matrices</title>
+    <url>/2022/06/26/%E5%9B%BE%E5%83%8F%E5%A4%84%E7%90%86/2022-06-26-Mask%20Mat/</url>
+    <content><![CDATA[<p><strong>此为OpenCV官方教程的个人翻译</strong></p>
+<h2 id="矩阵上的掩膜操作">矩阵上的掩膜操作</h2>
+<p>​	矩阵上的掩码操作非常简单。基本做法是，我们根据掩膜矩阵（也称为内核）重新计算图像中的每个像素值。此内核包含的值将调整相邻像素（和当前像素）对新像素值的影响程度。从数学的角度来看，我们用我们指定的值进行了一个加权平均值计算。</p>
+<h2 id="测试用例">测试用例</h2>
+<p>​	让我们考虑一下如何增强图像对比度。基本上，我们会对图像的每个像素应用以下公式：</p>
+<p><img src="https://s2.loli.net/2022/06/26/8H5k7SRCzQ1qExG.png" alt="1.png"></p>
+<p>​	第一种表示法是使用公式，而第二种表示法是使用掩码的第一种表示法的压缩版本。使用掩码核时，请将掩码矩阵的中心放在要计算的像素上，并将像素值与相应位置的矩阵值相乘。在大型矩阵的情况下，后一种表示法更容易查看。</p>
+<p>​	现在让我们看看如何使用基本的像素访问方法或使用<a href="http://docs.opencv.org/modules/imgproc/doc/filtering.html#filter2d">filter2D</a>函数来实现这一点。</p>
+<h2 id="基本方法">基本方法</h2>
+<p>​	以下函数可以执行掩膜操作:</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">void Sharpen(const Mat&amp; myImage, Mat&amp; result) &#123;
+    CV_Assert(myImage.depth() &#x3D;&#x3D; CV_8U);
+
+    result.create(myImage.size(), myImage.type());
+    const int nChannels &#x3D; myImage.channels();
+
+    for (int j &#x3D; 1; j &lt; myImage.rows - 1; ++j) &#123;
+        const uchar* previous &#x3D; myImage.ptr&lt;uchar&gt;(j - 1);
+        const uchar* current &#x3D; myImage.ptr&lt;uchar&gt;(j);
+        const uchar* next &#x3D; myImage.ptr&lt;uchar&gt;(j + 1);
+
+        uchar* output &#x3D; result.ptr&lt;uchar&gt;(j);
+        for (int i &#x3D; nChannels; i &lt; nChannels * (myImage.cols - 1); ++i) &#123;
+            *output++ &#x3D; saturate_cast&lt;uchar&gt;(
+                5 * current[i] - current[i - nChannels] -
+                current[i + nChannels] - previous[i] - next[i]);
+        &#125;
+    &#125;
+
+    result.row(0).setTo(Scalar(0));
+    result.row(result.rows - 1).setTo(Scalar(0));
+    result.col(0).setTo(Scalar(0));
+    result.col(result.cols - 1).setTo(Scalar(0));
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	首先，我们确保输入图像数据采用<code>uchar</code>格式。为此，我们使用<a href="http://docs.opencv.org/modules/core/doc/utility_and_system_functions_and_macros.html#cv-assert">CV_Assert</a>函数，当其中的表达式为 false 时，该函数会引发错误。</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">CV_Assert(myImage.depth() &#x3D;&#x3D; CV_8U);  &#x2F;&#x2F; accept only uchar images<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>​	我们创建与输入具有相同大小和类型类型的输出图像。正如您在<a href="../how_to_scan_images/how_to_scan_images.html#how-image-stored-memory">“图像矩阵如何存储在内存中？”</a>部分中看到的那样，根据通道的数量，我们可能具有一个或多个子列。我们将通过指针循环访问它们.</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Result.create(myImage.size(), myImage.type());
+const int nChannels &#x3D; myImage.channels();<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span></span></code></pre>
+<p>​	我们将使用普通的 C [] 运算符来访问像素。由于我们需要同时访问多行，因此我们将获取每个行的指针（上一行、当前行和下一行）。我们需要另一个指针，指向要保存计算结果的位置。然后，只需使用 [] 运算符访问正确的项目即可。为了将输出指针向前移动，我们只需在每次操作后增加此值（使用一个字节）：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">for(int j &#x3D; 1; j &lt; myImage.rows - 1; ++j)
+&#123;
+    const uchar* previous &#x3D; myImage.ptr&lt;uchar&gt;(j - 1);
+    const uchar* current  &#x3D; myImage.ptr&lt;uchar&gt;(j    );
+    const uchar* next     &#x3D; myImage.ptr&lt;uchar&gt;(j + 1);
+
+    uchar* output &#x3D; Result.ptr&lt;uchar&gt;(j);
+
+    for(int i &#x3D; nChannels; i &lt; nChannels * (myImage.cols - 1); ++i)
+    &#123;
+        *output++ &#x3D; saturate_cast&lt;uchar&gt;(5 * current[i]
+                     -current[i - nChannels] - current[i + nChannels] - previous[i] - next[i]);
+    &#125;
+&#125;<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>​	在图像的边界上，上一行不存在像素。因此,在这些点上，我们的公式是未定义的。一个简单的解决方案是不在这些点上应用掩码核，例如，将边界上的像素设置为零：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Result.row(0).setTo(Scalar(0));               &#x2F;&#x2F; The top row
+Result.row(Result.rows - 1).setTo(Scalar(0)); &#x2F;&#x2F; The bottom row
+Result.col(0).setTo(Scalar(0));               &#x2F;&#x2F; The left column
+Result.col(Result.cols - 1).setTo(Scalar(0)); &#x2F;&#x2F; The right column<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span></span></code></pre>
+<h2 id="filter2d-函数">filter2D 函数</h2>
+<p>​	应用这样的滤镜在图像处理中非常普遍，因此OpenCV提供一个函数来应用掩码（在某些地方也称为内核）。为此，您首先需要定义一个保存掩码核的 <em>Mat</em> 对象：</p>
+<pre class="line-numbers language-C++" data-language="C++"><code class="language-C++">Mat kern &#x3D; (Mat_&lt;char&gt;(3,3) &lt;&lt;  0, -1,  0,
+                               -1,  5, -1,
+                                0, -1,  0);<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span></span></code></pre>
+<p>​	然后调用 <a href="http://docs.opencv.org/modules/imgproc/doc/filtering.html#filter2d">filter2D</a> 函数，指定要使用的输入、输出图像和内核：</p>
+<pre class="line-numbers language-none"><code class="language-none">filter2D(I, K, I.depth(), kern);<span aria-hidden="true" class="line-numbers-rows"><span></span></span></code></pre>
+<p>​	该函数甚至有第五个可选参数来指定内核的中心，以及第六个用于确定在操作未定义的区域（边界）中要执行的操作的参数。使用此函数的优点是它更短，更不冗长，并且由于实现了一些优化技术，因此它通常比<em>手动编码的方法</em>更快。例如，在我的测试中，第二个只花了13毫秒，第一个花了大约31毫秒。有很大的不同。</p>
+<p>​	例如：</p>
+<p><img src="https://s2.loli.net/2022/06/26/U6TKPXgfdzFny9V.png" alt="2.png"></p>
 ]]></content>
       <categories>
-        <category>Linux</category>
-      </categories>
-      <tags>
-        <tag>Linux</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Vim的使用</title>
-    <url>/2022/06/25/linux/2022-06-22-Vim%E7%9A%84%E4%BD%BF%E7%94%A8/</url>
-    <content><![CDATA[<p>​	Vim是linux环境下常用的编辑器,这篇文章目的在于帮助我自己记忆Vim的相关语法命令.</p>
-<hr>
-<p><code>i</code>或<code>Insert</code>进入编辑模式</p>
-<p><code>:</code>或<code>/</code>进入命令模式</p>
-<p><code>vim [文件名]</code>使用vim进入文件</p>
-<p><code>vim [文件名] [文件名] ...</code>使用vim进入多个文件</p>
-<p><code>:ls</code>(命令)列出当前打开的所有文件,例如<code>:ls</code></p>
-<p><code>:bn</code>(命令)打开第n个文件例如:<code>:b1</code>,<code>:b2</code></p>
-<p><code>vim -On [files]</code>打开多个文件并左右分屏</p>
-<p><code>vim -on [flies]</code>打开多个文件并上下分屏</p>
-<p><code>:sp file</code>打开一个新的文件file,并上下分割当前文件与新打开的文件</p>
-<p><code>:vsp file</code>打开一个文件file并与当前文件左右分割</p>
-<p><code>Ctrl +  W</code>键为组合功能键,与其他键配合使用.</p>
-<ul>
-<li><code>s</code>上下分割当前打开的文件</li>
-<li><code>v</code>左右分割当前打开的文件</li>
-<li><code>h</code>将光标定在左边屏幕</li>
-<li><code>l</code>将光标定在右边屏幕</li>
-<li><code>H</code>将当前分屏移动到左边</li>
-<li><code>L</code>将当前分屏移动到右边</li>
-<li><code>j</code>将光标移到下面分屏</li>
-<li><code>k</code>将光标移到上面分屏</li>
-<li><code>J</code>将当前分屏移到下面</li>
-<li><code>K</code>将当前分屏移到上面</li>
-<li><code>c</code>关闭当前分屏</li>
-<li><code>q</code>关闭当前分屏,如果是最后一个分屏则退出vim</li>
-</ul>
-<p><code>:w</code>保存文件但不退出</p>
-<p><code>:w!</code>强制保存但不退出</p>
-<p><code>:w file</code>保存当前文件修改到file中</p>
-<p><code>:q!</code>强制退出文件,但不保存</p>
-<p><code>:qa!</code>强制退出所有文件,任何修改都不保存</p>
-<p><code>:wq</code>退出文件,保存修改</p>
-<p><code>:x</code>退出文件保存修改</p>
-<p><code>:e</code>打开另一个文件</p>
-<p><code>:e!</code>放弃对文件的所以修改,恢复文件到上次保存的位置</p>
-<p><code>:saveas file</code>另存为file</p>
-<p><code>快捷键ZZ(大写ZZ)</code>保存退出</p>
-<hr>
-<p><code>I</code>进入插入模式,把光标移至<strong>行首</strong></p>
-<p><code>i</code>进入插入模式,在光标所在字符之前插入</p>
-<p><code>a</code>在光标后插入</p>
-<p><code>A</code>在行尾插入</p>
-<p><code>o</code>光标下一行行首插入</p>
-<p><code>O</code>光标上一行行首插入</p>
-<p><code>s</code>删除光标所在处字符进行插入</p>
-<p><code>S</code>删除光标所在行在行首插入</p>
-<p><code>cw</code>删除光标处到单词结束的字符并进行插入</p>
-<p><code>:set nu</code>显示行号</p>
-<p><code>:set nonu</code>取消显示行号</p>
-<p><code>:n</code>定位至第n行</p>
-<hr>
-<p><code>/&#123;目标字符串&#125;</code>查找目标字符串</p>
-<p>查找成功后<code>n</code>寻找下一个匹配,<code>N</code>寻找下一个匹配</p>
-<p><code>:set ic</code>查找时不区分大小写</p>
-<p><code>:set noic</code>查找时区分大小写</p>
-<p><code>:n1, n2d</code>删除n1到n2行</p>
-<hr>
-<p><code>:&#123;作用范围&#125;s/&#123;目标&#125;/&#123;替换&#125;/&#123;替换标志&#125;</code>文本替换</p>
-<p>例如:</p>
-<ul>
-<li><code>:s/test/TEST/g</code>将当前行的test换为TEST</li>
-<li><code>:%s/test/TEST/g</code>换全文</li>
-<li><code>:n1,n2s/test/TEST/g</code>换n1到n2行</li>
-<li>选区,在可视模式下选区后输入<code>:</code>会自动添加<code>:'&lt;,'&gt;</code>,比如<code>:'&lt;,'&gt;s/test/TEST/g</code></li>
-</ul>
-<p><strong>替换标志</strong></p>
-<p><code>g</code>替换所有出现</p>
-<p><code>%s</code>替换所有行第一次出现,例如<code>%s/TEST/test</code></p>
-<p><code>(空)</code>替换当前光标开始的第一次出现</p>
-<p><code>i</code>大小写不敏感</p>
-<p><code>I</code>大小写敏感</p>
-<p><code>c</code>需要确认</p>
-<p><strong>执行linux命令</strong></p>
-<p><code>:![command]</code>command即为欲执行的命令,例如:</p>
-<ul>
-<li><code>:!date</code></li>
-</ul>
-<p><code>:r ![command]</code>将命令执行结果加至操作文本光标处</p>
-<p><strong>定义快捷键</strong></p>
-<p><code>:map [key] [value]</code></p>
-<hr>
-<p><strong>正常模式下</strong></p>
-<ol>
-<li>
-<p>在当前行上移动光标</p>
-<ul>
-<li><code>0</code>移动至行头</li>
-<li><code>^</code>移动到本行第一个不是空白字符的地方</li>
-<li><code>$</code>移动至行尾</li>
-<li><code>g_</code>移动到本行最后一个不是空白字符的地方</li>
-<li><code>w</code>移动到下一个单词开头</li>
-<li><code>e</code>移动到下一个单词结尾</li>
-<li><code>f[a]</code>移动到下一个为a的字符处,例如<code>fa</code>移动到下一个a,<code>fb</code>移动到下一个b</li>
-<li><code>nf[a]</code>移动到第n个字符为a的地方</li>
-<li><code>F[a]与nF[a]</code>查找方向与上两个相反</li>
-<li><code>t[a]</code>移动至a前一个字符</li>
-<li><code>nt[a]</code>移动到第n个</li>
-<li><code>;与,</code>;下一个字符,前一个字符</li>
-</ul>
-</li>
-<li>
-<p>跨行移动光标</p>
-<ul>
-<li><code>nG</code>到第n行行首</li>
-<li><code>gg</code>到第一行行首</li>
-<li><code>G</code>最后一行行首</li>
-<li><code>H</code>当前屏幕第一行行首</li>
-<li><code>M</code>当前屏幕中间</li>
-<li><code>L</code>当前屏幕尾部</li>
-<li><code>zt</code>当前屏幕最上方</li>
-<li><code>zz</code>当前屏幕中间</li>
-<li><code>zb</code>当前屏幕尾部</li>
-<li><code>%</code>匹配括号移动</li>
-<li><code>*与#</code>匹配光标当前单词,移动光标至下一个或上一个匹配的单词,<code>*</code>为下一个,<code>#</code>为上一个</li>
-</ul>
-</li>
-<li>
-<p>翻页操作</p>
-<ul>
-<li><code>ctrl+f</code>下一页</li>
-<li><code>ctrl+b</code>上一页</li>
-</ul>
-</li>
-</ol>
-<hr>
-<p><strong>复制粘贴删除</strong></p>
-<p><code>d</code>删除,<code>y</code>复制,<code>p</code>粘贴</p>
-<ol>
-<li>
-<p>关于<code>d</code>删除,它通常搭配不同字母使用</p>
-<ul>
-<li><code>dw</code>删除一个单词</li>
-<li><code>dnw</code>删除n个单词</li>
-<li><code>dfa</code>删除光标到下一个a处的字符</li>
-<li><code>dnfa</code>删除光标到第n个a处的字符</li>
-<li><code>dd</code>删除一整行</li>
-<li><code>ndd</code>删除光标开始的n行</li>
-<li><code>d$</code>删除光标至本行结尾</li>
-<li><code>dH</code>删除屏幕显示第一行文本到光标所在行</li>
-<li><code>dG</code>删除光标所在行到文本的结束</li>
-</ul>
-</li>
-<li>
-<p><code>y</code>复制,操作和上面<code>d</code>的基本一样</p>
-</li>
-<li>
-<p><code>p</code>粘贴</p>
-<ul>
-<li><code>p</code>光标和粘贴</li>
-<li><code>P</code>光标前粘贴</li>
-</ul>
-</li>
-</ol>
-<hr>
-<p><code>u</code>撤销</p>
-<p><code>ctrl+u</code>恢复撤销</p>
-<hr>
-<p><code>x</code>删除光标所在字符</p>
-<p><code>r</code>替换光标所在处的字符</p>
-<p><code>R</code>替换光标开始后的所有字符</p>
-<hr>
-<p><code>~</code>将光标处字母带小写改变</p>
-<p><code>n~</code>改变n个大小写</p>
-<p><code>g~~</code>改变当前行</p>
-<p><code>gUU</code>当前行全改成大写</p>
-<p><code>guu</code>小写</p>
-<p><code>3gUU</code>光标开始三行全改为大写</p>
-<p><code>gUw</code>光标处单词改为大写</p>
-<p><code>guw</code>小写</p>
-<p><code>n[command]</code>执行n次命令</p>
-]]></content>
-      <categories>
-        <category>Linux</category>
-      </categories>
-      <tags>
-        <tag>Linux</tag>
-        <tag>Vim</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>双链表</title>
-    <url>/2022/02/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-14-%E5%8F%8C%E9%93%BE%E8%A1%A8/</url>
-    <content><![CDATA[<p>相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
-<h2 id="前言：">前言：</h2>
-<p>1.这里的双链表使用C++实现</p>
-<p>2.只完成了插入删除操作</p>
-<h2 id="思路：">思路：</h2>
-<p><img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png" alt=""></p>
-<p>如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
-<h2 id="实现：">实现：</h2>
-<p>首先，需要定义表示节点的结构体:</p>
-<pre class="line-numbers language-none"><code class="language-none">struct node
-&#123;
-	string data;
-	node* next;		&#x2F;&#x2F;指向下一个元素
-	node* prev;		&#x2F;&#x2F;指向前一个元素
-	node()                　&#x2F;&#x2F;构造函数，用于在创建新节点时自动初始化    
-	&#123;
-		data &#x3D; &quot;&quot;;
-		prev &#x3D; NULL;
-		next &#x3D; NULL;
-	&#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>这里我为了在字面上区分节点和链表的区别，使用了</p>
-<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png" alt=""></p>
-<p>接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
-<pre class="line-numbers language-none"><code class="language-none">doubleLinkedList* createList()
-&#123;
-	node* list &#x3D; new node();　　&#x2F;&#x2F;这种方式返回不会存在局部变量内存销毁的问题，因为它是new出来的
-	return list;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>插入操作</p>
-<pre class="line-numbers language-none"><code class="language-none">void insert(node* position, string input)
-&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
-	node* newNode &#x3D; new node();
-	&lt;strong&gt;newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
-	newNode-&gt;next &#x3D; position-&gt;next;		　　　　 &#x2F;&#x2F;如果不对新节点优先处理，会造成找不到节点的清空，造成野指针
-	newNode-&gt;prev &#x3D; position;
-	if (position-&gt;next !&#x3D; NULL) &#123;　　　　　　　　　　　　&#x2F;&#x2F;如果不进行判断，可能会对NULL操作而错误
-		position-&gt;next-&gt;prev &#x3D; newNode;
-		position-&gt;next &#x3D; newNode;
-	&#125;
-	else &#123;
-		position-&gt;next &#x3D; newNode;
-	&#125;&lt;&#x2F;strong&gt;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-<pre class="line-numbers language-none"><code class="language-none">void deleteElement(node* ele)
-&#123;
-	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
-	if (ele-&gt;next !&#x3D; NULL)
-	&#123;
-		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
-	&#125;
-	else
-	&#123;&#x2F;&#x2F;ele-&gt;next为空时不需要做什么了
-	&#125;
-	delete ele;　　　　&#x2F;&#x2F;必须删除，否则长时间可能造成内存泄漏
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-<p>查找操作</p>
-<pre class="line-numbers language-none"><code class="language-none">node* find(string input, doubleLinkedList* list)
-&#123;&#x2F;&#x2F;与单链表差不多
-	doubleLinkedList* L &#x3D; list;
-	while (L !&#x3D; NULL)
-	&#123;
-		if (L-&gt;data &#x3D;&#x3D; input)
-		&#123;
-			return L;
-		&#125;
-		else
-		&#123;
-			L &#x3D; L-&gt;next;
-		&#125;
-	&#125;
-	return NULL;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>完整代码</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
-#include &lt;string&gt;
-using namespace std;
-struct node
-&#123;
-	string data;
-	node* next;		&#x2F;&#x2F;指向下一个元素
-	node* prev;		&#x2F;&#x2F;指向前一个元素
-	node()
-	&#123;
-		data &#x3D; &quot;&quot;;
-		prev &#x3D; NULL;
-		next &#x3D; NULL;
-	&#125;
-&#125;;
-
-using doubleLinkedList &#x3D; node;
-
-void insert(node* position, string input)
-&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
-	node* newNode &#x3D; new node();
-	newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
-	newNode-&gt;next &#x3D; position-&gt;next;		
-	newNode-&gt;prev &#x3D; position;
-	if (position-&gt;next !&#x3D; NULL) &#123;
-		position-&gt;next-&gt;prev &#x3D; newNode;
-		position-&gt;next &#x3D; newNode;
-	&#125;
-	else &#123;
-		position-&gt;next &#x3D; newNode;
-	&#125;
-&#125;
-
-void deleteElement(node* ele)
-&#123;
-	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
-	if (ele-&gt;next !&#x3D; NULL)
-	&#123;
-		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
-	&#125;
-	else
-	&#123;
-	&#125;
-	delete ele;
-&#125;
-
-node* find(string input, doubleLinkedList* list)
-&#123;
-	doubleLinkedList* L &#x3D; list;
-	while (L !&#x3D; NULL)
-	&#123;
-		if (L-&gt;data &#x3D;&#x3D; input)
-		&#123;
-			return L;
-		&#125;
-		else
-		&#123;
-			L &#x3D; L-&gt;next;
-		&#125;
-	&#125;
-	return NULL;
-&#125;
-
-doubleLinkedList* createList()
-&#123;
-	node* list &#x3D; new node();
-	return list;
-&#125;
-
-int main()
-&#123;
-	doubleLinkedList* list &#x3D; createList();
-	while (true)
-	&#123;
-		int j;
-		cin &gt;&gt; j;
-		if (j &#x3D;&#x3D; 1)
-		&#123;
-			string query, input;
-			cin &gt;&gt; input;
-			insert(list, input);
-		&#125;
-		else
-		&#123;
-			string query;
-			cin &gt;&gt; query;
-			deleteElement(find(query, list));
-		&#125;
-	&#125;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>此代码已经本人VS调试测试，暂时没有发现什么问题</p>
-<p>如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
-]]></content>
-      <categories>
-        <category>数据结构与算法</category>
+        <category>图像处理</category>
       </categories>
       <tags>
         <tag>C++</tag>
-        <tag>数据结构</tag>
-        <tag>线性表</tag>
+        <tag>图像处理</tag>
+        <tag>OpenCV</tag>
+        <tag>Core Module</tag>
       </tags>
   </entry>
   <entry>
@@ -2614,6 +2495,193 @@ int main()
 <h3 id="结语：">结语：</h3>
 <p>这就是静态链表这几个操作了，我经过VS调试后并未出现异常</p>
 <p>如有看不懂，或错误的地方，欢迎讨论。</p>
+]]></content>
+      <categories>
+        <category>数据结构与算法</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>数据结构</tag>
+        <tag>线性表</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>双链表</title>
+    <url>/2022/02/14/%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E4%B8%8E%E7%AE%97%E6%B3%95/2022-02-14-%E5%8F%8C%E9%93%BE%E8%A1%A8/</url>
+    <content><![CDATA[<p>相比单链表，双链表提供了prev指针，使得其在处理一些操作时更为简单。</p>
+<h2 id="前言：">前言：</h2>
+<p>1.这里的双链表使用C++实现</p>
+<p>2.只完成了插入删除操作</p>
+<h2 id="思路：">思路：</h2>
+<p><img src="https://s2.loli.net/2022/05/25/3LFDGZJONKn98y4.png" alt=""></p>
+<p>如上图所示，next指向下一个，而prev指向前一个，只要适当调整指针指向，即可完成双链表</p>
+<h2 id="实现：">实现：</h2>
+<p>首先，需要定义表示节点的结构体:</p>
+<pre class="line-numbers language-none"><code class="language-none">struct node
+&#123;
+	string data;
+	node* next;		&#x2F;&#x2F;指向下一个元素
+	node* prev;		&#x2F;&#x2F;指向前一个元素
+	node()                　&#x2F;&#x2F;构造函数，用于在创建新节点时自动初始化    
+	&#123;
+		data &#x3D; &quot;&quot;;
+		prev &#x3D; NULL;
+		next &#x3D; NULL;
+	&#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>这里我为了在字面上区分节点和链表的区别，使用了</p>
+<p><img src="https://s2.loli.net/2022/05/25/5OE78YwUT1kyhrp.png" alt=""></p>
+<p>接下来创建链表，实际上是创造了一个节点，将其作为头结点。</p>
+<pre class="line-numbers language-none"><code class="language-none">doubleLinkedList* createList()
+&#123;
+	node* list &#x3D; new node();　　&#x2F;&#x2F;这种方式返回不会存在局部变量内存销毁的问题，因为它是new出来的
+	return list;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>插入操作</p>
+<pre class="line-numbers language-none"><code class="language-none">void insert(node* position, string input)
+&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
+	node* newNode &#x3D; new node();
+	&lt;strong&gt;newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
+	newNode-&gt;next &#x3D; position-&gt;next;		　　　　 &#x2F;&#x2F;如果不对新节点优先处理，会造成找不到节点的清空，造成野指针
+	newNode-&gt;prev &#x3D; position;
+	if (position-&gt;next !&#x3D; NULL) &#123;　　　　　　　　　　　　&#x2F;&#x2F;如果不进行判断，可能会对NULL操作而错误
+		position-&gt;next-&gt;prev &#x3D; newNode;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+	else &#123;
+		position-&gt;next &#x3D; newNode;
+	&#125;&lt;&#x2F;strong&gt;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+<pre class="line-numbers language-none"><code class="language-none">void deleteElement(node* ele)
+&#123;
+	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
+	if (ele-&gt;next !&#x3D; NULL)
+	&#123;
+		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
+	&#125;
+	else
+	&#123;&#x2F;&#x2F;ele-&gt;next为空时不需要做什么了
+	&#125;
+	delete ele;　　　　&#x2F;&#x2F;必须删除，否则长时间可能造成内存泄漏
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+<p>查找操作</p>
+<pre class="line-numbers language-none"><code class="language-none">node* find(string input, doubleLinkedList* list)
+&#123;&#x2F;&#x2F;与单链表差不多
+	doubleLinkedList* L &#x3D; list;
+	while (L !&#x3D; NULL)
+	&#123;
+		if (L-&gt;data &#x3D;&#x3D; input)
+		&#123;
+			return L;
+		&#125;
+		else
+		&#123;
+			L &#x3D; L-&gt;next;
+		&#125;
+	&#125;
+	return NULL;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>完整代码</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include &lt;iostream&gt;
+#include &lt;string&gt;
+using namespace std;
+struct node
+&#123;
+	string data;
+	node* next;		&#x2F;&#x2F;指向下一个元素
+	node* prev;		&#x2F;&#x2F;指向前一个元素
+	node()
+	&#123;
+		data &#x3D; &quot;&quot;;
+		prev &#x3D; NULL;
+		next &#x3D; NULL;
+	&#125;
+&#125;;
+
+using doubleLinkedList &#x3D; node;
+
+void insert(node* position, string input)
+&#123;&#x2F;&#x2F;position是插入的位置，input是插入数据的data
+	node* newNode &#x3D; new node();
+	newNode-&gt;data &#x3D; input;				&#x2F;&#x2F;先处理新创造的节点
+	newNode-&gt;next &#x3D; position-&gt;next;		
+	newNode-&gt;prev &#x3D; position;
+	if (position-&gt;next !&#x3D; NULL) &#123;
+		position-&gt;next-&gt;prev &#x3D; newNode;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+	else &#123;
+		position-&gt;next &#x3D; newNode;
+	&#125;
+&#125;
+
+void deleteElement(node* ele)
+&#123;
+	ele-&gt;prev-&gt;next &#x3D; ele-&gt;next;
+	if (ele-&gt;next !&#x3D; NULL)
+	&#123;
+		ele-&gt;next-&gt;prev &#x3D; ele-&gt;prev;
+	&#125;
+	else
+	&#123;
+	&#125;
+	delete ele;
+&#125;
+
+node* find(string input, doubleLinkedList* list)
+&#123;
+	doubleLinkedList* L &#x3D; list;
+	while (L !&#x3D; NULL)
+	&#123;
+		if (L-&gt;data &#x3D;&#x3D; input)
+		&#123;
+			return L;
+		&#125;
+		else
+		&#123;
+			L &#x3D; L-&gt;next;
+		&#125;
+	&#125;
+	return NULL;
+&#125;
+
+doubleLinkedList* createList()
+&#123;
+	node* list &#x3D; new node();
+	return list;
+&#125;
+
+int main()
+&#123;
+	doubleLinkedList* list &#x3D; createList();
+	while (true)
+	&#123;
+		int j;
+		cin &gt;&gt; j;
+		if (j &#x3D;&#x3D; 1)
+		&#123;
+			string query, input;
+			cin &gt;&gt; input;
+			insert(list, input);
+		&#125;
+		else
+		&#123;
+			string query;
+			cin &gt;&gt; query;
+			deleteElement(find(query, list));
+		&#125;
+	&#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>此代码已经本人VS调试测试，暂时没有发现什么问题</p>
+<p>如果由不懂的或错误的，欢迎评论或加QQ私聊！</p>
 ]]></content>
       <categories>
         <category>数据结构与算法</category>
@@ -3963,6 +4031,59 @@ void InsertSortion::shellSort(TargetType *data, int n, int *dalta, int m)
       </tags>
   </entry>
   <entry>
+    <title>C++类里静态成员链接错误</title>
+    <url>/2022/03/03/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-03-03-C++%E7%B1%BB%E9%87%8C%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E9%93%BE%E6%8E%A5%E9%94%99%E8%AF%AF/</url>
+    <content><![CDATA[<p>我现声明一个类内静态变量:</p>
+<pre class="line-numbers language-none"><code class="language-none">class test&#123;
+public:
+    static int a;
+    int get();
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>在test.cpp中对a进行使用</p>
+<pre class="line-numbers language-none"><code class="language-none">#include&lt;test.h&gt;
+int test::get()
+&#123;
+    return a;                    
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>会产生链接错误</p>
+<p><img src="https://s2.loli.net/2022/05/29/MPGYQKLqogBn7uE.png" alt="1.png"><br>
+　　解决方案：</p>
+<p><strong>①在头文件中定义函数</strong></p>
+<p>**　　　　**</p>
+<pre class="line-numbers language-none"><code class="language-none">#pragma once
+class test
+&#123;
+public:
+	static int a;
+	int get()
+	&#123;
+		return a;
+	&#125;
+&#125;;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p><strong>②在源文件加上静态变量的声明</strong></p>
+<pre class="line-numbers language-none"><code class="language-none">#include &quot;test.h&quot;
+
+int test::a;
+
+int test::get()
+&#123;
+	return a;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p></p>
+]]></content>
+      <categories>
+        <category>细节问题</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>细节问题</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>关于函数体内指针指向问题</title>
     <url>/2022/02/16/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-02-16-%E5%85%B3%E4%BA%8E%E5%87%BD%E6%95%B0%E4%BD%93%E5%86%85%E6%8C%87%E9%92%88%E6%8C%87%E5%90%91%E9%97%AE%E9%A2%98/</url>
     <content><![CDATA[<p>今天在做一道题的时候，发现了一个问题，那就是函数的执行会不会改变指针指向的问题。</p>
@@ -4017,59 +4138,6 @@ int main()
 <p><img src="https://s2.loli.net/2022/05/26/irTmSIPNge8VUM6.png" alt="5.png"></p>
 <p></p>
 ]]></content>
-      <tags>
-        <tag>C++</tag>
-        <tag>细节问题</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>C++类里静态成员链接错误</title>
-    <url>/2022/03/03/%E7%BB%86%E8%8A%82%E9%97%AE%E9%A2%98/2022-03-03-C++%E7%B1%BB%E9%87%8C%E9%9D%99%E6%80%81%E6%88%90%E5%91%98%E9%93%BE%E6%8E%A5%E9%94%99%E8%AF%AF/</url>
-    <content><![CDATA[<p>我现声明一个类内静态变量:</p>
-<pre class="line-numbers language-none"><code class="language-none">class test&#123;
-public:
-    static int a;
-    int get();
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>在test.cpp中对a进行使用</p>
-<pre class="line-numbers language-none"><code class="language-none">#include&lt;test.h&gt;
-int test::get()
-&#123;
-    return a;                    
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>会产生链接错误</p>
-<p><img src="https://s2.loli.net/2022/05/29/MPGYQKLqogBn7uE.png" alt="1.png"><br>
-　　解决方案：</p>
-<p><strong>①在头文件中定义函数</strong></p>
-<p>**　　　　**</p>
-<pre class="line-numbers language-none"><code class="language-none">#pragma once
-class test
-&#123;
-public:
-	static int a;
-	int get()
-	&#123;
-		return a;
-	&#125;
-&#125;;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p><strong>②在源文件加上静态变量的声明</strong></p>
-<pre class="line-numbers language-none"><code class="language-none">#include &quot;test.h&quot;
-
-int test::a;
-
-int test::get()
-&#123;
-	return a;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p></p>
-]]></content>
-      <categories>
-        <category>细节问题</category>
-      </categories>
       <tags>
         <tag>C++</tag>
         <tag>细节问题</tag>
@@ -4349,209 +4417,6 @@ int main()
       </tags>
   </entry>
   <entry>
-    <title>逆波兰式（NOJ第8题）</title>
-    <url>/2022/03/17/%E9%A2%98%E8%A7%A3/2022-03-17-%E9%80%86%E6%B3%A2%E5%85%B0%E5%BC%8F%EF%BC%88NOJ%E7%AC%AC8%E9%A2%98%EF%BC%89/</url>
-    <content><![CDATA[<h1 id="前言">前言</h1>
-<p>对于NOJ，其实我最想吐槽的就是没有测试点输入输出的数据，这样我们只能拿前辈的代码来进行测试。</p>
-<p>就像这道题，我一开始全用的栈（因为课本上那道表达式的题用的就是栈），结果搁那耗了将近三个小时才想到合适的数据结构。</p>
-<p>而且我在解题的过程中，发现编程题好像就是在让我们钻研数学的本质。让我们在种种限制下起舞。</p>
-<p>还是太菜了啊。</p>
-<p><img src="https://s2.loli.net/2022/06/07/4dszr2I89GQwxcM.png" alt="1.png"></p>
-<h1 id="题目描述">题目描述</h1>
-<p><img src="https://s2.loli.net/2022/06/07/rOnCdzmWXJIVgZt.png" alt="2.png"></p>
-<p>我们先来看逆波兰式的例子吧</p>
-<p><strong>(a+b)(c+d)    ⟶    ab+cd+</strong></p>
-<p><strong>(a+(b+c))    ⟶    abc++</strong></p>
-<p><strong>(1+2)3/4(7+8)    ⟶    12+34/78+</strong></p>
-<p>基本就是以上的形式，愿君看清再做题。</p>
-<h1 id="算法设计">算法设计</h1>
-<p>在这道题中，我们会遇到六个符号</p>
-<center>( ) + - * /</center>
-<p>为了保证数字能按照顺序输出，我们使用队列来存储输入数据和其中的运算数</p>
-<p>为了能让操作符正确的输出（按照（）、【*、/】、【+、-】）来输出，我们使用栈来保存操作符</p>
-<p>而我们又考察到无论什么运算符，左边的都可以优先计算，所以我们从左边开始。</p>
-<ol>
-<li>
-<p>循环地从输入队列（SQ）中取出单个字符</p>
-</li>
-<li>
-<p>①如果是操作数，则入操作数队列（NQ）</p>
-</li>
-</ol>
-<p>②如果是操作符，则：</p>
-<p>（1）如果是’(’，则入操作符栈（OS)</p>
-<p>（2）如果是’)’,  则：</p>
-<p>Ⅰ.让NQ中所有数依次出队并输出</p>
-<p>Ⅱ.让OS中所有除’('外地操作符出栈并输出</p>
-<p>（3）如果是’*‘或’/’，则：**</p>
-<p>Ⅰ.如果下一操作符是’(’,则直接让下一操作符入栈</p>
-<p>​								 Ⅱ.如果不是，则先SQ出队并输出，然后OS出栈并输出</p>
-<p>(4)  如果是’+‘或’-’，则入OS栈</p>
-<p>（5）如果是操作数，则如NQ队列</p>
-<p>上述操作完成后，可以保证所有工作地正确地做完。</p>
-<h1 id="实现">实现</h1>
-<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;逆波兰式
-#include &lt;iostream&gt;
-#include &lt;cstring&gt;
-using namespace std;
-
-struct Queue
-&#123;
-    char queue[100];
-    int rear &#x3D; 0;
-    int front &#x3D; 0;
-    char pop()
-    &#123;
-        char rtn &#x3D; queue[front];
-        front++;
-        return rtn;
-    &#125;
-    char getTop()
-    &#123;
-        return queue[front];
-    &#125;
-    void push(char x)
-    &#123;
-        queue[rear] &#x3D; x;
-        rear++;
-    &#125;
-    bool isEmpty()
-    &#123;
-        return front &gt;&#x3D; rear;
-    &#125;
-&#125;;
-
-struct Stack
-&#123;
-    char stack[100];
-    int top &#x3D; -1;
-    char pop()
-    &#123;
-        char rtn &#x3D; stack[top];
-        top--;
-        return rtn;
-    &#125;
-    char getTop()
-    &#123;
-        return stack[top];
-    &#125;
-    void push(char x)
-    &#123;
-        top++;
-        stack[top] &#x3D; x;
-    &#125;
-    bool isEmpty()
-    &#123;
-        return top &#x3D;&#x3D; -1;
-    &#125;
-&#125;;
-
-bool isNormalOperator(char x)
-&#123;
-    if (x &#x3D;&#x3D; &#39;+&#39; || x &#x3D;&#x3D; &#39;-&#39;)
-    &#123;
-        return true;
-    &#125;
-    return false;
-&#125;
-
-bool isGreaterOperator(char x)
-&#123;
-    if (x &#x3D;&#x3D; &#39;*&#39; || x &#x3D;&#x3D; &#39;&#x2F;&#39;)
-    &#123;
-        return true;
-    &#125;
-    return false;
-&#125;
-
-bool isLeftBracket(char x)
-&#123;
-    if (x &#x3D;&#x3D; &#39;(&#39;)
-    &#123;
-        return true;
-    &#125;
-    return false;
-&#125;
-
-bool isRightBracket(char x)
-&#123;
-    if (x &#x3D;&#x3D; &#39;)&#39;)
-    &#123;
-        return true;
-    &#125;
-    return false;
-&#125;
-
-int main()
-&#123;
-    Queue SQ;
-    std::cin &gt;&gt; SQ.queue;
-    SQ.rear &#x3D; strlen(SQ.queue);
-    Stack OS;
-    Queue NQ;
-    while (!SQ.isEmpty())
-    &#123;
-        if (isLeftBracket(SQ.getTop()))
-        &#123;
-            OS.push(SQ.pop());
-        &#125;
-        else if (isRightBracket(SQ.getTop()))
-        &#123;
-            char x &#x3D; SQ.pop();
-            while (!NQ.isEmpty())
-            &#123;
-                std::cout &lt;&lt; NQ.pop();
-            &#125;
-            while (!OS.isEmpty())
-            &#123;
-                if (isLeftBracket(OS.getTop()) || isRightBracket(OS.getTop()))
-                &#123;
-                    OS.pop();
-                &#125;
-                else
-                &#123;
-                    std::cout &lt;&lt; OS.pop();
-                &#125;
-            &#125;
-        &#125;
-        else if (isGreaterOperator(SQ.getTop()))
-        &#123;
-            OS.push(SQ.pop());
-            char x &#x3D; SQ.getTop();
-            if (!isLeftBracket(x))
-            &#123;
-                std::cout &lt;&lt; SQ.pop();
-                std::cout &lt;&lt; OS.pop();
-            &#125;
-            else
-            &#123;
-                OS.push(SQ.pop());
-            &#125;
-        &#125;
-        else if (isNormalOperator(SQ.getTop()))
-        &#123;
-            OS.push(SQ.pop());
-        &#125;
-        else
-        &#123;
-            NQ.push(SQ.pop());
-        &#125;
-    &#125;
-&#125;
-<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
-<p>最前面的就是对栈和队列的实现，使用C函数可以很容易地实现那些类函数。</p>
-<p>我已经把完整的伪代码写在上面了，相信不用再写注释了。</p>
-]]></content>
-      <categories>
-        <category>题解</category>
-      </categories>
-      <tags>
-        <tag>C++</tag>
-        <tag>题解</tag>
-        <tag>NOJ</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>LOCATE操作（NOJ第6题）</title>
     <url>/2022/03/15/%E9%A2%98%E8%A7%A3/2022-03-15-LOCATE%E6%93%8D%E4%BD%9C%EF%BC%88NOJ%E7%AC%AC6%E9%A2%98%EF%BC%89/</url>
     <content><![CDATA[<h1 id="题目描述">题目描述</h1>
@@ -4760,6 +4625,209 @@ int main()
 <p>总之，这道题不怎么难，但是如果因为这道题能让您了解到STL，那也算值了！！！</p>
 <p>不过，<strong>如果您正在学习数据结构，那么不建议您过度依赖STL，以防止期末上机考试时STL被禁</strong>，但如果您在学习算法，那么STL将成为您的助力！！！</p>
 <p>**　　**</p>
+]]></content>
+      <categories>
+        <category>题解</category>
+      </categories>
+      <tags>
+        <tag>C++</tag>
+        <tag>题解</tag>
+        <tag>NOJ</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>逆波兰式（NOJ第8题）</title>
+    <url>/2022/03/17/%E9%A2%98%E8%A7%A3/2022-03-17-%E9%80%86%E6%B3%A2%E5%85%B0%E5%BC%8F%EF%BC%88NOJ%E7%AC%AC8%E9%A2%98%EF%BC%89/</url>
+    <content><![CDATA[<h1 id="前言">前言</h1>
+<p>对于NOJ，其实我最想吐槽的就是没有测试点输入输出的数据，这样我们只能拿前辈的代码来进行测试。</p>
+<p>就像这道题，我一开始全用的栈（因为课本上那道表达式的题用的就是栈），结果搁那耗了将近三个小时才想到合适的数据结构。</p>
+<p>而且我在解题的过程中，发现编程题好像就是在让我们钻研数学的本质。让我们在种种限制下起舞。</p>
+<p>还是太菜了啊。</p>
+<p><img src="https://s2.loli.net/2022/06/07/4dszr2I89GQwxcM.png" alt="1.png"></p>
+<h1 id="题目描述">题目描述</h1>
+<p><img src="https://s2.loli.net/2022/06/07/rOnCdzmWXJIVgZt.png" alt="2.png"></p>
+<p>我们先来看逆波兰式的例子吧</p>
+<p><strong>(a+b)(c+d)    ⟶    ab+cd+</strong></p>
+<p><strong>(a+(b+c))    ⟶    abc++</strong></p>
+<p><strong>(1+2)3/4(7+8)    ⟶    12+34/78+</strong></p>
+<p>基本就是以上的形式，愿君看清再做题。</p>
+<h1 id="算法设计">算法设计</h1>
+<p>在这道题中，我们会遇到六个符号</p>
+<center>( ) + - * /</center>
+<p>为了保证数字能按照顺序输出，我们使用队列来存储输入数据和其中的运算数</p>
+<p>为了能让操作符正确的输出（按照（）、【*、/】、【+、-】）来输出，我们使用栈来保存操作符</p>
+<p>而我们又考察到无论什么运算符，左边的都可以优先计算，所以我们从左边开始。</p>
+<ol>
+<li>
+<p>循环地从输入队列（SQ）中取出单个字符</p>
+</li>
+<li>
+<p>①如果是操作数，则入操作数队列（NQ）</p>
+</li>
+</ol>
+<p>②如果是操作符，则：</p>
+<p>（1）如果是’(’，则入操作符栈（OS)</p>
+<p>（2）如果是’)’,  则：</p>
+<p>Ⅰ.让NQ中所有数依次出队并输出</p>
+<p>Ⅱ.让OS中所有除’('外地操作符出栈并输出</p>
+<p>（3）如果是’*‘或’/’，则：**</p>
+<p>Ⅰ.如果下一操作符是’(’,则直接让下一操作符入栈</p>
+<p>​								 Ⅱ.如果不是，则先SQ出队并输出，然后OS出栈并输出</p>
+<p>(4)  如果是’+‘或’-’，则入OS栈</p>
+<p>（5）如果是操作数，则如NQ队列</p>
+<p>上述操作完成后，可以保证所有工作地正确地做完。</p>
+<h1 id="实现">实现</h1>
+<pre class="line-numbers language-none"><code class="language-none">&#x2F;&#x2F;逆波兰式
+#include &lt;iostream&gt;
+#include &lt;cstring&gt;
+using namespace std;
+
+struct Queue
+&#123;
+    char queue[100];
+    int rear &#x3D; 0;
+    int front &#x3D; 0;
+    char pop()
+    &#123;
+        char rtn &#x3D; queue[front];
+        front++;
+        return rtn;
+    &#125;
+    char getTop()
+    &#123;
+        return queue[front];
+    &#125;
+    void push(char x)
+    &#123;
+        queue[rear] &#x3D; x;
+        rear++;
+    &#125;
+    bool isEmpty()
+    &#123;
+        return front &gt;&#x3D; rear;
+    &#125;
+&#125;;
+
+struct Stack
+&#123;
+    char stack[100];
+    int top &#x3D; -1;
+    char pop()
+    &#123;
+        char rtn &#x3D; stack[top];
+        top--;
+        return rtn;
+    &#125;
+    char getTop()
+    &#123;
+        return stack[top];
+    &#125;
+    void push(char x)
+    &#123;
+        top++;
+        stack[top] &#x3D; x;
+    &#125;
+    bool isEmpty()
+    &#123;
+        return top &#x3D;&#x3D; -1;
+    &#125;
+&#125;;
+
+bool isNormalOperator(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;+&#39; || x &#x3D;&#x3D; &#39;-&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+bool isGreaterOperator(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;*&#39; || x &#x3D;&#x3D; &#39;&#x2F;&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+bool isLeftBracket(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;(&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+bool isRightBracket(char x)
+&#123;
+    if (x &#x3D;&#x3D; &#39;)&#39;)
+    &#123;
+        return true;
+    &#125;
+    return false;
+&#125;
+
+int main()
+&#123;
+    Queue SQ;
+    std::cin &gt;&gt; SQ.queue;
+    SQ.rear &#x3D; strlen(SQ.queue);
+    Stack OS;
+    Queue NQ;
+    while (!SQ.isEmpty())
+    &#123;
+        if (isLeftBracket(SQ.getTop()))
+        &#123;
+            OS.push(SQ.pop());
+        &#125;
+        else if (isRightBracket(SQ.getTop()))
+        &#123;
+            char x &#x3D; SQ.pop();
+            while (!NQ.isEmpty())
+            &#123;
+                std::cout &lt;&lt; NQ.pop();
+            &#125;
+            while (!OS.isEmpty())
+            &#123;
+                if (isLeftBracket(OS.getTop()) || isRightBracket(OS.getTop()))
+                &#123;
+                    OS.pop();
+                &#125;
+                else
+                &#123;
+                    std::cout &lt;&lt; OS.pop();
+                &#125;
+            &#125;
+        &#125;
+        else if (isGreaterOperator(SQ.getTop()))
+        &#123;
+            OS.push(SQ.pop());
+            char x &#x3D; SQ.getTop();
+            if (!isLeftBracket(x))
+            &#123;
+                std::cout &lt;&lt; SQ.pop();
+                std::cout &lt;&lt; OS.pop();
+            &#125;
+            else
+            &#123;
+                OS.push(SQ.pop());
+            &#125;
+        &#125;
+        else if (isNormalOperator(SQ.getTop()))
+        &#123;
+            OS.push(SQ.pop());
+        &#125;
+        else
+        &#123;
+            NQ.push(SQ.pop());
+        &#125;
+    &#125;
+&#125;
+<span aria-hidden="true" class="line-numbers-rows"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></span></code></pre>
+<p>最前面的就是对栈和队列的实现，使用C函数可以很容易地实现那些类函数。</p>
+<p>我已经把完整的伪代码写在上面了，相信不用再写注释了。</p>
 ]]></content>
       <categories>
         <category>题解</category>
